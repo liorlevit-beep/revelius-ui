@@ -1,17 +1,19 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Store, ScanLine, CreditCard, FileText, Wallet, Code, ChevronLeft, ChevronRight, MoreVertical, Zap, Play, Sparkles } from 'lucide-react';
+import { LayoutDashboard, Store, Tags, ScanLine, CreditCard, FileText, Wallet, Code, ChevronLeft, ChevronRight, MoreVertical, Zap, Play, Sparkles, Layers } from 'lucide-react';
 import { useSidebar } from '../contexts/SidebarContext';
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
   { name: 'Merchants', href: '/merchants', icon: Store },
+  { name: 'Categories', href: '/categories', icon: Tags },
   { name: 'Scans', href: '/scans', icon: ScanLine },
   { name: 'Transactions', href: '/transactions', icon: CreditCard },
   { name: 'Policies', href: '/policies', icon: FileText },
-  { name: 'Payment Providers', href: '/providers', icon: Wallet },
+  { name: 'Payment Providers', href: '/payment-providers', icon: Wallet },
   { name: 'Developers', href: '/developers', icon: Code },
   { name: 'API Console', href: '/api-playground', icon: Play },
   { name: 'Demo', href: '/demo', icon: Sparkles },
+  { name: 'ui-modules', href: '/ui-modules', icon: Layers },
 ];
 
 export function Sidebar() {

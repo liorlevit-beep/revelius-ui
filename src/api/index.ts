@@ -5,4 +5,4 @@
 export * from './scanner';
 export * from './products';
 export * from './operations';
-export { ApiError } from './http';
+export { ApiError, apiFetch } from './http';

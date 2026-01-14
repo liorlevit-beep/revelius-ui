@@ -44,8 +44,22 @@ export async function apiFetch<T>(
   // Build full URL
   const url = `${env.baseUrl}${path.startsWith('/') ? '' : '/'}${path}`;
 
+  // Debug logging for routing_table endpoint
+  if (path.includes('routing_table')) {
+    console.log('[apiFetch] === ROUTING TABLE REQUEST DEBUG ===');
+    console.log('[apiFetch] Full URL:', url);
+    console.log('[apiFetch] Access Key (first 10 chars):', env.accessKey.substring(0, 10) + '...');
+    console.log('[apiFetch] Secret Key (first 10 chars):', env.secretKey.substring(0, 10) + '...');
+    console.log('[apiFetch] Session ID:', sessionId || 'none');
+  }
+
   // Get signed headers
   const signedHeaders = getSignedHeaders(env.accessKey, env.secretKey, sessionId);
+
+  // Debug logging for routing_table endpoint
+  if (path.includes('routing_table')) {
+    console.log('[apiFetch] Signed Headers:', signedHeaders);
+  }
 
   // Build request headers
   const headers: Record<string, string> = {
@@ -105,7 +119,18 @@ export async function apiFetch<T>(
     }
 
     // Default: JSON
-    return await response.json() as T;
+    const jsonData = await response.json() as T;
+    
+    // Debug logging for routing_table endpoint
+    if (path.includes('routing_table')) {
+      console.log('[apiFetch] Response data:', jsonData);
+      const data = (jsonData as any)?.data ?? jsonData;
+      const mappingKeys = data?.mapping ? Object.keys(data.mapping) : [];
+      console.log('[apiFetch] Number of providers in mapping:', mappingKeys.length);
+      console.log('[apiFetch] Provider keys:', mappingKeys);
+    }
+    
+    return jsonData;
   } catch (error) {
     clearTimeout(timeoutId);
 

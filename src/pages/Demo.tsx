@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useLayoutEffect } from 'react';
+import { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
 import { Store, Zap, Search, AlertCircle, CheckCircle, AlertTriangle, XCircle, RotateCcw, ShoppingBag, GraduationCap, Users, Video, Pill, Package, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
