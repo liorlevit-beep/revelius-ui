@@ -88,4 +88,69 @@ body {
   table tbody td .flex {
     flex-wrap: nowrap !important;
   }
+
+  /* Liquid Glass Theme Animations */
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  @keyframes shimmer-fast {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(200%);
+    }
+  }
+
+  .animate-shimmer {
+    animation: shimmer 3s linear infinite;
+  }
+
+  .animate-shimmer-fast {
+    animation: shimmer-fast 2s linear infinite;
+  }
+
+  @keyframes ping-once {
+    75%, 100% {
+      transform: scale(1.1);
+      opacity: 0;
+    }
+  }
+
+  .animate-ping-once {
+    animation: ping-once 0.4s cubic-bezier(0, 0, 0.2, 1);
+  }
+
+  @keyframes ping-fast {
+    75%, 100% {
+      transform: scale(1.05);
+      opacity: 0;
+    }
+  }
+
+  .animate-ping-fast {
+    animation: ping-fast 0.3s cubic-bezier(0, 0, 0.2, 1);
+  }
+
+  /* Glass theme specific styles */
+  .liquid-glass-dashboard {
+    /* Ensure smooth rendering of glass effects */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Respect reduced motion preferences for glass theme */
+  @media (prefers-reduced-motion: reduce) {
+    .liquid-glass-dashboard * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 }

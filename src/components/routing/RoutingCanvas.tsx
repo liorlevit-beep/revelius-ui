@@ -58,6 +58,7 @@ interface RoutingCanvasProps {
   // Merchant context props
   mode?: 'transaction' | 'merchant'; // Default: 'transaction'
   activeProviders?: string[]; // For merchant mode: list of all active providers
+  glassTheme?: boolean;
 }
 
 // Provider configuration - Default/fallback config
@@ -210,6 +211,7 @@ export function RoutingCanvas({
   itemCount,
   mode = 'transaction',
   activeProviders = [],
+  glassTheme = false,
 }: RoutingCanvasProps) {
   const canvasRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -602,10 +604,15 @@ export function RoutingCanvas({
   if (!visibleProviders || visibleProviders.length === 0) {
     return (
       <div 
-        className="relative w-full bg-gray-50 rounded-xl border border-gray-200 overflow-hidden flex items-center justify-center" 
-        style={{ height: `${height}px` }}
+        className={`relative w-full rounded-xl border overflow-hidden flex items-center justify-center ${
+          glassTheme ? 'backdrop-blur-xl bg-white/[0.02]' : 'bg-gray-50 border-gray-200'
+        }`}
+        style={{ 
+          height: `${height}px`,
+          ...(glassTheme && { borderColor: 'var(--glass-border)' })
+        }}
       >
-        <div className="text-center text-gray-400">
+        <div className="text-center" style={glassTheme ? { color: 'var(--color-silver-mist-dim)' } : { color: '#9CA3AF' }}>
           <Store className="w-12 h-12 mx-auto mb-3 opacity-20" />
           <p className="text-sm">No routing providers available</p>
         </div>
@@ -614,31 +621,53 @@ export function RoutingCanvas({
   }
 
   return (
-    <div className="relative w-full bg-gray-50 rounded-xl border border-gray-200 overflow-hidden" style={{ height: `${height}px` }}>
+    <div 
+      className={`relative w-full rounded-xl border overflow-hidden ${
+        glassTheme ? 'backdrop-blur-xl bg-white/[0.02]' : 'bg-gray-50 border-gray-200'
+      }`} 
+      style={{ 
+        height: `${height}px`,
+        ...(glassTheme && { borderColor: 'var(--glass-border)' })
+      }}
+    >
       {/* Zoom Controls */}
       <div className="absolute top-4 right-4 z-20 flex flex-col gap-2">
         <button
           onClick={handleZoomIn}
-          className="w-10 h-10 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 transition-colors flex items-center justify-center"
+          className={`w-10 h-10 border rounded-lg shadow-sm transition-colors flex items-center justify-center ${
+            glassTheme ? 'backdrop-blur-md bg-white/[0.05] hover:bg-white/[0.08]' : 'bg-white border-gray-300 hover:bg-gray-50'
+          }`}
+          style={glassTheme ? { borderColor: 'var(--glass-border)', color: 'var(--color-silver-mist)' } : {}}
           title="Zoom In"
         >
           <ZoomIn className="w-5 h-5" />
         </button>
         <button
           onClick={handleZoomOut}
-          className="w-10 h-10 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 transition-colors flex items-center justify-center"
+          className={`w-10 h-10 border rounded-lg shadow-sm transition-colors flex items-center justify-center ${
+            glassTheme ? 'backdrop-blur-md bg-white/[0.05] hover:bg-white/[0.08]' : 'bg-white border-gray-300 hover:bg-gray-50'
+          }`}
+          style={glassTheme ? { borderColor: 'var(--glass-border)', color: 'var(--color-silver-mist)' } : {}}
           title="Zoom Out"
         >
           <ZoomOut className="w-5 h-5" />
         </button>
         <button
           onClick={handleResetZoom}
-          className="w-10 h-10 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 transition-colors flex items-center justify-center"
+          className={`w-10 h-10 border rounded-lg shadow-sm transition-colors flex items-center justify-center ${
+            glassTheme ? 'backdrop-blur-md bg-white/[0.05] hover:bg-white/[0.08]' : 'bg-white border-gray-300 hover:bg-gray-50'
+          }`}
+          style={glassTheme ? { borderColor: 'var(--glass-border)', color: 'var(--color-silver-mist)' } : {}}
           title="Reset View"
         >
           <Maximize2 className="w-5 h-5" />
         </button>
-        <div className="text-xs text-center text-gray-500 bg-white px-2 py-1 rounded border border-gray-200">
+        <div 
+          className={`text-xs text-center px-2 py-1 rounded border ${
+            glassTheme ? 'backdrop-blur-md bg-white/[0.05]' : 'bg-white border-gray-200'
+          }`}
+          style={glassTheme ? { borderColor: 'var(--glass-border)', color: 'var(--color-silver-mist-dim)' } : { color: '#6B7280' }}
+        >
           {Math.round(zoom * 100)}%
         </div>
       </div>
@@ -647,7 +676,10 @@ export function RoutingCanvas({
       <div className="absolute top-4 right-20 z-20">
         <button 
           onClick={handleReplay}
-          className="px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 flex items-center gap-2 text-sm font-medium cursor-pointer"
+          className={`px-4 py-2 border rounded-lg shadow-sm flex items-center gap-2 text-sm font-medium cursor-pointer transition-colors ${
+            glassTheme ? 'backdrop-blur-md bg-white/[0.05] hover:bg-white/[0.08]' : 'bg-white border-gray-300 hover:bg-gray-50'
+          }`}
+          style={glassTheme ? { borderColor: 'var(--glass-border)', color: 'var(--color-silver-mist)' } : {}}
         >
           <RotateCcw className="w-4 h-4" />
           Replay
