@@ -1,6 +1,11 @@
-import { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
-import { Store, Zap, Search, AlertCircle, CheckCircle, AlertTriangle, XCircle, RotateCcw, ShoppingBag, GraduationCap, Users, Video, Pill, Package, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
+import { useState, useRef, useEffect, useLayoutEffect, useCallback, useMemo } from 'react';
+import { Store, Zap, Search, AlertCircle, CheckCircle, AlertTriangle, XCircle, RotateCcw, ShoppingBag, GraduationCap, Users, Video, Pill, Package, ZoomIn, ZoomOut, Maximize2, MoreHorizontal } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRoutingTable } from '../hooks/useRoutingTable';
+import { getProviderDisplayName } from '../data/providerRegions';
+import { ProviderRouteModal } from '../components/routing/ProviderRouteModal';
+import { computeCartEligibility } from '../utils/routingEligibility';
+import type { SKU } from '../demo/transactions';
 
 // Types
 interface CartItem {
@@ -53,16 +58,47 @@ interface Port {
   y: number;
 }
 
-// PSP configuration
-const PSP_CONFIG = {
-  Stripe: { color: '#635BFF', logo: 'https://cdn.brandfetch.io/stripe.com/w/400/h/400/theme/dark/icon.jpeg?t=1734242558418' },
-  Adyen: { color: '#0ABF53', logo: 'https://cdn.brandfetch.io/adyen.com/w/400/h/400/theme/dark/icon.jpeg?t=1734242558418' },
-  Fiserv: { color: '#FF6600', logo: 'https://cdn.brandfetch.io/fiserv.com/w/400/h/400/theme/dark/icon.jpeg?t=1734242558418' },
-  Checkout: { color: '#6C5CE7', logo: 'https://cdn.brandfetch.io/checkout.com/w/400/h/400/theme/dark/icon.jpeg?t=1734242558418' },
-  Worldpay: { color: '#D62828', logo: 'https://logo.clearbit.com/worldpay.com' }
+// PSP configuration - Default/fallback config
+const DEFAULT_PSP_CONFIG: Record<string, { color: string; logo: string }> = {
+  stripe: { color: '#635BFF', logo: 'https://cdn.brandfetch.io/stripe.com/w/400/h/400/theme/dark/icon.jpeg?t=1734242558418' },
+  adyen: { color: '#0ABF53', logo: 'https://cdn.brandfetch.io/adyen.com/w/400/h/400/theme/dark/icon.jpeg?t=1734242558418' },
+  fiserv: { color: '#FF6600', logo: 'https://cdn.brandfetch.io/fiserv.com/w/400/h/400/theme/dark/icon.jpeg?t=1734242558418' },
+  checkout: { color: '#6C5CE7', logo: 'https://cdn.brandfetch.io/checkout.com/w/400/h/400/theme/dark/icon.jpeg?t=1734242558418' },
+  worldpay: { color: '#D62828', logo: 'https://logo.clearbit.com/worldpay.com' },
+  rapyd: { color: '#00C48C', logo: 'https://logo.clearbit.com/rapyd.net' },
+  braintree: { color: '#00AA6C', logo: 'https://logo.clearbit.com/braintreepayments.com' },
+  square: { color: '#000000', logo: 'https://logo.clearbit.com/squareup.com' },
+  paypal: { color: '#003087', logo: 'https://logo.clearbit.com/paypal.com' },
+  authorize: { color: '#0085CA', logo: 'https://logo.clearbit.com/authorize.net' },
 };
 
-type PSPName = keyof typeof PSP_CONFIG;
+// Stable color palette for providers not in default config
+const PROVIDER_COLORS = [
+  '#635BFF', '#0ABF53', '#FF6600', '#6C5CE7', '#D62828',
+  '#00C48C', '#00AA6C', '#000000', '#003087', '#0085CA',
+  '#8B5CF6', '#EC4899', '#F59E0B', '#10B981', '#3B82F6',
+  '#EF4444', '#14B8A6', '#F97316', '#06B6D4', '#84CC16'
+];
+
+type PSPName = string;
+
+/**
+ * Get provider config with fallback to generated config
+ */
+function getProviderConfig(providerKey: string, index: number): { color: string; logo: string } {
+  const lowerKey = providerKey.toLowerCase();
+  
+  if (DEFAULT_PSP_CONFIG[lowerKey]) {
+    return DEFAULT_PSP_CONFIG[lowerKey];
+  }
+  
+  // Generate config for unknown providers
+  const colorIndex = index % PROVIDER_COLORS.length;
+  return {
+    color: PROVIDER_COLORS[colorIndex],
+    logo: `https://logo.clearbit.com/${lowerKey}.com`
+  };
+}
 
 // Helper: Sample points along cubic bezier curve
 function cubicBezierPoint(t: number, p0: Point, p1: Point, p2: Point, p3: Point): Point {
@@ -297,11 +333,13 @@ const MOCK_TRANSACTIONS: MockTransaction[] = [
 ];
 
 // Deterministic Routing Logic
-function buildRoutingModel(tx: MockTransaction): { routes: RouteDecision[], tokens: TokenAssignment[] } {
+function buildRoutingModel(tx: MockTransaction, availableProviders: string[]): { routes: RouteDecision[], tokens: TokenAssignment[] } {
   const routes: Map<PSPName, { items: CartItem[], reasons: Set<string> }> = new Map();
   
-  // Initialize all PSPs
-  const allPSPs: PSPName[] = ['Stripe', 'Adyen', 'Fiserv', 'Checkout', 'Worldpay'];
+  // Initialize all PSPs from available providers
+  const allPSPs: PSPName[] = availableProviders.length > 0 
+    ? availableProviders 
+    : ['stripe', 'adyen', 'fiserv', 'checkout', 'worldpay'];
   allPSPs.forEach(psp => routes.set(psp, { items: [], reasons: new Set() }));
 
   // Route each item based on signals
@@ -309,24 +347,31 @@ function buildRoutingModel(tx: MockTransaction): { routes: RouteDecision[], toke
     const signals = item.signals;
     let targetPSP: PSPName;
 
+    // Route based on signals and available PSPs
     if (signals.includes('tobacco') || signals.includes('nicotine')) {
       // Tobacco items: distribute across specialized PSPs
-      targetPSP = signals.includes('high-risk') ? 'Fiserv' : 'Adyen';
+      targetPSP = signals.includes('high-risk') 
+        ? (allPSPs.includes('fiserv') ? 'fiserv' : allPSPs[2] || allPSPs[0])
+        : (allPSPs.includes('adyen') ? 'adyen' : allPSPs[1] || allPSPs[0]);
     } else if (signals.includes('ugc') || signals.includes('user-generated')) {
       // UGC content: route to Checkout or Worldpay
-      targetPSP = signals.includes('adult-adjacent') ? 'Checkout' : 'Worldpay';
+      targetPSP = signals.includes('adult-adjacent')
+        ? (allPSPs.includes('checkout') ? 'checkout' : allPSPs[3] || allPSPs[0])
+        : (allPSPs.includes('worldpay') ? 'worldpay' : allPSPs[4] || allPSPs[0]);
     } else if (signals.includes('health-claim') || item.type === 'health-claim') {
       // Health claims: route to Fiserv (review)
-      targetPSP = 'Fiserv';
+      targetPSP = allPSPs.includes('fiserv') ? 'fiserv' : allPSPs[2] || allPSPs[0];
     } else if (signals.includes('supplement')) {
       // Supplements: distribute based on risk
-      targetPSP = signals.includes('high-risk') ? 'Fiserv' : 'Adyen';
+      targetPSP = signals.includes('high-risk')
+        ? (allPSPs.includes('fiserv') ? 'fiserv' : allPSPs[2] || allPSPs[0])
+        : (allPSPs.includes('adyen') ? 'adyen' : allPSPs[1] || allPSPs[0]);
     } else if (signals.includes('subscription')) {
       // Subscriptions: Stripe or Checkout
-      targetPSP = 'Stripe';
+      targetPSP = allPSPs.includes('stripe') ? 'stripe' : allPSPs[0];
     } else {
       // Low risk items: Stripe default
-      targetPSP = 'Stripe';
+      targetPSP = allPSPs.includes('stripe') ? 'stripe' : allPSPs[0];
     }
 
     const route = routes.get(targetPSP)!;
@@ -627,6 +672,9 @@ function RoutingCanvasShell({ selectedTransaction, routingModel, tokens, animati
   const reveliusRef = useRef<HTMLDivElement>(null);
   const pspRowRefs = useRef<Map<PSPName, HTMLDivElement>>(new Map());
   
+  // Get routing table for dynamic providers
+  const { data: routingTable, providers: availableProviders } = useRoutingTable();
+  
   // Port system
   const { registerPortRef, portsById, recomputePorts } = usePorts(canvasRef);
   
@@ -634,12 +682,76 @@ function RoutingCanvasShell({ selectedTransaction, routingModel, tokens, animati
   const [tokenPaths, setTokenPaths] = useState<Map<PSPName, Point[]>>(new Map());
   const [merchantPath, setMerchantPath] = useState<string>('');
   const [hoveredPsp, setHoveredPsp] = useState<PSPName | null>(null);
+  const [showMoreProviders, setShowMoreProviders] = useState(false);
+  const [modalProvider, setModalProvider] = useState<PSPName | null>(null);
+  const [selectedProvider, setSelectedProvider] = useState<PSPName | null>(null);
   
   // Pan and Zoom state
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  
+  // Dynamic provider configuration
+  const MAX_VISIBLE_PROVIDERS = 6;
+  const pspConfig = useMemo(() => {
+    const providers = availableProviders.length > 0 
+      ? availableProviders 
+      : ['stripe', 'adyen', 'fiserv', 'checkout', 'worldpay'];
+    
+    const config: Record<string, { color: string; logo: string }> = {};
+    providers.forEach((provider, index) => {
+      config[provider] = getProviderConfig(provider, index);
+    });
+    return config;
+  }, [availableProviders]);
+  
+  const visibleProviders = useMemo(() => {
+    const allProviders = Object.keys(pspConfig);
+    return allProviders.slice(0, MAX_VISIBLE_PROVIDERS);
+  }, [pspConfig]);
+  
+  const hiddenProviders = useMemo(() => {
+    const allProviders = Object.keys(pspConfig);
+    return allProviders.slice(MAX_VISIBLE_PROVIDERS);
+  }, [pspConfig]);
+  
+  const hasMoreProviders = hiddenProviders.length > 0;
+  
+  // Compute eligibility for modal
+  const eligibilityResult = useMemo(() => {
+    if (!selectedTransaction || !routingTable) return null;
+    
+    // Convert transaction items to SKUs for eligibility calculation
+    const skus: SKU[] = selectedTransaction.items.map((item, index) => ({
+      sku_id: item.sku,
+      title: item.title,
+      quantity: 1,
+      price: item.price,
+      product_url: `https://example.com/products/${item.sku}`,
+      evidence_items: [],
+      category_id: item.type, // Use type as category_id for demo
+    }));
+    
+    return computeCartEligibility(skus, routingTable);
+  }, [selectedTransaction, routingTable]);
+  
+  // Get coverage for modal
+  const modalCoverage = eligibilityResult?.eligibleProviders.find(p => p.provider === modalProvider);
+  
+  // Get items for modal
+  const modalItems = useMemo(() => {
+    if (!selectedTransaction) return [];
+    return selectedTransaction.items.map((item, index) => ({
+      sku_id: item.sku,
+      title: item.title,
+      quantity: 1,
+      price: item.price,
+      product_url: `https://example.com/products/${item.sku}`,
+      evidence_items: [],
+      category_id: item.type,
+    }));
+  }, [selectedTransaction]);
   
   // Layout calculation state
   const [layout, setLayout] = useState({
@@ -671,7 +783,11 @@ function RoutingCanvasShell({ selectedTransaction, routingModel, tokens, animati
     const pspWidth = 220; // PSP card width
     const pspHeight = 52;
     const pspGap = 12; // Gap between PSP cards (gap-3 = 12px)
-    const pspStackHeight = (pspHeight + pspGap) * Object.keys(PSP_CONFIG).length - pspGap;
+    
+    // Calculate PSP grid layout (2 columns)
+    const visiblePspCount = visibleProviders.length + (hasMoreProviders ? 1 : 0);
+    const pspRows = Math.ceil(visiblePspCount / 2);
+    const pspStackHeight = (pspHeight + pspGap) * pspRows - pspGap;
     
     // Spacing between nodes (horizontal gaps) - responsive to canvas size
     const merchantToReveliusGap = Math.max(120, canvasWidth * 0.08);
@@ -710,7 +826,7 @@ function RoutingCanvasShell({ selectedTransaction, routingModel, tokens, animati
       contentHeight: totalContentHeight,
       scale
     });
-  }, []);
+  }, [visibleProviders.length, hasMoreProviders]);
 
   // Calculate paths based on port positions
   const calculatePaths = useCallback(() => {
@@ -739,8 +855,8 @@ function RoutingCanvasShell({ selectedTransaction, routingModel, tokens, animati
     const newPaths: PathData[] = [];
     const newTokenPaths = new Map<PSPName, Point[]>();
 
-    // Draw paths to ALL PSPs using port system
-    Object.keys(PSP_CONFIG).forEach(pspName => {
+    // Draw paths to visible PSPs using port system
+    visibleProviders.forEach(pspName => {
       const pspPortId = `psp:${pspName}:in`;
       const pspPort = portsById.get(pspPortId);
 
@@ -766,7 +882,7 @@ function RoutingCanvasShell({ selectedTransaction, routingModel, tokens, animati
 
       newPaths.push({
         d: pathD,
-        color: PSP_CONFIG[pspName as PSPName].color,
+        color: pspConfig[pspName]?.color || '#9CA3AF',
         pspName: pspName as PSPName
       });
 
@@ -787,7 +903,7 @@ function RoutingCanvasShell({ selectedTransaction, routingModel, tokens, animati
 
     setPaths(newPaths);
     setTokenPaths(newTokenPaths);
-  }, [portsById]);
+  }, [portsById, visibleProviders, pspConfig]);
 
   // Recalculate layout, ports, and paths on mount, routing change, and resize
   useLayoutEffect(() => {
@@ -1030,7 +1146,8 @@ function RoutingCanvasShell({ selectedTransaction, routingModel, tokens, animati
           const route = routingModel.find(r => r.pspName === path.pspName);
           const isActive = route && route.count > 0;
           const isHovered = hoveredPsp === path.pspName;
-          const isDimmed = hoveredPsp && !isHovered;
+          const isSelectedProvider = selectedProvider === path.pspName;
+          const isDimmed = (hoveredPsp && !isHovered) || (selectedProvider && !isSelectedProvider);
           
           const reveliusOut = portsById.get("revelius:out");
           const pspIn = portsById.get(`psp:${path.pspName}:in`);
@@ -1040,16 +1157,16 @@ function RoutingCanvasShell({ selectedTransaction, routingModel, tokens, animati
               <motion.path
                 d={path.d}
                 fill="none"
-                stroke={path.color}
-                strokeWidth={isHovered ? 4 : isActive ? 3 : 2}
+                stroke={isSelectedProvider ? '#10b981' : path.color}
+                strokeWidth={isSelectedProvider ? 5 : isHovered ? 4 : isActive ? 3 : 2}
                 strokeDasharray={isActive ? 'none' : '6 4'}
-                opacity={isDimmed ? 0.15 : isActive ? 0.8 : 0.3}
-                filter={isActive ? "url(#glow)" : "none"}
+                opacity={isDimmed ? 0.15 : isSelectedProvider ? 1.0 : isActive ? 0.8 : 0.3}
+                filter={isSelectedProvider || isActive ? "url(#glow)" : "none"}
                 strokeLinecap="round"
                 initial={{ pathLength: 0, opacity: 0 }}
                 animate={{ 
                   pathLength: 1, 
-                  opacity: isDimmed ? 0.15 : isActive ? 0.8 : 0.3 
+                  opacity: isDimmed ? 0.15 : isSelectedProvider ? 1.0 : isActive ? 0.8 : 0.3 
                 }}
                 transition={{ 
                   pathLength: { duration: 0.8, delay: 0.3, ease: "easeInOut" },
@@ -1061,12 +1178,12 @@ function RoutingCanvasShell({ selectedTransaction, routingModel, tokens, animati
                 <motion.circle
                   cx={pspIn.x}
                   cy={pspIn.y}
-                  r={isHovered ? 4 : 3}
-                  fill={path.color}
+                  r={isSelectedProvider ? 5 : isHovered ? 4 : 3}
+                  fill={isSelectedProvider ? '#10b981' : path.color}
                   initial={{ scale: 0, opacity: 0 }}
                   animate={{ 
                     scale: 1, 
-                    opacity: isDimmed ? 0.3 : 0.8 
+                    opacity: isDimmed ? 0.3 : isSelectedProvider ? 1.0 : 0.8 
                   }}
                   transition={{ duration: 0.3, delay: 1.0 }}
                 />
@@ -1076,9 +1193,9 @@ function RoutingCanvasShell({ selectedTransaction, routingModel, tokens, animati
                 <motion.circle
                   cx={reveliusOut.x}
                   cy={reveliusOut.y}
-                  r={2}
-                  fill={path.color}
-                  opacity={0.4}
+                  r={isSelectedProvider ? 3 : 2}
+                  fill={isSelectedProvider ? '#10b981' : path.color}
+                  opacity={isSelectedProvider ? 0.8 : 0.4}
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ duration: 0.3, delay: 0.8 }}
@@ -1145,8 +1262,11 @@ function RoutingCanvasShell({ selectedTransaction, routingModel, tokens, animati
           }}
         >
           <div className="relative">
-            {/* Glow Effect */}
-            <div className="absolute inset-0 bg-emerald-400 rounded-full blur-xl opacity-30" />
+            {/* Glow Effect - Fixed size to prevent jumping */}
+            <div 
+              className="absolute bg-emerald-400 rounded-full blur-2xl opacity-20 pointer-events-none"
+              style={{ width: '144px', height: '144px', left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}
+            />
             
             {/* Main Circle - with ref for path calculation */}
             <div 
@@ -1178,33 +1298,38 @@ function RoutingCanvasShell({ selectedTransaction, routingModel, tokens, animati
           )}
         </div>
 
-        {/* PSP Stack (Right) */}
+        {/* PSP Grid (Right) - 2 columns */}
         <div 
-          className="flex flex-col gap-3" 
+          className="grid grid-cols-2 gap-3" 
           style={{ 
             position: 'absolute', 
             left: `${layout.pspStartX}px`, 
             top: '50%', 
-            transform: 'translateY(-50%)' 
+            transform: 'translateY(-50%)',
+            width: `${220 * 2 + 12}px` // 2 columns + gap
           }}
         >
-          {Object.entries(PSP_CONFIG).map(([pspName, config]) => {
+          {visibleProviders.map((pspName) => {
+            const config = pspConfig[pspName];
             const route = routingModel.find(r => r.pspName === pspName);
             const status = route?.status || 'Approved';
             const count = route?.count || 0;
             const isActive = count > 0;
+            const isSelectedProvider = selectedProvider === pspName;
             
             const StatusIcon = status === 'Approved' ? CheckCircle :
               status === 'Review' ? AlertTriangle : XCircle;
             
-            const borderColor = !isActive ? 'border-gray-200' :
+            const borderColor = isSelectedProvider ? 'border-emerald-500' :
+              !isActive ? 'border-gray-200' :
               status === 'Approved' ? 'border-green-300' :
               status === 'Review' ? 'border-amber-400' : 'border-red-400';
             
             const iconColor = status === 'Approved' ? 'text-green-500' :
               status === 'Review' ? 'text-amber-500' : 'text-red-500';
 
-            const bgColor = !isActive ? 'bg-gray-50' : 'bg-white';
+            const bgColor = isSelectedProvider ? 'bg-emerald-50' :
+              !isActive ? 'bg-gray-50' : 'bg-white';
 
             return (
               <div
@@ -1216,12 +1341,12 @@ function RoutingCanvasShell({ selectedTransaction, routingModel, tokens, animati
                     pspRowRefs.current.delete(pspName as PSPName);
                   }
                 }}
+                onClick={() => setModalProvider(pspName)}
                 onMouseEnter={() => isActive && setHoveredPsp(pspName as PSPName)}
                 onMouseLeave={() => setHoveredPsp(null)}
-                className={`relative w-[220px] h-[52px] ${bgColor} border-2 ${borderColor} rounded-xl shadow-md flex items-center gap-3 px-3 transition-all pointer-events-auto ${
+                className={`relative w-[220px] h-[52px] ${bgColor} border-2 ${borderColor} rounded-xl shadow-md flex items-center gap-3 px-3 transition-all pointer-events-auto cursor-pointer hover:shadow-lg ${
                   !isActive ? 'opacity-40' : 'opacity-100'
-                } ${isActive ? 'cursor-pointer hover:shadow-lg' : ''}`}
-                style={{ cursor: isActive ? 'pointer' : 'default' }}
+                }`}
               >
                 {/* Port marker: left-center of PSP pill */}
                 <div 
@@ -1239,7 +1364,12 @@ function RoutingCanvasShell({ selectedTransaction, routingModel, tokens, animati
                   }}
                 />
                 <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-sm text-gray-900 truncate">{pspName}</div>
+                  <div className="font-semibold text-sm text-gray-900 truncate">
+                    {getProviderDisplayName(pspName)}
+                  </div>
+                  {isSelectedProvider && (
+                    <div className="text-xs font-semibold text-emerald-600">✓ Selected</div>
+                  )}
                 </div>
                 <StatusIcon className={`w-5 h-5 flex-shrink-0 ${iconColor}`} />
                 {isActive && (
@@ -1250,6 +1380,24 @@ function RoutingCanvasShell({ selectedTransaction, routingModel, tokens, animati
               </div>
             );
           })}
+          
+          {/* More Providers Node */}
+          {hasMoreProviders && (
+            <div
+              onClick={() => setShowMoreProviders(true)}
+              className="relative w-[220px] h-[52px] bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-300 border-dashed rounded-xl shadow-md flex items-center gap-3 px-3 transition-all pointer-events-auto cursor-pointer hover:shadow-lg hover:border-emerald-400"
+            >
+              <div className="flex-shrink-0 w-7 h-7 bg-gray-200 rounded-full flex items-center justify-center">
+                <MoreHorizontal className="w-4 h-4 text-gray-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="font-semibold text-sm text-gray-700">
+                  +{hiddenProviders.length} More
+                </div>
+                <div className="text-xs text-gray-500">Click to view</div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -1276,7 +1424,7 @@ function RoutingCanvasShell({ selectedTransaction, routingModel, tokens, animati
                 key={`${token.itemId}-${animationKey}`}
                 className="absolute w-6 h-6 bg-white border-2 rounded-full shadow-md flex items-center justify-center"
                 style={{
-                  borderColor: PSP_CONFIG[token.pspName].color,
+                  borderColor: pspConfig[token.pspName]?.color || '#9CA3AF',
                   left: 0,
                   top: 0
                 }}
@@ -1315,7 +1463,7 @@ function RoutingCanvasShell({ selectedTransaction, routingModel, tokens, animati
               >
                 <Icon 
                   className="w-3 h-3" 
-                  style={{ color: PSP_CONFIG[token.pspName].color }}
+                  style={{ color: pspConfig[token.pspName]?.color || '#9CA3AF' }}
                 />
                 <title>{`${token.title}\n${token.signals.slice(0, 2).join(', ')}`}</title>
               </motion.div>
@@ -1333,6 +1481,94 @@ function RoutingCanvasShell({ selectedTransaction, routingModel, tokens, animati
           </div>
         </div>
       )}
+      
+      {/* More Providers Modal */}
+      {showMoreProviders && (
+        <div 
+          className="absolute inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center pointer-events-auto"
+          onClick={() => setShowMoreProviders(false)}
+        >
+          <div 
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-bold text-gray-900">All Providers</h3>
+                <button
+                  onClick={() => setShowMoreProviders(false)}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <XCircle className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+              <p className="text-sm text-gray-600 mt-1">
+                {Object.keys(pspConfig).length} providers configured
+              </p>
+            </div>
+            <div className="p-6 overflow-y-auto max-h-[calc(80vh-120px)]">
+              <div className="grid grid-cols-2 gap-3">
+                {Object.entries(pspConfig).map(([pspName, config]) => {
+                  const route = routingModel.find(r => r.pspName === pspName);
+                  const count = route?.count || 0;
+                  const isActive = count > 0;
+                  const isSelectedProvider = selectedProvider === pspName;
+                  
+                  return (
+                    <div
+                      key={pspName}
+                      onClick={() => {
+                        setShowMoreProviders(false);
+                        setModalProvider(pspName);
+                      }}
+                      className={`relative w-full h-[52px] border-2 rounded-xl shadow-sm flex items-center gap-3 px-3 transition-all cursor-pointer hover:shadow-md ${
+                        isSelectedProvider ? 'bg-emerald-50 border-emerald-500' :
+                        isActive ? 'bg-white border-emerald-300' : 'bg-gray-50 border-gray-200 opacity-60'
+                      }`}
+                    >
+                      <img 
+                        src={config.logo} 
+                        alt={pspName} 
+                        className="w-7 h-7 rounded object-cover"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = 'none';
+                        }}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold text-sm text-gray-900 truncate">
+                          {getProviderDisplayName(pspName)}
+                        </div>
+                        {isSelectedProvider && (
+                          <div className="text-xs font-semibold text-emerald-600">✓ Selected</div>
+                        )}
+                      </div>
+                      {isActive && (
+                        <div className="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center text-xs font-bold">
+                          {count}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Provider Route Modal */}
+      {modalProvider && selectedTransaction && (
+        <ProviderRouteModal
+          open={!!modalProvider}
+          onOpenChange={(open) => !open && setModalProvider(null)}
+          provider={modalProvider}
+          coverage={modalCoverage}
+          items={modalItems}
+          onSelect={() => setSelectedProvider(modalProvider)}
+          isSelected={selectedProvider === modalProvider}
+        />
+      )}
       </div>
     </div>
   );
@@ -1343,9 +1579,12 @@ export default function Demo() {
   const [selectedTxId, setSelectedTxId] = useState<string | null>(MOCK_TRANSACTIONS[0].id);
   const [searchQuery, setSearchQuery] = useState('');
   const [animationKey, setAnimationKey] = useState(0);
+  
+  // Get routing table for dynamic providers
+  const { providers: availableProviders } = useRoutingTable();
 
   const selectedTransaction = MOCK_TRANSACTIONS.find(tx => tx.id === selectedTxId) || null;
-  const routingData = selectedTransaction ? buildRoutingModel(selectedTransaction) : { routes: [], tokens: [] };
+  const routingData = selectedTransaction ? buildRoutingModel(selectedTransaction, availableProviders) : { routes: [], tokens: [] };
 
   const handleSelectTransaction = (id: string) => {
     setSelectedTxId(id);

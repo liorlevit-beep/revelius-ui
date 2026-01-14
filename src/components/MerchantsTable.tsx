@@ -31,10 +31,10 @@ export function MerchantsTable({ merchants }: MerchantsTableProps) {
 
   return (
     <Card title="Merchants needing attention">
-      <div className="overflow-x-auto -mx-6">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-gray-100">
+      <div className="overflow-x-auto overflow-y-auto -mx-6" style={{ maxHeight: 'calc(100vh - 420px)' }}>
+        <table className="w-full table-fixed">
+          <thead className="bg-gray-50/95 backdrop-blur-sm border-b border-gray-100 sticky top-0 z-10">
+            <tr>
               <SortableTableHeader
                 label="Merchant"
                 sortKey="name"
@@ -75,7 +75,7 @@ export function MerchantsTable({ merchants }: MerchantsTableProps) {
             {sortedMerchants.map((merchant) => (
               <tr
                 key={merchant.id}
-                className="hover:bg-gray-50 cursor-pointer transition-colors"
+                className="group relative hover:bg-gray-50/80 cursor-pointer transition-all duration-150 active:scale-[0.998]"
                 onClick={() => navigate(`/merchants/${merchant.id}`)}
               >
                 <td className="py-4 px-6">

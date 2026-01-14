@@ -1,5 +1,6 @@
 import { Check, X, AlertCircle, ArrowRight } from 'lucide-react';
 import { Chip } from './Badges';
+import { getCountryFlag } from '../utils/countryFlags';
 import type { Transaction } from '../demo/transactions';
 
 interface RoutingPathProps {
@@ -22,7 +23,12 @@ export function RoutingPath({ transaction }: RoutingPathProps) {
             <h4 className="text-sm font-semibold text-gray-900 mb-2">Transaction Context</h4>
             <div className="flex flex-wrap gap-2">
               <Chip label={`${transaction.amount} ${transaction.currency}`} />
-              <Chip label={transaction.country} />
+              <span 
+                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
+                title={transaction.country}
+              >
+                <span className="text-lg leading-none">{getCountryFlag(transaction.country)}</span>
+              </span>
               <Chip label={transaction.method} />
               <Chip label={transaction.merchantName} />
             </div>

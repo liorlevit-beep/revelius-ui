@@ -6,6 +6,7 @@ import {
 import { JsonViewerWrapper } from '../JsonViewer';
 import { EllipsisCell } from '../table/EllipsisCell';
 import { VisualReportView } from './VisualReportView';
+import { CountryFlag } from '../CountryFlag';
 import { ScannerAPI } from '../../api';
 
 // ========================================================
@@ -410,7 +411,10 @@ export function ScanReportView({ reportData, sessionId, onRefresh }: ScanReportV
                     {overview.region && (
                       <div>
                         <p className="text-xs font-medium text-gray-500 mb-1">Region</p>
-                        <p className="text-sm text-gray-900">{overview.region}</p>
+                        <div className="flex items-center gap-2">
+                          <CountryFlag country={overview.region} />
+                          <span className="text-sm text-gray-700">{overview.region}</span>
+                        </div>
                       </div>
                     )}
                     

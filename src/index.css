@@ -68,4 +68,24 @@ body {
       transform: translateY(0);
     }
   }
+
+  /* Table single-line enforcement */
+  table tbody td {
+    white-space: nowrap !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 0;
+  }
+
+  table tbody td > div,
+  table tbody td > span,
+  table tbody td > button {
+    white-space: nowrap !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  table tbody td .flex {
+    flex-wrap: nowrap !important;
+  }
 }

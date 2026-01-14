@@ -8,6 +8,8 @@ import { UpliftKpis, UpliftChart, BreakdownTable } from '../components/UpliftCom
 import { OverviewTab } from '../components/merchant360/OverviewTab';
 import { ScansTab } from '../components/merchant360/ScansTab';
 import { FindingsTab } from '../components/merchant360/FindingsTab';
+import { CountryFlag } from '../components/CountryFlag';
+import { useRoutingTable } from '../hooks/useRoutingTable';
 import { merchants } from '../demo/merchants';
 import {
   getMerchantOverview,
@@ -28,6 +30,7 @@ import type { Finding } from '../components/merchant360/types';
 export function Merchant360() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { defaultPsp, providers } = useRoutingTable();
   const [activeTab, setActiveTab] = useState<'overview' | 'scans' | 'findings' | 'transactions' | 'uplift'>('overview');
   const [selectedFindingId, setSelectedFindingId] = useState<string | undefined>(undefined);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
@@ -139,7 +142,7 @@ export function Merchant360() {
 
             <div>
               <p className="text-xs text-gray-500 uppercase mb-1">Current Route</p>
-              <p className="text-lg font-semibold text-gray-900">{merchant.currentRoute || 'PSP A'}</p>
+              <p className="text-lg font-semibold text-gray-900">{merchant.currentRoute || defaultPsp || providers[0] || 'stripe'}</p>
             </div>
 
             <div>
@@ -203,6 +206,8 @@ export function Merchant360() {
           {activeTab === 'overview' && (
             <OverviewTab
               merchantId={merchant.id}
+              merchantName={merchant.name}
+              merchantCountry={merchant.geo}
               overview={overview}
               topFindings={topFindings}
               onFindingClick={handleFindingClick}
@@ -240,9 +245,9 @@ export function Merchant360() {
 
                   {/* Transactions Table */}
                   <div className="bg-white border border-gray-100 rounded-xl overflow-hidden">
-                    <div className="overflow-x-auto">
-                      <table className="w-full">
-                        <thead className="bg-gray-50 border-b border-gray-100">
+                    <div className="overflow-x-auto overflow-y-auto" style={{ maxHeight: 'calc(100vh - 520px)' }}>
+                      <table className="w-full table-fixed">
+                        <thead className="bg-gray-50/95 backdrop-blur-sm border-b border-gray-100 sticky top-0 z-10">
                           <tr>
                             <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider py-3 px-4">
                               Txn ID
@@ -273,7 +278,7 @@ export function Merchant360() {
                             return (
                               <tr
                                 key={txn.id}
-                                className={`hover:bg-gray-50 cursor-pointer transition-colors ${
+                                className={`group relative hover:bg-gray-50/80 cursor-pointer transition-all duration-150 active:scale-[0.998] ${
                                   selectedTransaction?.id === txn.id ? 'bg-emerald-50' : ''
                                 }`}
                                 onClick={() => setSelectedTransaction(txn)}
@@ -292,7 +297,9 @@ export function Merchant360() {
                                   </span>
                                 </td>
                                 <td className="py-3 px-4">
-                                  <span className="text-sm text-gray-700">{txn.country}</span>
+                                  <div className="flex items-center justify-center">
+                                    <CountryFlag country={txn.country} />
+                                  </div>
                                 </td>
                                 <td className="py-3 px-4">
                                   <span className="text-sm text-gray-700">{txn.method}</span>

@@ -163,10 +163,10 @@ export function Merchants() {
 
         {/* Table */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-100 bg-gray-50">
+          <div className="overflow-x-auto overflow-y-auto" style={{ maxHeight: 'calc(100vh - 320px)' }}>
+            <table className="w-full table-fixed">
+              <thead className="bg-gray-50/95 backdrop-blur-sm border-b border-gray-100 sticky top-0 z-10">
+                <tr>
                   <SortableTableHeader
                     label="Merchant"
                     sortKey="name"
@@ -226,7 +226,7 @@ export function Merchants() {
                 {paginatedMerchants.map((merchant) => (
                   <tr
                     key={merchant.id}
-                    className="hover:bg-gray-50 cursor-pointer transition-colors"
+                    className="group relative hover:bg-gray-50/80 cursor-pointer transition-all duration-150 active:scale-[0.998]"
                     onClick={(e) => {
                       if (!(e.target as HTMLElement).closest('.action-menu')) {
                         navigate(`/merchants/${merchant.id}`);

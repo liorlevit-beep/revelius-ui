@@ -5,8 +5,10 @@ import { Header } from '../components/Header';
 import { Card } from '../components/Card';
 import { ApiKeysModal } from '../components/ApiKeysModal';
 import { ProviderCard } from '../components/paymentProviders/ProviderCard';
-import { ProductsAPI, ScannerAPI } from '../api';
+import { ProviderDetailsModal } from '../components/paymentProviders/ProviderDetailsModal';
+import { ProductsAPI } from '../api';
 import type { Provider, ProviderRegion } from '../types/paymentProviders';
+import type { ProductCategory } from '../types/products';
 import { getProviderRegions, getProviderDisplayName } from '../data/providerRegions';
 
 const ALL_REGIONS: ProviderRegion[] = [
@@ -22,10 +24,15 @@ const ALL_REGIONS: ProviderRegion[] = [
 
 export function PaymentProvidersPage() {
   const [providers, setProviders] = useState<Provider[]>([]);
+  const [categories, setCategories] = useState<ProductCategory[]>([]);
   const [totalCategories, setTotalCategories] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showApiKeysModal, setShowApiKeysModal] = useState(false);
+  
+  // Provider detail modal
+  const [selectedProviderKey, setSelectedProviderKey] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -115,6 +122,12 @@ export function PaymentProvidersPage() {
     return groups;
   }, [filteredProviders]);
 
+  // Build selected provider object from selectedProviderKey
+  const selectedProvider = useMemo(() => {
+    if (!selectedProviderKey) return null;
+    return providers.find(p => p.key === selectedProviderKey) || null;
+  }, [selectedProviderKey, providers]);
+
   // Debug: log when providers state changes
   useEffect(() => {
     console.log('[PaymentProviders] State updated - providers:', providers);
@@ -139,15 +152,19 @@ export function PaymentProvidersPage() {
         // Fetch routing table and categories in parallel
         const [routingResponse, categoriesResponse] = await Promise.all([
           ProductsAPI.getRoutingTable(),
-          ScannerAPI.getCategories(),
+          ProductsAPI.getCategories(),
         ]);
         
-        // Extract categories count
+        // Extract categories
         const categoriesData = categoriesResponse?.data ?? categoriesResponse;
         const categoriesList = Array.isArray(categoriesData) ? categoriesData : [];
-        const categoryCount = categoriesList.length;
-        setTotalCategories(categoryCount);
-        console.log('[PaymentProviders] Total categories:', categoryCount);
+        console.log('[PaymentProviders] Categories response:', categoriesResponse);
+        console.log('[PaymentProviders] Categories data:', categoriesData);
+        console.log('[PaymentProviders] Categories list:', categoriesList);
+        console.log('[PaymentProviders] First category sample:', categoriesList[0]);
+        setCategories(categoriesList);
+        setTotalCategories(categoriesList.length);
+        console.log('[PaymentProviders] Total categories:', categoriesList.length);
         
         const response = routingResponse;
         console.log('[PaymentProviders] Raw API response:', response);
@@ -460,8 +477,8 @@ export function PaymentProvidersPage() {
                               provider={provider}
                               totalCategories={totalCategories}
                               onClick={() => {
-                                // TODO: Open provider modal
-                                console.log('Open provider:', provider.key);
+                                setSelectedProviderKey(provider.key);
+                                setIsModalOpen(true);
                               }}
                             />
                           </motion.div>
@@ -475,6 +492,14 @@ export function PaymentProvidersPage() {
           </>
         )}
       </main>
+
+      {/* Provider Details Modal */}
+      <ProviderDetailsModal
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        provider={selectedProvider}
+        categories={categories}
+      />
 
       {/* API Keys Modal */}
       <ApiKeysModal 

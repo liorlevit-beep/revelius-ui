@@ -1,9 +1,12 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Plus, Loader2, Copy, Check, AlertCircle, Columns3, ChevronUp, ChevronDown, RefreshCw } from 'lucide-react';
+import { Search, Plus, Loader2, Copy, Check, AlertCircle, Columns3, ChevronUp, ChevronDown, RefreshCw, CheckCircle, X } from 'lucide-react';
 import { Header } from '../components/Header';
 import { ScannerAPI } from '../api';
 import { EllipsisCell, SessionIdCell, UrlCell } from '../components/table/EllipsisCell';
+import { CountryFlag } from '../components/CountryFlag';
+import { NewScanModal } from '../components/scans/NewScanModal';
+import { LiveScansStrip } from '../components/scans/LiveScansStrip';
 import {
   unwrapList,
   pickSessionId,
@@ -54,6 +57,8 @@ export function Scans() {
   const [sortColumn, setSortColumn] = useState<SortColumn>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
   const [showColumnsMenu, setShowColumnsMenu] = useState(false);
+  const [isNewScanModalOpen, setIsNewScanModalOpen] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [pageSize, setPageSize] = useState<number>(() => {
     try {
       const stored = localStorage.getItem(PAGE_SIZE_STORAGE_KEY);
@@ -271,6 +276,20 @@ export function Scans() {
       });
   };
 
+  const handleScanSuccess = (sessionId: string) => {
+    // Show success message
+    setSuccessMessage(`Scan started successfully! Session: ${sessionId}`);
+    setTimeout(() => setSuccessMessage(null), 5000);
+
+    // Refresh the sessions list
+    handleRefresh();
+
+    // Navigate to the new scan detail page after a short delay
+    setTimeout(() => {
+      navigate(`/scans/${sessionId}`);
+    }, 1500);
+  };
+
   // Loading skeleton
   const renderLoadingSkeleton = () => (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
@@ -307,7 +326,7 @@ export function Scans() {
                 )}
                 {columnVisibility.region && (
                   <td className="py-4 px-4 whitespace-nowrap w-[10%]">
-                    <div className="h-4 bg-gray-200 rounded w-20"></div>
+                    <div className="h-6 w-6 bg-gray-200 rounded-full mx-auto"></div>
                   </td>
                 )}
                 {columnVisibility.created && (
@@ -339,6 +358,9 @@ export function Scans() {
       <div className="min-h-screen bg-gray-50">
         <Header title="Scans" timeRange="7" onTimeRangeChange={() => {}} />
         <main className="p-8">
+          {/* Live Scans Strip */}
+          <LiveScansStrip onNewScan={() => setIsNewScanModalOpen(true)} />
+
           {/* Controls skeleton */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">
             <div className="flex flex-col gap-4">
@@ -361,6 +383,9 @@ export function Scans() {
       <div className="min-h-screen bg-gray-50">
         <Header title="Scans" timeRange="7" onTimeRangeChange={() => {}} />
         <main className="p-8">
+          {/* Live Scans Strip */}
+          <LiveScansStrip onNewScan={() => setIsNewScanModalOpen(true)} />
+
           {/* Controls */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">
             <div className="flex flex-col gap-4">
@@ -402,6 +427,9 @@ export function Scans() {
       <Header title="Scans" timeRange="7" onTimeRangeChange={() => {}} />
 
       <main className="p-8">
+        {/* Live Scans Strip */}
+        <LiveScansStrip onNewScan={() => setIsNewScanModalOpen(true)} />
+
         {/* Controls */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">
           <div className="flex flex-col gap-4">
@@ -497,7 +525,7 @@ export function Scans() {
               <div className="flex-1" />
 
               <button
-                onClick={() => navigate('/scans/new')}
+                onClick={() => setIsNewScanModalOpen(true)}
                 className="px-4 py-2 bg-emerald-600 text-white rounded-xl text-sm font-semibold hover:bg-emerald-700 transition-colors flex items-center gap-2"
               >
                 <Plus className="w-4 h-4" />
@@ -506,6 +534,29 @@ export function Scans() {
             </div>
           </div>
         </div>
+
+        {/* Success Toast */}
+        {successMessage && (
+          <div className="fixed top-8 right-8 z-50 animate-in slide-in-from-top-4 fade-in duration-300">
+            <div className="bg-white rounded-xl border border-emerald-200 shadow-lg p-4 flex items-start gap-3 max-w-md">
+              <div className="flex-shrink-0">
+                <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
+                  <CheckCircle className="w-5 h-5 text-emerald-600" />
+                </div>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-gray-900 mb-0.5">Scan Started</p>
+                <p className="text-sm text-gray-600">{successMessage}</p>
+              </div>
+              <button
+                onClick={() => setSuccessMessage(null)}
+                className="flex-shrink-0 p-1 text-gray-400 hover:text-gray-600 rounded transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Empty state */}
         {filteredAndSortedSessions.length === 0 && sessions.length > 0 && (
@@ -539,7 +590,7 @@ export function Scans() {
               <h3 className="text-lg font-semibold text-gray-900 mb-2">No scan sessions yet</h3>
               <p className="text-gray-500 text-sm mb-4">Create your first scan to get started</p>
               <button
-                onClick={() => navigate('/scans/new')}
+                onClick={() => setIsNewScanModalOpen(true)}
                 className="px-4 py-2 bg-emerald-600 text-white rounded-xl text-sm font-semibold hover:bg-emerald-700 transition-colors inline-flex items-center gap-2"
               >
                 <Plus className="w-4 h-4" />
@@ -561,7 +612,7 @@ export function Scans() {
                     {columnVisibility.sessionId && (
                       <th 
                         onClick={() => handleSort('sessionId')}
-                        className="group text-left text-xs font-semibold text-gray-500 uppercase tracking-wider py-3 px-6 whitespace-nowrap cursor-pointer hover:bg-gray-100/80 transition-colors relative select-none w-[15%]"
+                        className="group text-left text-xs font-semibold text-gray-500 uppercase tracking-wider py-3 px-6 whitespace-nowrap cursor-pointer hover:bg-gray-100/80 transition-colors relative select-none w-[15%] overflow-hidden"
                       >
                         <div className="flex items-center gap-2">
                           Session ID
@@ -748,11 +799,17 @@ export function Scans() {
                           <td 
                             className="py-4 px-4 whitespace-nowrap w-[10%]"
                           >
-                            <EllipsisCell 
-                              value={`${region}${isInferred ? ' *' : ''}`}
-                              title={isInferred ? `${region} (Inferred from domain)` : region}
-                              className="text-sm text-gray-700"
-                            />
+                            <div className="flex items-center justify-center gap-1">
+                              <CountryFlag country={region} />
+                              {isInferred && (
+                                <span 
+                                  className="text-xs text-gray-400" 
+                                  title="Inferred from domain"
+                                >
+                                  *
+                                </span>
+                              )}
+                            </div>
                           </td>
                         )}
                         {columnVisibility.created && (
@@ -846,6 +903,13 @@ export function Scans() {
           </div>
         )}
       </main>
+
+      {/* New Scan Modal */}
+      <NewScanModal 
+        isOpen={isNewScanModalOpen}
+        onClose={() => setIsNewScanModalOpen(false)}
+        onSuccess={handleScanSuccess}
+      />
     </div>
   );
 }

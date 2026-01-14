@@ -1,8 +1,10 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { SidebarProvider } from './contexts/SidebarContext';
+import { ModeProvider } from './contexts/ModeContext';
 import { ProvidersProvider } from './state/providersStore';
 import { Sidebar } from './components/Sidebar';
 import { ApiKeysModal } from './components/ApiKeysModal';
+import { FloatingScansIndicator } from './components/scans/FloatingScansIndicator';
 import { Dashboard } from './pages/Dashboard';
 import { Merchants } from './pages/Merchants';
 import { Merchant360 } from './pages/Merchant360';
@@ -58,6 +60,9 @@ function AppContent() {
           <Route path="/ui-modules" element={<UiModules />} />
         </Routes>
       </main>
+      
+      {/* Global Floating Scan Indicator */}
+      <FloatingScansIndicator />
     </div>
   );
 }
@@ -65,11 +70,13 @@ function AppContent() {
 function App() {
   return (
     <Router>
-      <SidebarProvider>
-        <ProvidersProvider>
-          <AppContent />
-        </ProvidersProvider>
-      </SidebarProvider>
+      <ModeProvider>
+        <SidebarProvider>
+          <ProvidersProvider>
+            <AppContent />
+          </ProvidersProvider>
+        </SidebarProvider>
+      </ModeProvider>
     </Router>
   );
 }

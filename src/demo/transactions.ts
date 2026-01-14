@@ -18,6 +18,41 @@ export interface RouteCandidate {
   reasons: string[];
 }
 
+export interface LineItem {
+  sku: string;
+  name: string;
+  categoryId: string;
+  quantity: number;
+  price: number;
+}
+
+export interface SKU {
+  sku_id: string;
+  title: string;
+  quantity: number;
+  price: number;
+  product_url: string;
+  evidence_items: EvidenceItem[];
+  category_id?: string;
+}
+
+export interface EvidenceItem {
+  url: string;
+  url_referrer: string;
+  content_type: string;
+  status: string;
+  blocked_reason?: string;
+  confidence?: number;
+}
+
+export interface EvidenceSummary {
+  total_scanned_items: number;
+  total_failed_items: number;
+  passed_percentage: number;
+  failed_percentage: number;
+  review_required_count: number;
+}
+
 export interface Transaction {
   id: string;
   merchantId: string;
@@ -33,6 +68,11 @@ export interface Transaction {
   baselineApprovalProb: number;
   suggestedRoute: string;
   suggestedApprovalProb: number;
+  lineItems?: LineItem[];
+  evidence_session_id?: string;
+  status?: string;
+  cart?: SKU[];
+  evidence_summary?: EvidenceSummary;
   explanation: {
     signalsUsed: string[];
     whyCurrent: string[];
@@ -60,36 +100,32 @@ export interface UpliftBreakdown {
   volume: number;
 }
 
-export const routes: Route[] = [
-  {
-    id: 'psp-a',
-    name: 'PSP A',
-    costBps: 280,
-    approvalBase: 82,
-    notes: 'Primary global processor, good for general commerce',
-  },
-  {
-    id: 'psp-b',
-    name: 'PSP B',
-    costBps: 250,
-    approvalBase: 80,
-    notes: 'Secondary processor, lower cost but slightly lower approval',
-  },
-  {
-    id: 'local-acquirer',
-    name: 'Local Acquirer',
-    costBps: 320,
-    approvalBase: 88,
-    notes: 'Regional specialists, better for high-risk categories',
-  },
-  {
-    id: 'alt-rail',
-    name: 'Alt Rail',
-    costBps: 300,
-    approvalBase: 85,
-    notes: 'Alternative payment rail, good for specific verticals',
-  },
-];
+// Helper to get provider display name (Title Case)
+function toTitleCase(str: string): string {
+  return str
+    .split(/[-_\s]+/)
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+}
+
+// Generate routes from provider list
+export function generateRoutesFromProviders(providers: string[]): Route[] {
+  if (!providers || providers.length === 0) {
+    // Fallback to default providers
+    providers = ['stripe', 'adyen', 'rapyd', 'checkout', 'braintree'];
+  }
+  
+  return providers.map((provider, index) => ({
+    id: provider,
+    name: toTitleCase(provider),
+    costBps: 250 + (index * 10), // Vary cost slightly
+    approvalBase: 80 + Math.min(index * 2, 10), // Vary approval rate
+    notes: `Provider ${index + 1}`,
+  }));
+}
+
+// Default routes (for backwards compatibility)
+export const routes: Route[] = generateRoutesFromProviders(['stripe', 'adyen', 'rapyd', 'checkout', 'braintree']);
 
 // Helper function to generate mock transactions
 function generateTransaction(
@@ -97,8 +133,12 @@ function generateTransaction(
   merchantId: string,
   merchantName: string,
   merchantCategory: string,
-  index: number
+  index: number,
+  availableProviders?: string[]
 ): Transaction {
+  const providerRoutes = availableProviders && availableProviders.length > 0
+    ? generateRoutesFromProviders(availableProviders)
+    : routes;
   const countries = ['US', 'UK', 'DE', 'FR', 'ES', 'IT', 'CA', 'AU'];
   const methods: Array<'Card' | 'APM' | 'Wallet' | 'Bank transfer'> = ['Card', 'APM', 'Wallet', 'Bank transfer'];
   const currencies = ['USD', 'EUR', 'GBP', 'CAD', 'AUD'];
@@ -110,7 +150,7 @@ function generateTransaction(
   
   // Determine routing based on category and signals
   const isHighRisk = ['Adult', 'Gambling', 'Supplements'].includes(merchantCategory);
-  const currentRoute = ['PSP A', 'PSP B', 'PSP A', 'Local Acquirer'][index % 4];
+  const currentRoute = providerRoutes[index % providerRoutes.length].name;
   
   // Risk signals
   const allSignals = [
@@ -126,7 +166,7 @@ function generateTransaction(
   const riskSignals = allSignals.filter(() => Math.random() > 0.7).slice(0, 3);
   
   // Baseline probability
-  const baseRoute = routes.find(r => r.name === currentRoute);
+  const baseRoute = providerRoutes.find(r => r.name === currentRoute);
   let baselineApprovalProb = baseRoute ? baseRoute.approvalBase : 80;
   if (riskSignals.length > 2) baselineApprovalProb -= 10;
   if (isHighRisk) baselineApprovalProb -= 5;
@@ -139,16 +179,15 @@ function generateTransaction(
   let suggestedApprovalProb = baselineApprovalProb;
   
   if (Math.random() < 0.3 || currentOutcome === 'Declined') {
-    // Suggest optimization
-    if (isHighRisk) {
-      suggestedRoute = 'Local Acquirer';
-      suggestedApprovalProb = 88 - (riskSignals.length * 2);
-    } else if (country === 'US' || country === 'UK') {
-      suggestedRoute = 'PSP A';
-      suggestedApprovalProb = 85 - (riskSignals.length * 2);
-    } else {
-      suggestedRoute = 'Alt Rail';
-      suggestedApprovalProb = 85 - (riskSignals.length * 2);
+    // Suggest optimization - pick a different provider
+    const otherRoutes = providerRoutes.filter(r => r.name !== currentRoute);
+    if (otherRoutes.length > 0) {
+      // Pick the provider with highest approval rate
+      const bestRoute = otherRoutes.reduce((best, current) => 
+        current.approvalBase > best.approvalBase ? current : best
+      );
+      suggestedRoute = bestRoute.name;
+      suggestedApprovalProb = bestRoute.approvalBase - (riskSignals.length * 2);
     }
   }
   
@@ -184,16 +223,14 @@ function generateTransaction(
   if (suggestedRoute !== currentRoute) {
     const uplift = suggestedApprovalProb - baselineApprovalProb;
     whySuggested.push(`${suggestedRoute} has +${uplift.toFixed(1)}pp higher approval for this transaction type`);
+    whySuggested.push('Historical data shows better performance for similar transactions');
+    whySuggested.push('Lower fraud score threshold for this merchant segment');
     
-    if (suggestedRoute === 'Local Acquirer') {
-      whySuggested.push('Local acquirer has better relationships with issuing banks in this region');
-      whySuggested.push('Specialized in high-risk merchant categories');
-    } else if (suggestedRoute === 'Alt Rail') {
-      whySuggested.push('Alternative rail optimized for cross-border transactions');
-      whySuggested.push('Lower false positive rate for this card BIN');
-    } else {
-      whySuggested.push('Historical data shows better performance for similar transactions');
-      whySuggested.push('Lower fraud score threshold for this merchant segment');
+    if (isHighRisk) {
+      whySuggested.push('Better suited for high-risk merchant categories');
+    }
+    if (country !== 'US') {
+      whySuggested.push('Optimized for cross-border transactions in this region');
     }
   }
   
@@ -205,10 +242,9 @@ function generateTransaction(
     complianceNotes.push('Cross-border transaction - regional licensing verified');
   }
   
-  // Generate routing candidates
-  const allRoutes = ['PSP A', 'PSP B', 'Local Acquirer', 'Alt Rail'];
-  const candidates: RouteCandidate[] = allRoutes.map((routeName) => {
-    const routeData = routes.find(r => r.name === routeName);
+  // Generate routing candidates from available providers
+  const candidates: RouteCandidate[] = providerRoutes.map((routeData) => {
+    const routeName = routeData.name;
     const isBaseline = routeName === currentRoute;
     const isSuggested = routeName === suggestedRoute;
     
@@ -218,36 +254,35 @@ function generateTransaction(
     let reasons: string[] = [];
     
     // Adjust based on risk and merchant category
-    if (isHighRisk && routeName === 'PSP A') {
+    const providerIndex = providerRoutes.indexOf(routeData);
+    if (isHighRisk && providerIndex === 0) {
       eligibility = 'warning';
       approvalProb -= 0.15;
       complianceFit = 'ok';
       reasons.push('High-risk category may face stricter rules');
       reasons.push('Historical approval rate lower for this merchant type');
-    } else if (isHighRisk && routeName === 'Local Acquirer') {
+    } else if (isHighRisk && providerIndex > 1) {
       complianceFit = 'good';
-      reasons.push('Specialized in high-risk merchant categories');
-      reasons.push('Better compliance framework for regulated industries');
+      reasons.push('Better suited for high-risk merchant categories');
+      reasons.push('Strong compliance framework for regulated industries');
     }
     
     // Cross-border considerations
-    if (country !== 'US' && routeName === 'PSP B') {
-      eligibility = 'ineligible';
-      approvalProb = 0;
-      complianceFit = 'bad';
-      reasons.push('No cross-border support for this region');
-      reasons.push('Licensing restrictions prevent processing');
-    } else if (country !== 'US' && routeName === 'Alt Rail') {
-      complianceFit = 'good';
-      reasons.push('Optimized for cross-border transactions');
-      reasons.push('Regional compliance verified');
+    if (country !== 'US') {
+      if (Math.random() > 0.7 && providerIndex === 1) {
+        eligibility = 'warning';
+        approvalProb -= 0.1;
+        reasons.push('Limited cross-border support for this region');
+      } else {
+        reasons.push('Supports cross-border transactions');
+        approvalProb += 0.02;
+      }
     }
     
     // High velocity considerations
-    if (riskSignals.includes('High velocity') && routeName === 'PSP A') {
-      eligibility = 'warning';
+    if (riskSignals.includes('High velocity')) {
       approvalProb -= 0.05;
-      reasons.push('Velocity limits may apply');
+      reasons.push('Velocity monitoring active');
     }
     
     // Set decision
@@ -272,17 +307,43 @@ function generateTransaction(
     }
     
     return {
-      routeId: routeData?.id || routeName.toLowerCase().replace(' ', '-'),
+      routeId: routeData.id,
       displayName: routeName,
-      logoText: routeName.split(' ').map(w => w[0]).join(''),
+      logoText: routeName.split(' ').map(w => w[0]).join('').substring(0, 3).toUpperCase(),
       eligibility,
       approvalProb: Math.max(0, Math.min(1, approvalProb)),
-      costBps: routeData?.costBps || 250,
+      costBps: routeData.costBps,
       complianceFit,
       decision,
       reasons,
     };
   });
+  
+  // Generate line items with category IDs
+  const possibleCategories = [
+    { id: 'tobacco', name: 'Tobacco Products' },
+    { id: 'cbd', name: 'CBD Products' },
+    { id: 'adult', name: 'Adult Content' },
+    { id: 'supplements', name: 'Dietary Supplements' },
+    { id: 'electronics', name: 'Electronics' },
+    { id: 'apparel', name: 'Apparel' },
+    { id: 'jewelry', name: 'Jewelry' },
+    { id: 'software', name: 'Software' },
+  ];
+  
+  const itemCount = Math.floor(Math.random() * 3) + 1; // 1-3 items
+  const lineItems: LineItem[] = [];
+  for (let i = 0; i < itemCount; i++) {
+    const category = possibleCategories[Math.floor(Math.random() * possibleCategories.length)];
+    const itemPrice = Math.floor((amount / itemCount) * (0.8 + Math.random() * 0.4));
+    lineItems.push({
+      sku: `SKU-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+      name: `${category.name} Item ${i + 1}`,
+      categoryId: category.id,
+      quantity: Math.floor(Math.random() * 3) + 1,
+      price: itemPrice,
+    });
+  }
   
   return {
     id,
@@ -299,6 +360,7 @@ function generateTransaction(
     baselineApprovalProb,
     suggestedRoute,
     suggestedApprovalProb,
+    lineItems,
     explanation: {
       signalsUsed,
       whyCurrent,
@@ -316,24 +378,32 @@ function generateTransaction(
 // Generate mock transactions from merchants
 import { merchants } from './merchants';
 
-export const transactions: Transaction[] = [];
-merchants.slice(0, 10).forEach((merchant, mIdx) => {
-  const txnCount = Math.floor(Math.random() * 10) + 5;
-  for (let i = 0; i < txnCount; i++) {
-    transactions.push(
-      generateTransaction(
-        `T-${(mIdx * 100 + i).toString().padStart(5, '0')}`,
-        merchant.id,
-        merchant.name,
-        merchant.category,
-        mIdx * 10 + i
-      )
-    );
-  }
-});
+// Generate transactions with dynamic providers
+export function generateTransactions(availableProviders?: string[]): Transaction[] {
+  const txns: Transaction[] = [];
+  merchants.slice(0, 10).forEach((merchant, mIdx) => {
+    const txnCount = Math.floor(Math.random() * 10) + 5;
+    for (let i = 0; i < txnCount; i++) {
+      txns.push(
+        generateTransaction(
+          `T-${(mIdx * 100 + i).toString().padStart(5, '0')}`,
+          merchant.id,
+          merchant.name,
+          merchant.category,
+          mIdx * 10 + i,
+          availableProviders
+        )
+      );
+    }
+  });
+  
+  // Sort by date descending
+  txns.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  return txns;
+}
 
-// Sort by date descending
-transactions.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+// Default transactions (for backwards compatibility)
+export const transactions: Transaction[] = generateTransactions();
 
 // Uplift time series for different ranges
 export const upliftSeries = {
@@ -364,12 +434,22 @@ export const upliftBreakdownByCountry: UpliftBreakdown[] = [
   { label: 'AU', baseline: 84, optimized: 88, uplift: 4.0, volume: 321 },
 ];
 
-export const upliftBreakdownByRoute: UpliftBreakdown[] = [
-  { label: 'PSP A', baseline: 82, optimized: 86, uplift: 4.0, volume: 2145 },
-  { label: 'PSP B', baseline: 80, optimized: 85, uplift: 5.0, volume: 1432 },
-  { label: 'Local Acquirer', baseline: 88, optimized: 90, uplift: 2.0, volume: 892 },
-  { label: 'Alt Rail', baseline: 85, optimized: 88, uplift: 3.0, volume: 578 },
-];
+// Generate uplift breakdown by route dynamically
+export function generateUpliftByRoute(availableProviders?: string[]): UpliftBreakdown[] {
+  const providerRoutes = availableProviders && availableProviders.length > 0
+    ? generateRoutesFromProviders(availableProviders)
+    : routes;
+  
+  return providerRoutes.map((route, index) => ({
+    label: route.name,
+    baseline: route.approvalBase,
+    optimized: route.approvalBase + 3 + Math.random() * 2,
+    uplift: 3 + Math.random() * 2,
+    volume: Math.floor(2000 - (index * 300) + Math.random() * 200),
+  }));
+}
+
+export const upliftBreakdownByRoute: UpliftBreakdown[] = generateUpliftByRoute();
 
 // Helper to get transactions for a specific merchant
 export function getTransactionsForMerchant(merchantId: string): Transaction[] {

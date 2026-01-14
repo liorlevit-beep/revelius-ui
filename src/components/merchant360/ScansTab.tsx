@@ -175,9 +175,9 @@ export function ScansTab({ merchantId, scans }: ScansTabProps) {
 
       {/* Scans Table */}
       <Card>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-100">
+        <div className="overflow-x-auto overflow-y-auto" style={{ maxHeight: 'calc(100vh - 520px)' }}>
+          <table className="w-full table-fixed">
+            <thead className="bg-gray-50/95 backdrop-blur-sm border-b border-gray-100 sticky top-0 z-10">
               <tr>
                 <th className="text-left py-3 px-4 w-8">
                   {/* Checkbox column */}
@@ -209,7 +209,7 @@ export function ScansTab({ merchantId, scans }: ScansTabProps) {
               {filteredScans.map((scan) => (
                 <tr
                   key={scan.id}
-                  className="hover:bg-gray-50 transition-colors"
+                  className="group relative hover:bg-gray-50/80 transition-all duration-150"
                 >
                   <td className="py-3 px-4">
                     <button

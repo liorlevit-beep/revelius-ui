@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronDown, ChevronRight, Info } from 'lucide-react';
 import { Chip } from './Badges';
+import { getCountryFlag } from '../utils/countryFlags';
 import type { Transaction, RouteCandidate } from '../demo/transactions';
 
 interface RoutingDecisionFlowProps {
@@ -89,7 +90,7 @@ export function RoutingDecisionFlow({ transaction }: RoutingDecisionFlowProps) {
                     </p>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-700">
-                    <span className="font-medium">{transaction.country}</span>
+                    <span className="font-medium text-xl" title={transaction.country}>{getCountryFlag(transaction.country)}</span>
                     <span className="text-gray-400">•</span>
                     <span>{transaction.method}</span>
                   </div>
@@ -168,8 +169,10 @@ export function RoutingDecisionFlow({ transaction }: RoutingDecisionFlowProps) {
             <p className="text-xl font-bold text-gray-900 mb-2">
               {transaction.amount} {transaction.currency}
             </p>
-            <p className="text-sm text-gray-700 mb-2">
-              {transaction.country} • {transaction.method}
+            <p className="text-sm text-gray-700 mb-2 flex items-center gap-2">
+              <span className="text-xl leading-none" title={transaction.country}>{getCountryFlag(transaction.country)}</span>
+              <span>•</span>
+              <span>{transaction.method}</span>
             </p>
             <button
               onClick={() => navigate(`/merchants/${transaction.merchantId}`)}

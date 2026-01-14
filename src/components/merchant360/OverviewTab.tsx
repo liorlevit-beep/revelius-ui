@@ -4,16 +4,19 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { CheckCircle, Play, AlertTriangle } from 'lucide-react';
 import { Card } from '../Card';
 import { Chip } from '../Badges';
+import { RoutingCanvas } from '../routing/RoutingCanvas';
 import type { MerchantOverview, Finding } from './types';
 
 interface OverviewTabProps {
   merchantId: string;
+  merchantName: string;
+  merchantCountry: string;
   overview: MerchantOverview | null;
   topFindings: Finding[];
   onFindingClick: (finding: Finding) => void;
 }
 
-export function OverviewTab({ merchantId, overview, topFindings, onFindingClick }: OverviewTabProps) {
+export function OverviewTab({ merchantId, merchantName, merchantCountry, overview, topFindings, onFindingClick }: OverviewTabProps) {
   const navigate = useNavigate();
 
   if (!overview) {
@@ -44,6 +47,21 @@ export function OverviewTab({ merchantId, overview, topFindings, onFindingClick 
 
   return (
     <div className="p-6 space-y-6">
+      {/* Merchant Routing Visualization */}
+      <Card>
+        <div className="p-6">
+          <h3 className="text-base font-semibold text-gray-900 mb-4">Payment Provider Routing</h3>
+          <div style={{ height: '500px' }}>
+            <RoutingCanvas
+              merchantName={merchantName}
+              merchantCountry={merchantCountry}
+              mode="merchant"
+              height={500}
+            />
+          </div>
+        </div>
+      </Card>
+
       {/* Row 1: Declared vs Observed + Risk Breakdown */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Declared vs Observed */}

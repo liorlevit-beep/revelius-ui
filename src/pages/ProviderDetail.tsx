@@ -273,9 +273,9 @@ export function ProviderDetail() {
                   {provider.topMerchants.length === 0 ? (
                     <p className="text-sm text-gray-600">No merchant data available yet.</p>
                   ) : (
-                    <div className="overflow-x-auto">
-                      <table className="w-full">
-                        <thead className="bg-gray-50 border-b border-gray-100">
+                    <div className="overflow-x-auto overflow-y-auto" style={{ maxHeight: 'calc(100vh - 520px)' }}>
+                      <table className="w-full table-fixed">
+                        <thead className="bg-gray-50/95 backdrop-blur-sm border-b border-gray-100 sticky top-0 z-10">
                           <tr>
                             <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider py-3 px-4">
                               Merchant
@@ -293,7 +293,7 @@ export function ProviderDetail() {
                         </thead>
                         <tbody className="divide-y divide-gray-50">
                           {provider.topMerchants.map((merchant) => (
-                            <tr key={merchant.merchantId} className="hover:bg-gray-50 transition-colors">
+                            <tr key={merchant.merchantId} className="group relative hover:bg-gray-50/80 cursor-pointer transition-all duration-150 active:scale-[0.998]">
                               <td className="py-3 px-4">
                                 <button
                                   onClick={() => navigate(`/merchants/${merchant.merchantId}`)}

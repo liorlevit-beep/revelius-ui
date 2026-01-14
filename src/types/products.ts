@@ -10,7 +10,8 @@ export type ProductCategory = {
 
 export type RoutingTable = {
   default_psp: string;
-  mapping: Record<string, string[]>;
+  mapping?: Record<string, string[]>;
+  provider_category_mapping?: Record<string, string[]>;
 };
 
 export type RouteProductsRequest = {
