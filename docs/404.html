@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Revelius - Redirecting...</title>
+  <script>
+    // GitHub Pages SPA redirect handler
+    // This script takes the current URL and converts it to a format that will be handled by the index.html
+    (function() {
+      var redirect = sessionStorage.getItem('redirect');
+      
+      // If we're already redirecting, stop to prevent infinite loop
+      if (redirect) {
+        return;
+      }
+      
+      // Get the path after /revelius-ui/
+      var path = window.location.pathname.replace(/^\/revelius-ui\//, '');
+      
+      // Store the path and query string
+      sessionStorage.setItem('redirect', path + window.location.search + window.location.hash);
+      
+      // Redirect to the base URL
+      window.location.replace('/revelius-ui/');
+    })();
+  </script>
+</head>
+<body>
+  <p>Redirecting...</p>
+</body>
+</html>
