@@ -309,7 +309,7 @@ export default function DemoLab() {
   const reveliusOut = ports.get('revelius:out');
 
   return (
-    <div className="min-h-screen bg-white relative overflow-hidden" 
+    <div className="min-h-screen bg-white dark:bg-transparent relative overflow-hidden" 
          style={{
            backgroundImage: 'radial-gradient(circle, #e5e7eb 1px, transparent 1px)',
            backgroundSize: '20px 20px'

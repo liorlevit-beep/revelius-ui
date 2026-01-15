@@ -9,7 +9,7 @@ export function DashboardLiquidGlassTheme({ children }: DashboardLiquidGlassThem
     <div
       className="liquid-glass-dashboard min-h-screen relative overflow-x-hidden"
       style={{
-        background: 'radial-gradient(circle at 50% 50%, #1e1b4b 0%, #0a0a0f 100%)',
+        background: 'transparent',
         // CSS Variables for the theme
         ['--color-obsidian' as string]: '#0a0a0f',
         ['--color-deep-indigo' as string]: '#1e1b4b',

@@ -362,7 +362,7 @@ export default function ApiPlayground() {
 
           <div className="space-y-4">
             <button
-              onClick={() => handleApiCall('getProductCategories', ProductsAPI.getCategories)}
+              onClick={() => handleApiCall('getProductCategories', ProductsAPI.getCategories, 'GET', '/products/categories')}
               disabled={loading === 'getProductCategories'}
               className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
             >
@@ -370,7 +370,15 @@ export default function ApiPlayground() {
             </button>
 
             <button
-              onClick={() => handleApiCall('getRoutingTable', ProductsAPI.getRoutingTable)}
+              onClick={() => handleApiCall('getAllProducts', ProductsAPI.getAllProducts, 'GET', '/products/all')}
+              disabled={loading === 'getAllProducts'}
+              className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+            >
+              {loading === 'getAllProducts' ? 'Loading...' : 'Get All Products'}
+            </button>
+
+            <button
+              onClick={() => handleApiCall('getRoutingTable', ProductsAPI.getRoutingTable, 'GET', '/products/routing_table')}
               disabled={loading === 'getRoutingTable'}
               className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
             >

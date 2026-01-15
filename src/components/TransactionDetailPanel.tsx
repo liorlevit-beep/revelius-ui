@@ -67,30 +67,30 @@ export function TransactionDetailPanel({ transaction, onClose }: TransactionDeta
   };
 
   return (
-    <div className="bg-white flex flex-col h-full rounded-2xl">
+    <div className="bg-white dark:bg-gray-900 flex flex-col h-full rounded-2xl">
       {/* Header - Fixed */}
-      <div className="flex-shrink-0 bg-white border-b border-gray-100 px-8 py-6 flex items-center justify-between rounded-t-2xl">
+      <div className="flex-shrink-0 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 px-8 py-6 flex items-center justify-between rounded-t-2xl">
         <div>
-          <h3 className="text-2xl font-bold text-gray-900">Transaction {transaction.id}</h3>
-          <p className="text-sm text-gray-500 mt-1">{transaction.createdAt.toLocaleString()}</p>
+          <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Transaction {transaction.id}</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{transaction.createdAt.toLocaleString()}</p>
         </div>
         <button
           onClick={onClose}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
         >
-          <X className="w-6 h-6 text-gray-500" />
+          <X className="w-6 h-6 text-gray-500 dark:text-gray-400" />
         </button>
       </div>
 
       {/* Tabs */}
-      <div className="flex-shrink-0 bg-white border-b border-gray-100">
+      <div className="flex-shrink-0 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
         <nav className="flex gap-8 px-8">
           <button
             onClick={() => setActiveTab('routing')}
             className={`py-4 text-sm font-semibold border-b-2 transition-colors ${
               activeTab === 'routing'
                 ? 'border-emerald-600 text-emerald-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
+                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
             }`}
           >
             Routing Decision
@@ -100,7 +100,7 @@ export function TransactionDetailPanel({ transaction, onClose }: TransactionDeta
             className={`py-4 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 ${
               activeTab === 'evidence'
                 ? 'border-emerald-600 text-emerald-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
+                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
             }`}
           >
             <FileText className="w-4 h-4" />
@@ -117,7 +117,7 @@ export function TransactionDetailPanel({ transaction, onClose }: TransactionDeta
         <div className="flex-1 overflow-y-auto p-8 space-y-8 scrollbar-thin">
         {/* Routing Canvas Visualization */}
         <div>
-          <h4 className="text-base font-semibold text-gray-900 mb-6">Routing Visualization</h4>
+          <h4 className="text-base font-semibold text-gray-900 dark:text-white mb-6">Routing Visualization</h4>
           <RoutingCanvas
             cart={transaction.cart}
             lineItems={transaction.lineItems}
@@ -138,15 +138,15 @@ export function TransactionDetailPanel({ transaction, onClose }: TransactionDeta
 
         {/* Cart-Based Routing Decision (for generated transactions with cart) */}
         {transaction.cart && transaction.cart.length > 0 && (
-          <div className="border-t border-gray-200 pt-8">
-            <h4 className="text-base font-semibold text-gray-900 mb-6">Cart Routing Analysis</h4>
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-8">
+            <h4 className="text-base font-semibold text-gray-900 dark:text-white mb-6">Cart Routing Analysis</h4>
             <CartRoutingDecision cart={transaction.cart} />
           </div>
         )}
 
         {/* Signals Used */}
-        <div className="border-t border-gray-200 pt-6">
-          <h4 className="text-sm font-semibold text-gray-900 mb-3">Signals Used</h4>
+        <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+          <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Signals Used</h4>
           <div className="flex flex-wrap gap-2">
             {transaction.explanation.signalsUsed.map((signal, i) => (
               <Chip key={i} label={signal} />
@@ -156,13 +156,13 @@ export function TransactionDetailPanel({ transaction, onClose }: TransactionDeta
 
         {/* Why Current Route */}
         {transaction.explanation.whyCurrent.length > 0 && (
-          <div className="border-t border-gray-200 pt-6">
-            <h4 className="text-sm font-semibold text-gray-900 mb-3">
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+            <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
               Why Current Route {transaction.currentOutcome === 'Declined' ? 'Failed' : 'Was Used'}
             </h4>
             <ul className="space-y-2">
               {transaction.explanation.whyCurrent.map((reason, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
+                <li key={i} className="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300">
                   <span className="w-1.5 h-1.5 bg-gray-400 rounded-full mt-1.5 flex-shrink-0" />
                   {reason}
                 </li>
@@ -173,11 +173,11 @@ export function TransactionDetailPanel({ transaction, onClose }: TransactionDeta
 
         {/* Why Suggested Route is Better */}
         {transaction.explanation.whySuggested.length > 0 && (
-          <div className="border-t border-gray-200 pt-6">
-            <h4 className="text-sm font-semibold text-gray-900 mb-3">Why Suggested Route is Better</h4>
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+            <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Why Suggested Route is Better</h4>
             <ul className="space-y-2">
               {transaction.explanation.whySuggested.map((reason, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
+                <li key={i} className="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300">
                   <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-1.5 flex-shrink-0" />
                   {reason}
                 </li>
@@ -188,11 +188,11 @@ export function TransactionDetailPanel({ transaction, onClose }: TransactionDeta
 
         {/* Compliance Notes */}
         {transaction.explanation.complianceNotes.length > 0 && (
-          <div className="border-t border-gray-200 pt-6">
-            <h4 className="text-sm font-semibold text-gray-900 mb-3">Compliance Notes</h4>
-            <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg space-y-2">
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+            <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Compliance Notes</h4>
+            <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg space-y-2">
               {transaction.explanation.complianceNotes.map((note, i) => (
-                <p key={i} className="text-sm text-amber-800">
+                <p key={i} className="text-sm text-amber-800 dark:text-amber-300">
                   • {note}
                 </p>
               ))}
@@ -207,18 +207,18 @@ export function TransactionDetailPanel({ transaction, onClose }: TransactionDeta
         <div className="flex-1 overflow-y-auto p-8 space-y-6 scrollbar-thin">
           {/* Routing Decision Section */}
           <div>
-            <h4 className="text-lg font-semibold text-gray-900 mb-4">Routing Decision</h4>
+            <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Routing Decision</h4>
             <RoutingDecisionBlock lineItems={transaction.lineItems} />
           </div>
 
           {/* Evidence Pack Section */}
-          <div className="border-t border-gray-200 pt-6">
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
             <div className="flex items-center justify-between">
-              <h4 className="text-lg font-semibold text-gray-900">Evidence Pack</h4>
+              <h4 className="text-lg font-semibold text-gray-900 dark:text-white">Evidence Pack</h4>
             {boundSessionId && (
               <button
                 onClick={() => setShowAttachModal(true)}
-                className="text-sm text-gray-600 hover:text-gray-900 underline"
+                className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300 underline"
               >
                 Change
               </button>
@@ -227,12 +227,12 @@ export function TransactionDetailPanel({ transaction, onClose }: TransactionDeta
 
           {/* No Session Bound - Empty State */}
           {!boundSessionId && (
-            <div className="flex flex-col items-center justify-center py-16 px-4 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+            <div className="flex flex-col items-center justify-center py-16 px-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700">
+              <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
                 <LinkIcon className="w-8 h-8 text-gray-400" />
               </div>
-              <h5 className="text-lg font-semibold text-gray-900 mb-2">No evidence attached</h5>
-              <p className="text-sm text-gray-600 text-center mb-6 max-w-md">
+              <h5 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No evidence attached</h5>
+              <p className="text-sm text-gray-600 dark:text-gray-400 text-center mb-6 max-w-md">
                 Attach a scan session to view compliance evidence and website analysis for this transaction.
               </p>
               <button
@@ -267,19 +267,19 @@ export function TransactionDetailPanel({ transaction, onClose }: TransactionDeta
               {evidenceLoading && (
                 <div className="flex flex-col items-center justify-center py-12">
                   <Loader2 className="w-8 h-8 text-emerald-600 animate-spin mb-3" />
-                  <p className="text-sm text-gray-600">Loading evidence report...</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Loading evidence report...</p>
                 </div>
               )}
 
               {/* Error State */}
               {evidenceError && !evidenceLoading && (
-                <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
-                  <p className="text-sm text-red-800">
+                <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-xl">
+                  <p className="text-sm text-red-800 dark:text-red-300">
                     <strong>Error:</strong> {evidenceError}
                   </p>
                   <button
                     onClick={() => fetchEvidenceReport(boundSessionId)}
-                    className="mt-3 text-sm text-red-700 hover:text-red-900 underline"
+                    className="mt-3 text-sm text-red-700 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 underline"
                   >
                     Retry
                   </button>
@@ -291,10 +291,10 @@ export function TransactionDetailPanel({ transaction, onClose }: TransactionDeta
                 <div className="space-y-4">
                   {/* Toggle between visual and raw JSON */}
                   <div className="flex items-center justify-between">
-                    <h5 className="text-sm font-semibold text-gray-900">Evidence Report</h5>
+                    <h5 className="text-sm font-semibold text-gray-900 dark:text-white">Evidence Report</h5>
                     <button
                       onClick={() => setShowRawJson(!showRawJson)}
-                      className="text-xs text-gray-600 hover:text-gray-900 underline"
+                      className="text-xs text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300 underline"
                     >
                       {showRawJson ? 'Show Visual Report' : 'Show Raw JSON'}
                     </button>
@@ -322,8 +322,8 @@ export function TransactionDetailPanel({ transaction, onClose }: TransactionDeta
 
                   {/* Raw JSON Viewer (for debugging) */}
                   {showRawJson && (
-                    <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 overflow-x-auto">
-                      <div className="bg-white border border-gray-200 rounded-lg p-4 max-h-[600px] overflow-y-auto">
+                    <div className="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4 overflow-x-auto">
+                      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-4 max-h-[600px] overflow-y-auto">
                         <JsonViewer data={evidenceData} expanded={true} />
                       </div>
                     </div>

@@ -1,0 +1,33 @@
+.tiltCard {
+  position: relative;
+  transform-style: preserve-3d;
+  will-change: transform;
+  transition: none;
+  overflow: hidden;
+  border-radius: 16px;
+}
+
+.tiltCard.isTransitioning {
+  transition: transform 120ms ease;
+}
+
+.tiltGlare {
+  position: absolute;
+  top: -120px;
+  right: -120px;
+  width: 420px;
+  height: 420px;
+  border-radius: 999px;
+  filter: blur(50px);
+  background: white;
+  opacity: 0.08;
+  pointer-events: none;
+  z-index: 1;
+  will-change: top, left;
+}
+
+.tiltContent {
+  position: relative;
+  z-index: 2;
+  transform: translateZ(20px);
+}

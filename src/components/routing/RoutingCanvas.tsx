@@ -605,7 +605,7 @@ export function RoutingCanvas({
     return (
       <div 
         className={`relative w-full rounded-xl border overflow-hidden flex items-center justify-center ${
-          glassTheme ? 'backdrop-blur-xl bg-white/[0.02]' : 'bg-gray-50 border-gray-200'
+          glassTheme ? 'backdrop-blur-xl bg-gray-950/80' : 'bg-gray-50 border-gray-200'
         }`}
         style={{ 
           height: `${height}px`,
@@ -623,7 +623,7 @@ export function RoutingCanvas({
   return (
     <div 
       className={`relative w-full rounded-xl border overflow-hidden ${
-        glassTheme ? 'backdrop-blur-xl bg-white/[0.02]' : 'bg-gray-50 border-gray-200'
+        glassTheme ? 'backdrop-blur-xl bg-gray-950/80' : 'bg-gray-50 border-gray-200'
       }`} 
       style={{ 
         height: `${height}px`,
@@ -838,31 +838,31 @@ export function RoutingCanvas({
               {transactionId ? (
                 // Transaction context - show transaction details
                 <div className="mt-2 flex flex-col items-center">
-                  <div className="text-xs font-semibold text-gray-900 font-mono">
+                  <div className={`text-xs font-semibold font-mono ${glassTheme ? 'text-white' : 'text-gray-900'}`}>
                     {transactionId}
                   </div>
                   {transactionAmount !== undefined && transactionCurrency && (
-                    <div className="text-sm font-bold text-gray-900 mt-1">
+                    <div className={`text-sm font-bold mt-1 ${glassTheme ? 'text-white' : 'text-gray-900'}`}>
                       {transactionCurrency} {transactionAmount.toFixed(2)}
                     </div>
                   )}
                   {itemCount !== undefined && itemCount > 0 && (
-                    <div className="text-xs text-gray-500 mt-0.5">
+                    <div className={`text-xs mt-0.5 ${glassTheme ? 'text-gray-300' : 'text-gray-500'}`}>
                       {itemCount} item{itemCount !== 1 ? 's' : ''}
                     </div>
                   )}
-                  <div className="text-xs text-gray-500 mt-0.5 max-w-[100px] text-center truncate">
+                  <div className={`text-xs mt-0.5 max-w-[100px] text-center truncate ${glassTheme ? 'text-gray-300' : 'text-gray-500'}`}>
                     {merchantName}
                   </div>
                 </div>
               ) : (
                 // Merchant context - show merchant details
                 <>
-                  <div className="mt-2 text-sm font-medium text-gray-900 max-w-[100px] text-center truncate">
+                  <div className={`mt-2 text-sm font-medium max-w-[100px] text-center truncate ${glassTheme ? 'text-white' : 'text-gray-900'}`}>
                     {merchantName}
                   </div>
                   {merchantCountry && (
-                    <div className="text-xs text-gray-500 mt-1">
+                    <div className={`text-xs mt-1 ${glassTheme ? 'text-gray-300' : 'text-gray-500'}`}>
                       {merchantCountry}
                     </div>
                   )}
@@ -948,11 +948,11 @@ export function RoutingCanvas({
                   />
                 </div>
               </div>
-              <div className="mt-2 text-sm font-bold text-gray-900">
+              <div className={`mt-2 text-sm font-bold ${glassTheme ? 'text-white' : 'text-gray-900'}`}>
                 Revelius
               </div>
               {skus.length > 0 && (
-                <div className="text-xs text-gray-500 mt-1">
+                <div className={`text-xs mt-1 ${glassTheme ? 'text-gray-300' : 'text-gray-500'}`}>
                   {skus.length} items routing
                 </div>
               )}
@@ -986,15 +986,21 @@ export function RoutingCanvas({
                 
                 // Styling based on whether provider is highlighted
                 const pspBrandColor = config?.color || '#9CA3AF';
-                const borderColor = mode === 'merchant' 
+                const borderColor = mode === 'merchant'
                   ? (isActive ? pspBrandColor : '#e5e7eb') // Use brand color in merchant mode when active
                   : (isHighlighted ? '#10b981' : '#e5e7eb'); // Use emerald for selected in transaction mode
                 
                 const borderWidth = (mode === 'merchant' && isActive) || (mode !== 'merchant' && isHighlighted) ? '3px' : '2px';
                 
                 const bgColorStyle = mode === 'merchant'
-                  ? (isActive ? `${pspBrandColor}08` : '#f9fafb') // Light tint of brand color in merchant mode
-                  : (isHighlighted ? '#ecfdf5' : '#f9fafb'); // Emerald tint for selected in transaction mode
+                  ? (isActive 
+                      ? (glassTheme ? `${pspBrandColor}30` : `${pspBrandColor}08`) 
+                      : (glassTheme ? 'rgba(255, 255, 255, 0.08)' : '#f9fafb')
+                    )
+                  : (isHighlighted 
+                      ? (glassTheme ? 'rgba(16, 185, 129, 0.3)' : '#ecfdf5')
+                      : (glassTheme ? 'rgba(255, 255, 255, 0.08)' : '#f9fafb')
+                    );
                 
                 const iconColor = status === 'Approved' ? 'text-green-500' :
                   status === 'Review' ? 'text-amber-500' : 'text-red-500';
@@ -1005,14 +1011,16 @@ export function RoutingCanvas({
                     onClick={() => handleProviderClick(pspName)}
                     onMouseEnter={() => setHoveredPsp(pspName)}
                     onMouseLeave={() => setHoveredPsp(null)}
-                    className={`relative w-[220px] h-[52px] rounded-xl shadow-md flex items-center gap-3 px-3 transition-all pointer-events-auto cursor-pointer hover:shadow-lg ${
+                    className={`relative w-[220px] h-[52px] rounded-xl flex items-center gap-3 px-3 transition-all pointer-events-auto cursor-pointer ${
                       !isActive ? 'opacity-40' : 'opacity-100'
-                    }`}
+                    } ${glassTheme ? '' : 'shadow-md hover:shadow-lg'}`}
                     style={{ 
                       borderColor, 
                       borderWidth,
                       borderStyle: 'solid',
-                      backgroundColor: bgColorStyle 
+                      backgroundColor: bgColorStyle,
+                      backdropFilter: glassTheme ? 'blur(12px) saturate(180%)' : undefined,
+                      WebkitBackdropFilter: glassTheme ? 'blur(12px) saturate(180%)' : undefined,
                     }}
                   >
                     <div
@@ -1023,20 +1031,30 @@ export function RoutingCanvas({
                     
                     <div
                       className="w-8 h-8 rounded-lg flex-shrink-0 flex items-center justify-center"
-                      style={{ backgroundColor: `${config?.color}20` }}
+                      style={{ 
+                        backgroundColor: glassTheme 
+                          ? `${config?.color}40` 
+                          : `${config?.color}20`
+                      }}
                     >
                       <div
                         className="w-5 h-5 rounded"
-                        style={{ backgroundColor: config?.color || '#9CA3AF' }}
+                        style={{ 
+                          backgroundColor: config?.color || '#9CA3AF'
+                        }}
                       />
                     </div>
                     
                     <div className="flex-1 min-w-0">
-                      <div className={`text-sm font-semibold truncate ${isActive ? 'text-gray-900' : 'text-gray-400'}`}>
+                      <div className={`text-sm font-semibold truncate ${
+                        glassTheme 
+                          ? (isActive ? 'text-white' : 'text-gray-400')
+                          : (isActive ? 'text-gray-900' : 'text-gray-400')
+                      }`}>
                         {getProviderDisplayName(pspName)}
                       </div>
                       {isActive && (
-                        <div className="text-xs text-gray-500">
+                        <div className={`text-xs ${glassTheme ? 'text-gray-300' : 'text-gray-500'}`}>
                           {count} item{count !== 1 ? 's' : ''}
                         </div>
                       )}

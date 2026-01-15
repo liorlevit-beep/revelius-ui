@@ -16,7 +16,7 @@ export function PolicyPackDetail() {
 
   if (!pack) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 dark:bg-transparent">
         <Header title="Policy Pack Not Found" timeRange="7" onTimeRangeChange={() => {}} />
         <main className="p-8">
           <Card className="p-12 text-center">
@@ -58,7 +58,7 @@ export function PolicyPackDetail() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-transparent">
       <Header title="Policy Pack" timeRange="7" onTimeRangeChange={() => {}} />
 
       <main className="p-8">

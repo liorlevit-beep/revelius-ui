@@ -1,0 +1,301 @@
+/* Iridescent Glass Button Styles */
+
+.ir-btn {
+  /* Base Structure */
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  height: 48px;
+  width: 100%;
+  padding: 0 16px;
+  border-radius: 10px;
+  
+  /* Transparent Base - No background when idle */
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  
+  /* No Border When Idle */
+  border: 1px solid transparent;
+  
+  /* Typography */
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  text-align: left;
+  
+  /* 3D Transform Setup */
+  position: relative;
+  overflow: hidden;
+  transform-style: preserve-3d;
+  
+  /* Transitions - DISABLED */
+  transition: none;
+  
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Iridescent Glow Layer - DISABLED */
+.ir-btn::before {
+  display: none;
+}
+
+/* Inner Glassy Glow - DISABLED */
+.ir-btn::after {
+  display: none;
+}
+
+/* Drop Shadow Layer - DISABLED */
+.ir-drop {
+  display: none;
+}
+
+/* Sheen Sweep Effect - DISABLED */
+.ir-sheen {
+  display: none;
+}
+
+.ir-sheen::before,
+.ir-sheen::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: inherit;
+  transform: none;
+  pointer-events: none;
+}
+
+.ir-sheen::before {
+  filter: blur(10px);
+  opacity: 0.5;
+  mask: linear-gradient(
+    90deg,
+    transparent 0%,
+    black 35%,
+    black 65%,
+    transparent 100%
+  );
+}
+
+.ir-sheen::after {
+  filter: blur(16px);
+  opacity: 0.3;
+  mask: linear-gradient(
+    90deg,
+    transparent 0%,
+    transparent 40%,
+    black 50%,
+    transparent 60%,
+    transparent 100%
+  );
+}
+
+/* Content Wrapper */
+.ir-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  min-width: 0;
+}
+
+/* Icon */
+.ir-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+}
+
+/* Label with Ellipsis */
+.ir-label {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 1;
+  transition: none;
+}
+
+/* Label fade out when sidebar is collapsing */
+.sidebar-collapsing .ir-label {
+  opacity: 0;
+  transition: opacity 0.15s ease-in;
+}
+
+/* Hover State - Disabled */
+.ir-btn:hover {
+  /* No hover effects */
+}
+
+/* Focus Visible - DISABLED */
+.ir-btn:focus-visible {
+  outline: none;
+}
+
+/* Active/Pressed State - DISABLED */
+.ir-btn:active,
+.ir-btn--active:active {
+  transform: none;
+}
+
+/* Active Button (Selected State) - Much Brighter and Shinier */
+.ir-btn--active {
+  color: #0a0a0a;
+  border: 1px solid transparent;
+  
+  /* Layered gradient background with more vibrant colors */
+  background: 
+    linear-gradient(to bottom, 
+      hsl(257, 70%, 94%),
+      hsl(257, 75%, 90%, 0.9) 33%,
+      hsl(257, 65%, 97%, 0.9)) padding-box,
+    linear-gradient(165deg, 
+      hsl(257, 80%, 93%, 0.95) 25%,
+      hsl(240, 70%, 94%, 0.9)) border-box;
+  
+  backdrop-filter: blur(12px) saturate(1.5) contrast(1.1);
+  -webkit-backdrop-filter: blur(12px) saturate(1.5) contrast(1.1);
+  
+  /* Multi-layer shadow system with color depth */
+  --inset-shadow:
+    inset 0 0 0 0 hsl(257, 50%, 100%, 0),
+    inset -0.35em -0.35em 0.25em -0.25em hsl(257, 70%, 96%),
+    inset -0.33em -1em 0.75em -0.75em hsl(240, 65%, 94%);
+  
+  --outer-shadow: 
+    rgba(168, 85, 247, 0.22) 0px 0.3em 0.3em 0px,
+    rgba(147, 100, 247, 0.18) 0px 0.18em 0.18em 0px,
+    rgba(120, 130, 247, 0.15) 0px 0.05em 0.05em 0px;
+  
+  box-shadow: var(--inset-shadow), var(--outer-shadow);
+}
+
+/* Drive animation - DISABLED */
+.ir-btn--deselecting-up,
+.ir-btn--deselecting-down {
+  animation: none !important;
+}
+
+.ir-btn--active::before {
+  opacity: 0.6;
+  translate: 0;
+  scale: 1;
+  transition-duration: 0.3s;
+  transition-timing-function: cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+.ir-btn--active::after {
+  opacity: 0.8;
+  transition-duration: 0.3s;
+  transition-timing-function: cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+.ir-btn--active .ir-drop {
+  opacity: 1;
+  translate: 0.33em 0.5em;
+  scale: 1.3 0.66;
+  transition-duration: 0.3s;
+  transition-timing-function: cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+/* Hover on Active Button - Enhanced shine (tilt handled by JS) */
+.ir-btn--active:hover {
+  --outer-shadow: 
+    rgba(168, 85, 247, 0.30) 0px 0.5em 0.8em 0px,
+    rgba(147, 100, 247, 0.25) 0px 0.3em 0.5em 0px,
+    rgba(120, 130, 247, 0.20) 0px 0.1em 0.2em 0px;
+}
+
+.ir-btn--active:hover::before {
+  opacity: 0.75;
+}
+
+.ir-btn--active:hover::after {
+  opacity: 1;
+}
+
+/* Collapsed Sidebar Button Styles */
+.ir-btn-collapsed {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.ir-btn-collapsed--active {
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  flex-shrink: 0;
+  border-radius: 10px;
+  box-shadow: 
+    inset 0 0 0 0 hsl(257, 50%, 100%, 0),
+    inset -0.35em -0.35em 0.25em -0.25em hsl(257, 70%, 96%),
+    inset -0.33em -1em 0.75em -0.75em hsl(240, 65%, 94%),
+    rgba(168, 85, 247, 0.22) 0px 0.3em 0.3em 0px,
+    rgba(147, 100, 247, 0.18) 0px 0.18em 0.18em 0px,
+    rgba(120, 130, 247, 0.15) 0px 0.05em 0.05em 0px;
+}
+
+.ir-btn-collapsed--active:hover {
+  box-shadow: 
+    inset 0 0 0 0 hsl(257, 50%, 100%, 0),
+    inset -0.35em -0.35em 0.25em -0.25em hsl(257, 70%, 96%),
+    inset -0.33em -1em 0.75em -0.75em hsl(240, 65%, 94%),
+    rgba(168, 85, 247, 0.30) 0px 0.5em 0.8em 0px,
+    rgba(147, 100, 247, 0.25) 0px 0.3em 0.5em 0px,
+    rgba(120, 130, 247, 0.20) 0px 0.1em 0.2em 0px;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .ir-btn,
+  .ir-btn::before,
+  .ir-btn::after,
+  .ir-drop,
+  .ir-sheen,
+  .ir-sheen::before,
+  .ir-sheen::after {
+    transition: none !important;
+  }
+  
+  .ir-sheen,
+  .ir-sheen::before,
+  .ir-sheen::after {
+    display: none;
+  }
+  
+  .ir-btn:hover,
+  .ir-btn:active,
+  .ir-btn--active,
+  .ir-btn--active:hover,
+  .ir-btn--active:active {
+    transform: none !important;
+    translate: none;
+  }
+  
+  .ir-btn::before,
+  .ir-drop {
+    translate: 0;
+    scale: 1;
+  }
+  
+  .ir-btn--active .ir-drop {
+    translate: 0;
+    scale: 1;
+  }
+}

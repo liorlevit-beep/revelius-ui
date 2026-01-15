@@ -1,27 +1,42 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Globe, TrendingUp, ExternalLink, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { Provider } from '../../types/paymentProviders';
-import { getProviderDomain } from '../../data/providerRegions';
+import { resolveProviderLogo, generateInitials } from '../../utils/providerLogoResolver';
 
 interface ProviderCardProps {
   provider: Provider;
   totalCategories: number;
   onClick?: () => void;
+  showDebugInfo?: boolean;
 }
 
-export function ProviderCard({ provider, totalCategories, onClick }: ProviderCardProps) {
+export function ProviderCard({ provider, totalCategories, onClick, showDebugInfo = false }: ProviderCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [logoError, setLogoError] = useState(false);
+  const [logoSrc, setLogoSrc] = useState<string | null>(null);
+  const [resolvedLogoPath, setResolvedLogoPath] = useState<string>('');
 
   // Calculate coverage
   const coverage = totalCategories > 0 ? provider.categoryIds.length / totalCategories : 0;
   const coveragePercent = Math.round(coverage * 100);
   const hasAllCategories = coverage >= 0.98;
 
-  // Get logo URL from Clearbit
-  const domain = getProviderDomain(provider.key);
-  const logoUrl = domain ? `https://logo.clearbit.com/${domain}` : null;
+  // Resolve logo on mount
+  useEffect(() => {
+    const resolveLogo = async () => {
+      const result = await resolveProviderLogo(provider.key, provider.name);
+      setResolvedLogoPath(result.src || `initials: ${result.initials}`);
+      
+      if (result.type === 'svg' && result.src) {
+        setLogoSrc(result.src);
+      } else {
+        setLogoError(true);
+      }
+    };
+    
+    resolveLogo();
+  }, [provider.key, provider.name]);
 
   // Generate initials for logo placeholder
   const getInitials = (name: string) => {
@@ -77,14 +92,14 @@ export function ProviderCard({ provider, totalCategories, onClick }: ProviderCar
       className="group"
     >
       <div
-        className={`relative bg-white rounded-2xl border transition-all duration-300 overflow-hidden ${
+        className={`relative bg-white dark:bg-white/5 dark:backdrop-blur-xl rounded-2xl border transition-all duration-300 overflow-hidden ${
           hasAllCategories
             ? isHovered
-              ? 'border-amber-300 shadow-xl shadow-amber-100/50 ring-2 ring-amber-200'
-              : 'border-amber-200 shadow-md ring-1 ring-amber-100'
+              ? 'border-amber-300 dark:border-amber-500/50 shadow-xl shadow-amber-100/50 dark:shadow-amber-500/20 ring-2 ring-amber-200 dark:ring-amber-500/30'
+              : 'border-amber-200 dark:border-amber-500/30 shadow-md ring-1 ring-amber-100 dark:ring-amber-500/20'
             : isHovered
-            ? 'border-emerald-300 shadow-xl shadow-emerald-100/50'
-            : 'border-gray-100 shadow-sm'
+            ? 'border-emerald-300 dark:border-emerald-500/50 shadow-xl shadow-emerald-100/50 dark:shadow-emerald-500/20'
+            : 'border-gray-100 dark:border-white/10 shadow-sm'
         }`}
       >
         {/* Gradient accent bar */}
@@ -99,12 +114,20 @@ export function ProviderCard({ provider, totalCategories, onClick }: ProviderCar
               whileHover={{ rotate: 5, scale: 1.05 }}
               transition={{ type: 'spring', stiffness: 400, damping: 10 }}
             >
-              {logoUrl && !logoError ? (
+              {logoSrc && !logoError ? (
                 <img
-                  src={logoUrl}
+                  src={logoSrc}
                   alt={`${provider.name} logo`}
                   className="w-full h-full object-contain p-2"
-                  onError={() => setLogoError(true)}
+                  onError={() => {
+                    console.warn(`[ProviderCard] ❌ Failed to load: ${logoSrc}`);
+                    setLogoError(true);
+                  }}
+                  onLoad={() => {
+                    if (import.meta.env.DEV) {
+                      console.log(`[ProviderCard] ✅ Loaded: ${logoSrc}`);
+                    }
+                  }}
                   loading="lazy"
                 />
               ) : (
@@ -117,34 +140,41 @@ export function ProviderCard({ provider, totalCategories, onClick }: ProviderCar
             {/* Name + Key */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
-                <h3 className="text-lg font-bold text-gray-900 truncate">{provider.name}</h3>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white truncate">{provider.name}</h3>
                 {provider.isDefault && (
-                  <span className="flex-shrink-0 inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-purple-100 text-purple-700 border border-purple-200">
+                  <span className="flex-shrink-0 inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400 border border-purple-200 dark:border-purple-500/30">
                     DEFAULT
                   </span>
                 )}
               </div>
-              <p className="text-xs text-gray-500 font-mono truncate">{provider.key}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 font-mono truncate">{provider.key}</p>
+              
+              {/* Debug Info - show resolved logo path */}
+              {showDebugInfo && (
+                <p className="text-xs text-orange-600 dark:text-orange-400 font-mono mt-1 break-all">
+                  🔍 {resolvedLogoPath}
+                </p>
+              )}
             </div>
           </div>
 
           {/* Middle: Region Chips */}
           <div className="mb-4">
             <div className="flex items-center gap-1.5 mb-2">
-              <Globe className="w-3.5 h-3.5 text-gray-400" />
-              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Regions</span>
+              <Globe className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
+              <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Regions</span>
             </div>
             <div className="flex flex-wrap gap-1.5">
               {visibleRegions.map((region) => (
                 <span
                   key={region}
-                  className="inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200"
+                  className="inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium bg-blue-50 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-500/30"
                 >
                   {region}
                 </span>
               ))}
               {remainingCount > 0 && (
-                <span className="inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200">
+                <span className="inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-white/10">
                   +{remainingCount}
                 </span>
               )}
@@ -153,22 +183,22 @@ export function ProviderCard({ provider, totalCategories, onClick }: ProviderCar
 
           {/* Coverage Bar */}
           {totalCategories > 0 && (
-            <div className="mb-4 pb-4 border-b border-gray-100">
+            <div className="mb-4 pb-4 border-b border-gray-100 dark:border-white/10">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Category Coverage</span>
+                <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Category Coverage</span>
                 {hasAllCategories && (
                   <motion.span
                     initial={{ scale: 0, rotate: -180 }}
                     animate={{ scale: 1, rotate: 0 }}
                     transition={{ type: 'spring', stiffness: 300, damping: 15 }}
-                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold bg-amber-100 text-amber-700 border border-amber-300"
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-300 dark:border-amber-500/30"
                   >
                     <Sparkles className="w-3 h-3" />
                     All Categories
                   </motion.span>
                 )}
               </div>
-              <div className="relative h-2 bg-gray-100 rounded-full overflow-hidden">
+              <div className="relative h-2 bg-gray-100 dark:bg-white/10 rounded-full overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${coveragePercent}%` }}
@@ -186,7 +216,7 @@ export function ProviderCard({ provider, totalCategories, onClick }: ProviderCar
               </div>
               <div className="mt-1 text-right">
                 <span className={`text-xs font-semibold ${
-                  hasAllCategories ? 'text-amber-700' : 'text-gray-600'
+                  hasAllCategories ? 'text-amber-700 dark:text-amber-400' : 'text-gray-600 dark:text-gray-400'
                 }`}>
                   {coveragePercent}%
                 </span>
@@ -195,19 +225,19 @@ export function ProviderCard({ provider, totalCategories, onClick }: ProviderCar
           )}
 
           {/* Bottom: Category Count + Sparkline + CTA */}
-          <div className="space-y-3 pt-4 border-t border-gray-100">
+          <div className="space-y-3 pt-4 border-t border-gray-100 dark:border-white/10">
             {/* Category Count + Sparkline */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-emerald-500" />
-                <span className="text-sm text-gray-600">
-                  <span className="font-semibold text-gray-900">{provider.categoryIds.length}</span>{' '}
+                <TrendingUp className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  <span className="font-semibold text-gray-900 dark:text-white">{provider.categoryIds.length}</span>{' '}
                   {provider.categoryIds.length === 1 ? 'category' : 'categories'}
                 </span>
               </div>
               
               {/* Mini Sparkline */}
-              <svg width="80" height="30" className="text-emerald-500">
+              <svg width="80" height="30" className="text-emerald-500 dark:text-emerald-400">
                 <polyline
                   points={sparklinePoints}
                   fill="none"
@@ -226,8 +256,8 @@ export function ProviderCard({ provider, totalCategories, onClick }: ProviderCar
               whileTap={{ scale: 0.98 }}
               className={`w-full py-2.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all duration-200 ${
                 isHovered
-                  ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-200'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-200 dark:shadow-emerald-500/20'
+                  : 'bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/20'
               }`}
             >
               <span>Open Provider</span>

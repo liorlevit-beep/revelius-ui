@@ -1,0 +1,131 @@
+/* Dark Gradient Background - CSS Module */
+/* Inspired by animated gradient background, heavily slowed down */
+
+.container {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  background: linear-gradient(40deg, #0a0a0f, #1a0f2e, #0f1a2e, #0a0a0f);
+}
+
+.gradientsContainer {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  filter: blur(80px) saturate(150%);
+  top: 0;
+  left: 0;
+}
+
+/* Blob base styles */
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  mix-blend-mode: hard-light;
+  width: 80%;
+  height: 80%;
+  left: 50%;
+  top: 50%;
+  transform-origin: 50% 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Individual blob gradients */
+.g1 {
+  background: radial-gradient(circle at center, rgba(59, 130, 246, 0.8) 0, rgba(59, 130, 246, 0) 50%) no-repeat;
+  animation: moveVertical 50s ease infinite, moveHorizontal 80s ease infinite;
+}
+
+.g2 {
+  background: radial-gradient(circle at center, rgba(168, 85, 247, 0.8) 0, rgba(168, 85, 247, 0) 50%) no-repeat;
+  animation: moveInCircle 40s reverse infinite, moveHorizontal 60s ease infinite;
+}
+
+.g3 {
+  background: radial-gradient(circle at center, rgba(236, 72, 153, 0.8) 0, rgba(236, 72, 153, 0) 50%) no-repeat;
+  animation: moveInCircle 60s linear infinite, moveVertical 70s ease infinite;
+}
+
+.g4 {
+  background: radial-gradient(circle at center, rgba(14, 165, 233, 0.8) 0, rgba(14, 165, 233, 0) 50%) no-repeat;
+  animation: moveHorizontal 70s ease infinite, moveVertical 60s ease infinite;
+}
+
+.g5 {
+  background: radial-gradient(circle at center, rgba(139, 92, 246, 0.8) 0, rgba(139, 92, 246, 0) 50%) no-repeat;
+  animation: moveInCircle 50s ease infinite, moveHorizontal 90s ease infinite;
+}
+
+/* Interactive blob (mouse follower) */
+.interactive {
+  background: radial-gradient(circle at center, rgba(99, 102, 241, 0.9) 0, rgba(99, 102, 241, 0) 50%) no-repeat;
+  width: 100%;
+  height: 100%;
+  top: -50%;
+  left: -50%;
+  transform: translate(0, 0);
+  will-change: transform;
+}
+
+/* Intensity variants */
+.subtle .gradientsContainer {
+  opacity: 0.35;
+}
+
+.normal .gradientsContainer {
+  opacity: 0.55;
+}
+
+.strong .gradientsContainer {
+  opacity: 0.75;
+}
+
+/* Keyframe animations - significantly slowed down */
+@keyframes moveInCircle {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  50% {
+    transform: translate(-50%, -50%) rotate(180deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+@keyframes moveVertical {
+  0% {
+    transform: translate(-50%, -50%) translateY(-50%);
+  }
+  50% {
+    transform: translate(-50%, -50%) translateY(50%);
+  }
+  100% {
+    transform: translate(-50%, -50%) translateY(-50%);
+  }
+}
+
+@keyframes moveHorizontal {
+  0% {
+    transform: translate(-50%, -50%) translateX(-50%) translateY(-10%);
+  }
+  50% {
+    transform: translate(-50%, -50%) translateX(50%) translateY(10%);
+  }
+  100% {
+    transform: translate(-50%, -50%) translateX(-50%) translateY(-10%);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .blob {
+    animation: none !important;
+  }
+  
+  .interactive {
+    display: none;
+  }
+}
