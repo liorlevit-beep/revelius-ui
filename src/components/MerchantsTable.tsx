@@ -31,9 +31,9 @@ export function MerchantsTable({ merchants }: MerchantsTableProps) {
 
   return (
     <Card title="Merchants needing attention">
-      <div className="overflow-x-auto overflow-y-auto -mx-6" style={{ maxHeight: 'calc(100vh - 420px)' }}>
+      <div className="overflow-x-auto overflow-y-auto -mx-6" style={{ minHeight: '500px', maxHeight: 'calc(100vh - 280px)' }}>
         <table className="w-full table-fixed">
-          <thead className="bg-gray-50/95 backdrop-blur-sm border-b border-gray-100 sticky top-0 z-10">
+          <thead className="glass-surface border-b border-gray-200/50 dark:border-white/10 sticky top-0 z-10">
             <tr>
               <SortableTableHeader
                 label="Merchant"

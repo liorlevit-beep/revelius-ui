@@ -33,7 +33,7 @@ export function GlassMerchantsTable({ merchants }: GlassMerchantsTableProps) {
     <GlassChartWrapper title="Merchants needing attention">
       <div 
         className="overflow-x-auto overflow-y-auto -mx-6 merchants-table-scroll" 
-        style={{ maxHeight: 'calc(100vh - 420px)' }}
+        style={{ minHeight: '500px', maxHeight: 'calc(100vh - 280px)' }}
       >
         <table className="w-full table-fixed">
           <thead className="border-b sticky top-0 z-10" style={{ 

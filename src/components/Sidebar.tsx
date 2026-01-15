@@ -127,15 +127,26 @@ export function Sidebar() {
 
   return (
     <div 
-      className={`bg-gray-900 dark:bg-gray-950/80 dark:backdrop-blur-xl border-r border-gray-800 dark:border-gray-700/50 h-screen fixed left-0 top-0 transition-all duration-300 z-40 flex flex-col overflow-y-auto ${
+      className={`border-r border-gray-800 dark:border-gray-700/50 h-screen fixed left-0 top-0 transition-all duration-300 z-40 flex flex-col overflow-y-auto ${
         collapsed ? 'w-20 overflow-x-hidden' : 'w-64'
       }`}
-      style={collapsed ? undefined : { overflowX: 'visible' }}
+      style={
+        collapsed 
+          ? { 
+              background: 'linear-gradient(180deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)',
+              boxShadow: 'inset -12px 0 24px -8px rgba(0, 0, 0, 0.5)',
+            } 
+          : { 
+              overflowX: 'visible',
+              background: 'linear-gradient(180deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%)',
+              boxShadow: 'inset -12px 0 24px -8px rgba(0, 0, 0, 0.5)',
+            }
+      }
     >
       {/* Header */}
       <div className={`p-6 flex items-center border-b border-gray-800 flex-shrink-0 ${collapsed ? 'justify-center' : 'justify-between'}`}>
         {!collapsed && (
-          <h1 className="text-xl font-bold text-white transition-opacity">
+          <h1 className="font-bold text-white transition-opacity" style={{ fontFamily: 'Alice, serif', fontSize: '1.5625rem' }}>
             Revelius
           </h1>
         )}

@@ -13,14 +13,7 @@ export function Header({ title, timeRange, onTimeRangeChange, glassTheme = false
   if (glassTheme) {
     return (
       <header 
-        className="border-b px-8 py-5" 
-        style={{
-          background: 'rgba(255, 255, 255, 0.05)',
-          backdropFilter: 'blur(16px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(16px) saturate(180%)',
-          borderColor: 'rgba(255, 255, 255, 0.18)',
-          boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
-        }}
+        className="glass-surface border-b border-white/10 px-8 py-5"
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -34,14 +27,7 @@ export function Header({ title, timeRange, onTimeRangeChange, glassTheme = false
             {onThemeToggle && (
               <button
                 onClick={onThemeToggle}
-                className="w-10 h-10 rounded-lg transition-all hover:-translate-y-0.5 flex items-center justify-center group"
-                style={{
-                  background: 'rgba(255, 255, 255, 0.08)',
-                  backdropFilter: 'blur(10px) saturate(180%)',
-                  WebkitBackdropFilter: 'blur(10px) saturate(180%)',
-                  border: '1px solid rgba(255, 255, 255, 0.18)',
-                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
-                }}
+                className="w-10 h-10 glass-surface rounded-lg transition-all hover:-translate-y-0.5 flex items-center justify-center group"
                 title="Switch to Light Mode"
               >
                 <Sun className="w-5 h-5 text-amber-400 group-hover:rotate-180 transition-transform duration-500" />
@@ -52,22 +38,7 @@ export function Header({ title, timeRange, onTimeRangeChange, glassTheme = false
               <input
                 type="text"
                 placeholder="Search merchants, domains, scan IDs…"
-                className="pl-10 pr-4 py-2.5 w-96 rounded-xl text-sm transition-all text-gray-200 placeholder:text-gray-500"
-                style={{ 
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  backdropFilter: 'blur(10px) saturate(180%)',
-                  WebkitBackdropFilter: 'blur(10px) saturate(180%)',
-                  border: '1px solid rgba(255, 255, 255, 0.18)',
-                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
-                }}
-                onFocus={(e) => {
-                  e.target.style.borderColor = 'rgba(6, 182, 212, 0.4)';
-                  e.target.style.background = 'rgba(255, 255, 255, 0.08)';
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = 'rgba(255, 255, 255, 0.18)';
-                  e.target.style.background = 'rgba(255, 255, 255, 0.05)';
-                }}
+                className="pl-10 pr-4 py-2.5 w-96 glass-surface rounded-xl text-sm transition-all text-gray-200 placeholder:text-gray-500 focus:ring-2 focus:ring-cyan-500/50"
               />
             </div>
             
@@ -77,14 +48,7 @@ export function Header({ title, timeRange, onTimeRangeChange, glassTheme = false
             <select
               value={timeRange}
               onChange={(e) => onTimeRangeChange(e.target.value)}
-              className="px-4 py-2.5 rounded-xl text-sm font-medium transition-all cursor-pointer text-gray-200 [&>option]:bg-gray-900 [&>option]:text-white"
-              style={{ 
-                background: 'rgba(255, 255, 255, 0.05)',
-                backdropFilter: 'blur(10px) saturate(180%)',
-                WebkitBackdropFilter: 'blur(10px) saturate(180%)',
-                border: '1px solid rgba(255, 255, 255, 0.18)',
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
-              }}
+              className="px-4 py-2.5 glass-surface rounded-xl text-sm font-medium transition-all cursor-pointer text-gray-200 [&>option]:bg-gray-900 [&>option]:text-white"
             >
               <option value="7">Last 7 days</option>
               <option value="30">Last 30 days</option>
@@ -97,7 +61,7 @@ export function Header({ title, timeRange, onTimeRangeChange, glassTheme = false
   }
   
   return (
-    <header className="bg-white border-b border-gray-100 px-8 py-5">
+    <header className="glass-surface border-b border-gray-200/50 dark:border-white/10 px-8 py-5">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
@@ -110,7 +74,7 @@ export function Header({ title, timeRange, onTimeRangeChange, glassTheme = false
           {onThemeToggle && (
             <button
               onClick={onThemeToggle}
-              className="w-10 h-10 bg-gray-50 border border-gray-200 rounded-lg transition-all hover:bg-gray-100 flex items-center justify-center group"
+              className="w-10 h-10 glass-surface rounded-lg transition-all hover:-translate-y-0.5 flex items-center justify-center group"
               title="Switch to Dark Mode"
             >
               <Moon className="w-5 h-5 text-gray-600 group-hover:rotate-[360deg] transition-transform duration-500" />
@@ -122,7 +86,7 @@ export function Header({ title, timeRange, onTimeRangeChange, glassTheme = false
             <input
               type="text"
               placeholder="Search merchants, domains, scan IDs…"
-              className="pl-10 pr-4 py-2.5 w-96 bg-gray-50 border border-gray-200 rounded-xl text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:bg-white transition-all"
+              className="pl-10 pr-4 py-2.5 w-96 glass-surface rounded-xl text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-transparent transition-all"
             />
           </div>
           
@@ -132,7 +96,7 @@ export function Header({ title, timeRange, onTimeRangeChange, glassTheme = false
           <select
             value={timeRange}
             onChange={(e) => onTimeRangeChange(e.target.value)}
-            className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:bg-white transition-all cursor-pointer"
+            className="px-4 py-2.5 glass-surface rounded-xl text-sm font-medium text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-transparent transition-all cursor-pointer"
           >
             <option value="7">Last 7 days</option>
             <option value="30">Last 30 days</option>

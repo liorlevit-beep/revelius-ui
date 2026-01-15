@@ -8,7 +8,7 @@ import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { ApiKeysModal } from './components/ApiKeysModal';
 import { FloatingScansIndicator } from './components/scans/FloatingScansIndicator';
-import { DarkGradientBackground } from './components/ui/DarkGradientBackground';
+import { LivingGradientBackground } from './components/ui/LivingGradientBackground';
 import { DashboardLiquidGlassTheme } from './theme/DashboardLiquidGlassTheme';
 import { Dashboard } from './pages/Dashboard';
 import { Merchants } from './pages/Merchants';
@@ -59,8 +59,8 @@ function AppContent() {
 
   const renderContent = () => (
     <>
-      {/* Dark mode animated gradient background - z-index 0, behind everything */}
-      <DarkGradientBackground intensity="normal" />
+      {/* Living gradient background - works in both light and dark modes - z-index 0, behind everything */}
+      <LivingGradientBackground intensity="normal" enabled={true} />
       
       {/* API Keys Modal - needs high z-index */}
       <ApiKeysModal />
@@ -86,7 +86,7 @@ function AppContent() {
       
       {/* Main content area - no z-index to allow modals independent stacking */}
       <main 
-        className={`absolute overflow-y-auto overflow-x-hidden transition-all duration-300 max-w-full ${
+        className={`absolute overflow-y-auto overflow-x-hidden transition-all duration-300 max-w-full bg-transparent ${
           collapsed ? 'left-20' : 'left-64'
         }`}
         style={{ top: '73px', bottom: 0, right: 0 }}
@@ -121,7 +121,7 @@ function AppContent() {
   );
 
   return (
-    <div className="relative w-full h-screen overflow-x-hidden">
+    <div className="relative w-full h-screen overflow-x-hidden bg-transparent">
       {darkMode ? (
         <DashboardLiquidGlassTheme>
           {renderContent()}

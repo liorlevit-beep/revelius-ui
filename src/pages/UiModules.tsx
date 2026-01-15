@@ -41,7 +41,7 @@ export function UiModules() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-transparent">
+    <div className="min-h-screen bg-transparent">
       <Header title="UI Modules" timeRange="7" onTimeRangeChange={() => {}} />
 
       <main className="p-8">

@@ -7,7 +7,7 @@ interface KPICardProps {
 
 export function KPICard({ kpi }: KPICardProps) {
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all p-6">
+    <div className="glass-surface glass-hover rounded-2xl p-6">
       <p className="text-sm font-medium text-gray-500 mb-3">{kpi.label}</p>
       <div className="flex items-baseline gap-3">
         <span className="text-3xl font-bold text-gray-900">{kpi.value}</span>

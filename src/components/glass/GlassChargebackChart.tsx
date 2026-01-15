@@ -1,4 +1,4 @@
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { ComposedChart, Line, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import type { TimeSeriesDataPoint } from '../../demo/dashboardMetrics';
 import { GlassChartWrapper } from './GlassChartWrapper';
 
@@ -27,7 +27,16 @@ export function GlassChargebackChart({ data }: GlassChargebackChartProps) {
   return (
     <GlassChartWrapper title="Chargebacks over time">
       <ResponsiveContainer width="100%" height={300}>
-        <LineChart data={data} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+        <ComposedChart data={data} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+          <defs>
+            {/* Gradient fill from line to bottom - subtle red for dark mode */}
+            <linearGradient id="chargebackGradientDark" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#ef4444" stopOpacity={0.3} />
+              <stop offset="50%" stopColor="#f87171" stopOpacity={0.15} />
+              <stop offset="100%" stopColor="#fca5a5" stopOpacity={0} />
+            </linearGradient>
+          </defs>
+          
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(203, 213, 225, 0.1)" vertical={false} />
           <XAxis
             dataKey="date"
@@ -47,6 +56,13 @@ export function GlassChargebackChart({ data }: GlassChargebackChartProps) {
             tickFormatter={(value) => `${value.toFixed(2)}%`}
           />
           <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(203, 213, 225, 0.2)', strokeWidth: 1 }} />
+          <Area
+            type="monotone"
+            dataKey="chargebackRate"
+            stroke="none"
+            fill="url(#chargebackGradientDark)"
+            fillOpacity={1}
+          />
           <Line
             type="monotone"
             dataKey="chargebackRate"
@@ -55,7 +71,7 @@ export function GlassChargebackChart({ data }: GlassChargebackChartProps) {
             dot={false}
             activeDot={{ r: 6, fill: '#ef4444' }}
           />
-        </LineChart>
+        </ComposedChart>
       </ResponsiveContainer>
     </GlassChartWrapper>
   );

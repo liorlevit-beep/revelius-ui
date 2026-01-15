@@ -11,6 +11,15 @@ export function RoutingDistributionChart({ data }: RoutingDistributionChartProps
     <Card title="Routing distribution (Before vs After)">
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={data} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+          <defs>
+            {/* Cursor hover gradient - Bottom to top, fading to transparent */}
+            <linearGradient id="cursorGradient" x1="0" y1="1" x2="0" y2="0">
+              <stop offset="0%" stopColor="#93c5fd" stopOpacity={0.3} />
+              <stop offset="50%" stopColor="#bfdbfe" stopOpacity={0.15} />
+              <stop offset="100%" stopColor="#dbeafe" stopOpacity={0} />
+            </linearGradient>
+          </defs>
+          
           <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
           <XAxis 
             dataKey="route" 
@@ -32,6 +41,7 @@ export function RoutingDistributionChart({ data }: RoutingDistributionChartProps
               borderRadius: '12px',
               boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
             }}
+            cursor={{ fill: 'url(#cursorGradient)' }}
           />
           <Legend 
             wrapperStyle={{ paddingTop: '20px' }}

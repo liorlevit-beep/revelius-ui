@@ -1,4 +1,4 @@
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
+import { ComposedChart, Line, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
 import type { TimeSeriesDataPoint } from '../demo/dashboardMetrics';
 import { Card } from './Card';
 
@@ -13,7 +13,7 @@ export function ApprovalUpliftChart({ data }: ApprovalUpliftChartProps) {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-white p-4 border border-gray-100 rounded-xl shadow-lg">
+        <div className="glass-surface p-4 rounded-xl">
           <p className="text-sm font-semibold text-gray-900 mb-2">{data.date}</p>
           <div className="space-y-1.5">
             <p className="text-sm text-gray-600 flex items-center gap-2">
@@ -39,7 +39,23 @@ export function ApprovalUpliftChart({ data }: ApprovalUpliftChartProps) {
   return (
     <Card title="Approval uplift over time">
       <ResponsiveContainer width="100%" height={320}>
-        <LineChart data={data} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+        <ComposedChart data={data} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+          <defs>
+            {/* Gradient fill for baseline - top to bottom gray */}
+            <linearGradient id="baselineGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#9ca3af" stopOpacity={0.25} />
+              <stop offset="50%" stopColor="#d1d5db" stopOpacity={0.12} />
+              <stop offset="100%" stopColor="#e5e7eb" stopOpacity={0} />
+            </linearGradient>
+            
+            {/* Gradient fill for optimized - top to bottom green */}
+            <linearGradient id="optimizedGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#22c55e" stopOpacity={0.35} />
+              <stop offset="50%" stopColor="#4ade80" stopOpacity={0.18} />
+              <stop offset="100%" stopColor="#86efac" stopOpacity={0} />
+            </linearGradient>
+          </defs>
+          
           <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
           <XAxis
             dataKey="date"
@@ -78,6 +94,20 @@ export function ApprovalUpliftChart({ data }: ApprovalUpliftChartProps) {
               }}
             />
           )}
+          <Area
+            type="monotone"
+            dataKey="baseline"
+            stroke="none"
+            fill="url(#baselineGradient)"
+            fillOpacity={1}
+          />
+          <Area
+            type="monotone"
+            dataKey="optimized"
+            stroke="none"
+            fill="url(#optimizedGradient)"
+            fillOpacity={1}
+          />
           <Line
             type="monotone"
             dataKey="baseline"
@@ -96,7 +126,7 @@ export function ApprovalUpliftChart({ data }: ApprovalUpliftChartProps) {
             dot={false}
             activeDot={{ r: 6, fill: '#22c55e' }}
           />
-        </LineChart>
+        </ComposedChart>
       </ResponsiveContainer>
     </Card>
   );

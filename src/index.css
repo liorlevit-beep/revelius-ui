@@ -2,6 +2,79 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================
+   LIVING GRADIENT BACKGROUND TOKENS
+   Used by both light and dark modes
+   ============================================ */
+
+:root {
+  /* Light Mode Living Gradient - Soft Luminous Tones */
+  --bg-grad-base-1: #e0edff; /* Soft pearl blue - deeper */
+  --bg-grad-base-2: #ffe5f3; /* Pale rose - richer */
+  --bg-grad-base-3: #e0fdf4; /* Mint whisper - more vibrant */
+  --bg-grad-base-4: #f0e5ff; /* Lilac mist - more saturated */
+  
+  /* Light Mode Blob Colors (low saturation, high luminosity) */
+  --bg-grad-blob-1: rgba(147, 197, 253, 0.80); /* Soft sky blue */
+  --bg-grad-blob-2: rgba(216, 180, 254, 0.75); /* Pale lavender */
+  --bg-grad-blob-3: rgba(251, 207, 232, 0.72); /* Soft pink */
+  --bg-grad-blob-4: rgba(165, 243, 252, 0.78); /* Pale cyan */
+  --bg-grad-blob-5: rgba(196, 181, 253, 0.76); /* Soft purple */
+  --bg-grad-blob-interactive: rgba(167, 139, 250, 0.70); /* Gentle violet */
+  
+  /* Light Mode Settings */
+  --bg-grad-blur: 90px; /* Tighter blur for more definition */
+  --bg-grad-saturate: 160%; /* Higher saturation for pop */
+  --bg-grad-opacity-subtle: 0.75;
+  --bg-grad-opacity-normal: 0.95;
+  --bg-grad-opacity-strong: 1.0;
+  
+  /* White Veil for Legibility */
+  --bg-grad-veil: rgba(255, 255, 255, 0.25);
+  --bg-grad-veil-opacity: 1;
+  
+  /* Frosted Glass Surface Tokens - Light Mode */
+  --glass-bg: rgba(255, 255, 255, 0.75);
+  --glass-border: rgba(255, 255, 255, 0.8);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+  --glass-blur: 16px;
+  --glass-shine: linear-gradient(45deg, transparent 0%, rgba(255, 255, 255, 0.4) 30%, rgba(255, 255, 255, 1) 50%, rgba(255, 255, 255, 0.4) 70%, transparent 100%);
+}
+
+.dark {
+  /* Dark Mode Living Gradient - Deep Rich Tones */
+  --bg-grad-base-1: #0a0a0f;
+  --bg-grad-base-2: #1a0f2e;
+  --bg-grad-base-3: #0f1a2e;
+  --bg-grad-base-4: #0a0a0f;
+  
+  /* Dark Mode Blob Colors (vibrant, moody) */
+  --bg-grad-blob-1: rgba(59, 130, 246, 0.8); /* Electric blue */
+  --bg-grad-blob-2: rgba(168, 85, 247, 0.8); /* Vivid purple */
+  --bg-grad-blob-3: rgba(236, 72, 153, 0.8); /* Hot pink */
+  --bg-grad-blob-4: rgba(14, 165, 233, 0.8); /* Bright cyan */
+  --bg-grad-blob-5: rgba(139, 92, 246, 0.8); /* Deep violet */
+  --bg-grad-blob-interactive: rgba(99, 102, 241, 0.9); /* Indigo */
+  
+  /* Dark Mode Settings */
+  --bg-grad-blur: 80px; /* Tighter blur for drama */
+  --bg-grad-saturate: 150%; /* High saturation */
+  --bg-grad-opacity-subtle: 0.35;
+  --bg-grad-opacity-normal: 0.55;
+  --bg-grad-opacity-strong: 0.75;
+  
+  /* No Veil in Dark Mode */
+  --bg-grad-veil: transparent;
+  --bg-grad-veil-opacity: 0;
+  
+  /* Frosted Glass Surface Tokens - Dark Mode */
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(255, 255, 255, 0.18);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --glass-blur: 16px;
+  --glass-shine: linear-gradient(45deg, transparent 0%, rgba(255, 255, 255, 0.1) 30%, rgba(255, 255, 255, 0.25) 50%, rgba(255, 255, 255, 0.1) 70%, transparent 100%);
+}
+
 @layer base {
   html {
     overflow-x: hidden !important;
@@ -12,13 +85,30 @@
     padding: 0;
 }
 
-body {
-    @apply bg-gray-50 text-gray-900 antialiased;
+html {
     overflow-x: hidden !important;
     overflow-y: auto;
     width: 100%;
     height: 100%;
-  margin: 0;
+    margin: 0;
+    padding: 0;
+    /* Light mode: soft pearl base */
+    background: #f8fafc;
+}
+
+html.dark {
+    /* Dark mode: deep obsidian */
+    background: #0a0a0f;
+}
+
+body {
+    @apply text-gray-900 antialiased;
+    background: transparent !important;
+    overflow-x: hidden !important;
+    overflow-y: auto;
+    width: 100%;
+    height: 100%;
+    margin: 0;
     padding: 0;
     max-width: 100vw;
 }
@@ -28,6 +118,7 @@ body {
     height: 100%;
     overflow-x: hidden !important;
     max-width: 100vw;
+    background: transparent !important;
   }
   
   * {
@@ -37,6 +128,82 @@ body {
 }
 
 @layer utilities {
+  /* Frosted Glass Utilities */
+  .glass-surface {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .glass-surface::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    right: -50%;
+    bottom: -50%;
+    background: var(--glass-shine);
+    pointer-events: none;
+    opacity: 0.15;
+    mix-blend-mode: overlay;
+    transform: rotate(45deg);
+  }
+  
+  /* Hide shine effect on header to prevent visible diagonal line */
+  header.glass-surface::before {
+    opacity: 0.05;
+  }
+  
+  .glass-surface.glass-animated::before {
+    animation: shine-sweep 8s ease-in-out infinite;
+  }
+  
+  @keyframes shine-sweep {
+    0%, 100% {
+      transform: rotate(45deg) translateX(-100%);
+      opacity: 0;
+    }
+    10% {
+      opacity: 0.7;
+    }
+    50% {
+      transform: rotate(45deg) translateX(100%);
+      opacity: 0.7;
+    }
+    60% {
+      opacity: 0;
+    }
+  }
+  
+  @media (prefers-reduced-motion: reduce) {
+    .glass-surface.glass-animated::before {
+      animation: none;
+      transform: rotate(45deg) translateX(0);
+    }
+  }
+  
+  .glass-hover {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .glass-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.12);
+  }
+  
+  :root .glass-hover:hover {
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.12);
+  }
+  
+  .dark .glass-hover:hover {
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.6);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
   .scrollbar-thin::-webkit-scrollbar {
     width: 6px;
     height: 6px;

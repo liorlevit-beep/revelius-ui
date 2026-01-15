@@ -33,7 +33,7 @@ export function Policies() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-transparent">
+    <div className="min-h-screen bg-transparent">
       <div className="p-8">
         {/* Header */}
         <div className="mb-8">

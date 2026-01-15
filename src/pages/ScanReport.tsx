@@ -184,7 +184,7 @@ export function ScanReport() {
   // No sessionId
   if (!sessionId) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-transparent">
+      <div className="min-h-screen bg-transparent">
         <main className="p-8">
           <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-2xl p-6">
             <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 mb-2" />
@@ -218,7 +218,7 @@ export function ScanReport() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-transparent">
+    <div className="min-h-screen bg-transparent">
       <main className="p-8">
         {/* Breadcrumb */}
         <button

@@ -1,0 +1,172 @@
+/* Living Gradient Background - CSS Module */
+/* Works for both light and dark modes using CSS tokens */
+
+.container {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  background: linear-gradient(
+    40deg, 
+    var(--bg-grad-base-1), 
+    var(--bg-grad-base-2), 
+    var(--bg-grad-base-3), 
+    var(--bg-grad-base-4)
+  );
+}
+
+/* White veil overlay for light mode legibility */
+.veil {
+  position: absolute;
+  inset: 0;
+  background: var(--bg-grad-veil);
+  opacity: var(--bg-grad-veil-opacity);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.gradientsContainer {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  filter: blur(var(--bg-grad-blur)) saturate(var(--bg-grad-saturate));
+  top: 0;
+  left: 0;
+  z-index: 0;
+}
+
+/* Blob base styles */
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  mix-blend-mode: hard-light;
+  width: 80%;
+  height: 80%;
+  left: 50%;
+  top: 50%;
+  transform-origin: 50% 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Individual blob gradients - now using CSS tokens */
+.g1 {
+  background: radial-gradient(
+    circle at center, 
+    var(--bg-grad-blob-1) 0, 
+    transparent 50%
+  ) no-repeat;
+  animation: moveVertical 50s ease infinite, moveHorizontal 80s ease infinite;
+}
+
+.g2 {
+  background: radial-gradient(
+    circle at center, 
+    var(--bg-grad-blob-2) 0, 
+    transparent 50%
+  ) no-repeat;
+  animation: moveInCircle 40s reverse infinite, moveHorizontal 60s ease infinite;
+}
+
+.g3 {
+  background: radial-gradient(
+    circle at center, 
+    var(--bg-grad-blob-3) 0, 
+    transparent 50%
+  ) no-repeat;
+  animation: moveInCircle 60s linear infinite, moveVertical 70s ease infinite;
+}
+
+.g4 {
+  background: radial-gradient(
+    circle at center, 
+    var(--bg-grad-blob-4) 0, 
+    transparent 50%
+  ) no-repeat;
+  animation: moveHorizontal 70s ease infinite, moveVertical 60s ease infinite;
+}
+
+.g5 {
+  background: radial-gradient(
+    circle at center, 
+    var(--bg-grad-blob-5) 0, 
+    transparent 50%
+  ) no-repeat;
+  animation: moveInCircle 50s ease infinite, moveHorizontal 90s ease infinite;
+}
+
+/* Interactive blob (mouse follower) */
+.interactive {
+  background: radial-gradient(
+    circle at center, 
+    var(--bg-grad-blob-interactive) 0, 
+    transparent 50%
+  ) no-repeat;
+  width: 100%;
+  height: 100%;
+  top: -50%;
+  left: -50%;
+  transform: translate(0, 0);
+  will-change: transform;
+}
+
+/* Intensity variants - use token-based opacity */
+.subtle .gradientsContainer {
+  opacity: var(--bg-grad-opacity-subtle);
+}
+
+.normal .gradientsContainer {
+  opacity: var(--bg-grad-opacity-normal);
+}
+
+.strong .gradientsContainer {
+  opacity: var(--bg-grad-opacity-strong);
+}
+
+/* Keyframe animations - identical timing for both modes */
+@keyframes moveInCircle {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  50% {
+    transform: translate(-50%, -50%) rotate(180deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+@keyframes moveVertical {
+  0% {
+    transform: translate(-50%, -50%) translateY(-50%);
+  }
+  50% {
+    transform: translate(-50%, -50%) translateY(50%);
+  }
+  100% {
+    transform: translate(-50%, -50%) translateY(-50%);
+  }
+}
+
+@keyframes moveHorizontal {
+  0% {
+    transform: translate(-50%, -50%) translateX(-50%) translateY(-10%);
+  }
+  50% {
+    transform: translate(-50%, -50%) translateX(50%) translateY(10%);
+  }
+  100% {
+    transform: translate(-50%, -50%) translateX(-50%) translateY(-10%);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .blob {
+    animation: none !important;
+  }
+  
+  .interactive {
+    display: none;
+  }
+}

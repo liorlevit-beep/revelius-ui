@@ -29,7 +29,7 @@ export function GenerateFromScan() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-transparent">
+    <div className="min-h-screen bg-transparent">
       {/* Header */}
       <div className="bg-white dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
         <div className="max-w-[2000px] mx-auto px-4 sm:px-6 py-4">

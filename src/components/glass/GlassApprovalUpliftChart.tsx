@@ -1,4 +1,4 @@
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
+import { ComposedChart, Line, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
 import type { TimeSeriesDataPoint } from '../../demo/dashboardMetrics';
 import { GlassChartWrapper } from './GlassChartWrapper';
 
@@ -41,7 +41,23 @@ export function GlassApprovalUpliftChart({ data }: GlassApprovalUpliftChartProps
   return (
     <GlassChartWrapper title="Approval uplift over time">
       <ResponsiveContainer width="100%" height={320}>
-        <LineChart data={data} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+        <ComposedChart data={data} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+          <defs>
+            {/* Gradient fill for baseline - dark mode - top to bottom gray */}
+            <linearGradient id="baselineGradientDark" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#9ca3af" stopOpacity={0.2} />
+              <stop offset="50%" stopColor="#d1d5db" stopOpacity={0.1} />
+              <stop offset="100%" stopColor="#e5e7eb" stopOpacity={0} />
+            </linearGradient>
+            
+            {/* Gradient fill for optimized - dark mode - top to bottom emerald */}
+            <linearGradient id="optimizedGradientDark" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#10b981" stopOpacity={0.3} />
+              <stop offset="50%" stopColor="#34d399" stopOpacity={0.15} />
+              <stop offset="100%" stopColor="#6ee7b7" stopOpacity={0} />
+            </linearGradient>
+          </defs>
+          
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(203, 213, 225, 0.1)" vertical={false} />
           <XAxis
             dataKey="date"
@@ -80,6 +96,20 @@ export function GlassApprovalUpliftChart({ data }: GlassApprovalUpliftChartProps
               }}
             />
           )}
+          <Area
+            type="monotone"
+            dataKey="baseline"
+            stroke="none"
+            fill="url(#baselineGradientDark)"
+            fillOpacity={1}
+          />
+          <Area
+            type="monotone"
+            dataKey="optimized"
+            stroke="none"
+            fill="url(#optimizedGradientDark)"
+            fillOpacity={1}
+          />
           <Line
             type="monotone"
             dataKey="baseline"
@@ -98,7 +128,7 @@ export function GlassApprovalUpliftChart({ data }: GlassApprovalUpliftChartProps
             dot={false}
             activeDot={{ r: 6, fill: '#10b981' }}
           />
-        </LineChart>
+        </ComposedChart>
       </ResponsiveContainer>
     </GlassChartWrapper>
   );

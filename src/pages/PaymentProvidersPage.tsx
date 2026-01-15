@@ -221,7 +221,7 @@ export function PaymentProvidersPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-transparent">
+    <div className="min-h-screen bg-transparent">
       <div className="p-8">
         {/* Header with stats */}
         <div className="mb-6 flex items-center justify-between">

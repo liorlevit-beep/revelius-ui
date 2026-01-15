@@ -45,7 +45,7 @@ export function Dashboard() {
   // Original Dashboard (Light Mode)
   if (!darkMode) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-transparent">
+      <div className="min-h-screen bg-transparent">
         <div className="p-8 space-y-8">
           {/* KPI Strip */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5">
@@ -56,8 +56,8 @@ export function Dashboard() {
 
           {/* Hero Routing Visualization - Only for Merchants mode */}
           {mode === 'merchants' && (
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-              <div className="p-6 border-b border-gray-100">
+            <div className="glass-surface glass-hover rounded-2xl overflow-hidden">
+              <div className="p-6 border-b border-gray-200/50 dark:border-white/10">
                 <h2 className="text-xl font-bold text-gray-900">Intelligent Payment Routing</h2>
                 <p className="text-sm text-gray-600 mt-1">Real-time routing optimization across your payment providers</p>
               </div>

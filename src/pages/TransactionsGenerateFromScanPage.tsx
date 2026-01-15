@@ -199,7 +199,7 @@ export function TransactionsGenerateFromScanPage() {
 
   if (!sessionId) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-transparent">
+      <div className="flex items-center justify-center min-h-screen bg-transparent">
         <div className="text-center">
           <p className="text-red-600 dark:text-red-400 font-medium mb-4">
             No session ID provided
@@ -216,7 +216,7 @@ export function TransactionsGenerateFromScanPage() {
   }
 
   return (
-    <div className="p-6 min-h-screen bg-gray-50 dark:bg-transparent">
+    <div className="p-6 min-h-screen bg-transparent">
       <div className="max-w-7xl mx-auto">
         {/* Back Button */}
         <button
