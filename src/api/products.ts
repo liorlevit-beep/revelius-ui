@@ -27,10 +27,26 @@ export const ProductsAPI = {
   },
 
   /**
+   * Get all available payment providers
+   */
+  async getPaymentProviders(): Promise<ApiEnvelope<unknown>> {
+    return apiFetch<ApiEnvelope<unknown>>('/products/payment_providers');
+  },
+
+  /**
    * Get the current routing table configuration
    */
   async getRoutingTable(): Promise<ApiEnvelope<RoutingTable>> {
     return apiFetch<ApiEnvelope<RoutingTable>>('/products/routing_table');
+  },
+
+  /**
+   * Delete the routing table configuration
+   */
+  async deleteRoutingTable(): Promise<ApiEnvelope<unknown>> {
+    return apiFetch<ApiEnvelope<unknown>>('/products/routing_table', {
+      method: 'DELETE',
+    });
   },
 
   /**
