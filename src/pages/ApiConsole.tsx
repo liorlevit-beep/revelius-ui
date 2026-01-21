@@ -36,7 +36,11 @@ export default function ApiConsole() {
   const [routingTableJson, setRoutingTableJson] = useState(
     JSON.stringify({ default_psp: 'stripe', mapping: { adyen: ['cat1'] } }, null, 2)
   );
+  const [routingTableByProvidersJson, setRoutingTableByProvidersJson] = useState(
+    JSON.stringify({ default_psp: 'stripe', provider_ids: ['696dc6935821b00efa752e3b', '696dc6935821b00efa752e39'] }, null, 2)
+  );
   const [routingJsonError, setRoutingJsonError] = useState('');
+  const [routingProviderJsonError, setRoutingProviderJsonError] = useState('');
   const [productsInput, setProductsInput] = useState('product1\nproduct2\nproduct3');
   const [productsSessionId, setProductsSessionId] = useState('');
 
@@ -416,6 +420,37 @@ export default function ApiConsole() {
     }
   };
 
+  const handleGetPaymentProviders = async () => {
+    const result = await executeRequest('getPaymentProviders', 'GET', '/products/payment_providers', ProductsAPI.getPaymentProviders);
+    if (result) {
+      setResponse(JSON.stringify(result, null, 2));
+    }
+  };
+
+  const handleDeleteRoutingTable = async () => {
+    const result = await executeRequest('deleteRoutingTable', 'DELETE', '/products/routing_table', ProductsAPI.deleteRoutingTable);
+    if (result) {
+      setResponse(JSON.stringify(result, null, 2));
+    }
+  };
+
+  const handlePostRoutingTableByProviders = async () => {
+    try {
+      const payload = JSON.parse(routingTableByProvidersJson);
+      setRoutingProviderJsonError('');
+      const result = await executeRequest('postRoutingTableByProviders', 'POST', '/products/routing_table', () => ProductsAPI.upsertRoutingTable(payload));
+      if (result) {
+        setResponse(JSON.stringify(result, null, 2));
+      }
+    } catch (err) {
+      if (err instanceof SyntaxError) {
+        setRoutingProviderJsonError('Invalid JSON: ' + err.message);
+      } else {
+        setRoutingProviderJsonError('Error: ' + String(err));
+      }
+    }
+  };
+
   const handleRouteProducts = async () => {
     const products = productsInput.split(/[\n,]/).map(p => p.trim()).filter(Boolean);
     const result = await executeRequest('routeProducts', 'POST', '/products/router', () => ProductsAPI.routeProducts(productsSessionId, products));
@@ -697,6 +732,18 @@ export default function ApiConsole() {
                 </button>
               </Card>
 
+              {/* Get Payment Providers */}
+              <Card className="p-4">
+                <h3 className="font-semibold mb-3">Get Payment Providers</h3>
+                <button
+                  onClick={handleGetPaymentProviders}
+                  disabled={loading}
+                  className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                >
+                  GET /products/payment_providers
+                </button>
+              </Card>
+
               {/* Routing Table GET */}
               <Card className="p-4">
                 <h3 className="font-semibold mb-3">Get Routing Table</h3>
@@ -709,9 +756,21 @@ export default function ApiConsole() {
                 </button>
               </Card>
 
-              {/* Routing Table POST */}
+              {/* Delete Routing Table */}
               <Card className="p-4">
-                <h3 className="font-semibold mb-3">Update Routing Table</h3>
+                <h3 className="font-semibold mb-3">Delete Routing Table</h3>
+                <button
+                  onClick={handleDeleteRoutingTable}
+                  disabled={loading}
+                  className="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+                >
+                  DELETE /products/routing_table
+                </button>
+              </Card>
+
+              {/* Routing Table POST (by Category Mapping) */}
+              <Card className="p-4">
+                <h3 className="font-semibold mb-3">Update Routing Table (by Category Mapping)</h3>
                 <textarea
                   value={routingTableJson}
                   onChange={(e) => {
@@ -730,6 +789,30 @@ export default function ApiConsole() {
                   className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
                 >
                   POST /products/routing_table
+                </button>
+              </Card>
+
+              {/* Routing Table POST (by Provider IDs) */}
+              <Card className="p-4">
+                <h3 className="font-semibold mb-3">Update Routing Table (by Provider IDs)</h3>
+                <textarea
+                  value={routingTableByProvidersJson}
+                  onChange={(e) => {
+                    setRoutingTableByProvidersJson(e.target.value);
+                    setRoutingProviderJsonError('');
+                  }}
+                  rows={6}
+                  className="w-full px-3 py-2 border rounded-lg font-mono text-xs mb-2"
+                />
+                {routingProviderJsonError && (
+                  <p className="text-xs text-red-600 mb-2">{routingProviderJsonError}</p>
+                )}
+                <button
+                  onClick={handlePostRoutingTableByProviders}
+                  disabled={loading}
+                  className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                >
+                  POST /products/routing_table (by providers)
                 </button>
               </Card>
 
