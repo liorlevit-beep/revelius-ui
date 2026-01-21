@@ -28,6 +28,7 @@ import SdkDemo from './pages/SdkDemo';
 import ApiConsole from './pages/ApiConsole';
 import Demo from './pages/Demo';
 import DemoLab from './pages/DemoLab';
+import ProviderCategoriesTable from './pages/ProviderCategoriesTable';
 import Categories from './pages/Categories';
 import { UiModules } from './pages/UiModules';
 import { useSidebar } from './contexts/SidebarContext';
@@ -112,6 +113,7 @@ function AppContent() {
           <Route path="/demo" element={<Demo />} />
           <Route path="/demo-lab" element={<DemoLab />} />
           <Route path="/ui-modules" element={<UiModules />} />
+          <Route path="/provider-categories" element={<ProviderCategoriesTable />} />
         </Routes>
       </main>
       
