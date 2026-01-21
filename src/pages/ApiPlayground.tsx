@@ -378,6 +378,13 @@ export default function ApiPlayground() {
             </button>
 
             <button
+              onClick={() => handleApiCall('getPaymentProviders', ProductsAPI.getPaymentProviders, 'GET', '/products/payment_providers')}
+              disabled={loading === 'getPaymentProviders'}
+              className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors">
+              {loading === 'getPaymentProviders' ? 'Loading...' : 'Get Payment Providers'}
+            </button>
+
+            <button
               onClick={() => handleApiCall('getRoutingTable', ProductsAPI.getRoutingTable, 'GET', '/products/routing_table')}
               disabled={loading === 'getRoutingTable'}
               className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
@@ -385,9 +392,16 @@ export default function ApiPlayground() {
               {loading === 'getRoutingTable' ? 'Loading...' : 'Get Routing Table'}
             </button>
 
+            <button
+              onClick={() => handleApiCall('deleteRoutingTable', ProductsAPI.deleteRoutingTable, 'DELETE', '/products/routing_table')}
+              disabled={loading === 'deleteRoutingTable'}
+              className="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors">
+              {loading === 'deleteRoutingTable' ? 'Deleting...' : 'Delete Routing Table'}
+            </button>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Routing Table JSON
+                Routing Table JSON (by Category Mapping)
               </label>
               <textarea
                 value={routingTableJson}
@@ -401,6 +415,34 @@ export default function ApiPlayground() {
                 className="w-full mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
               >
                 {loading === 'upsertRoutingTable' ? 'Updating...' : 'Upsert Routing Table'}
+                {loading === 'upsertRoutingTable' ? 'Updating...' : 'Create/Update Routing Table'}
+              </button>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Routing Table JSON (by Provider IDs)
+              </label>
+              <textarea
+                value={routingTableByProvidersJson}
+                onChange={(e) => setRoutingTableByProvidersJson(e.target.value)}
+                rows={5}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+              />
+              <button
+                onClick={async () => {
+                  const payload = JSON.parse(routingTableByProvidersJson);
+                  await handleApiCall(
+                    'upsertRoutingTableByProviders',
+                    async () => ProductsAPI.upsertRoutingTable(payload),
+                    'POST',
+                    '/products/routing_table',
+                    payload
+                  );
+                }}
+                disabled={loading === 'upsertRoutingTableByProviders'}
+                className="w-full mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors">
+                {loading === 'upsertRoutingTableByProviders' ? 'Updating...' : 'Create/Update by Providers'}
               </button>
             </div>
 
