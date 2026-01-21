@@ -153,4 +153,59 @@ body {
       transition-duration: 0.01ms !important;
     }
   }
+
+  /* Custom scrollbar for merchants table - show only on hover */
+  .merchants-table-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+    transition: scrollbar-color 0.3s ease;
+  }
+
+  .merchants-table-scroll:hover {
+    scrollbar-color: rgba(6, 182, 212, 0.5) rgba(255, 255, 255, 0.05);
+  }
+
+  /* WebKit browsers (Chrome, Safari, Edge) */
+  .merchants-table-scroll::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .merchants-table-scroll::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 10px;
+  }
+
+  .merchants-table-scroll:hover::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .merchants-table-scroll::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 10px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .merchants-table-scroll:hover::-webkit-scrollbar-thumb {
+    background: rgba(6, 182, 212, 0.4);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+
+  .merchants-table-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(6, 182, 212, 0.6);
+    box-shadow: 0 0 6px rgba(6, 182, 212, 0.5);
+  }
+
+  .merchants-table-scroll::-webkit-scrollbar-thumb:active {
+    background: rgba(6, 182, 212, 0.8);
+    box-shadow: 0 0 10px rgba(6, 182, 212, 0.7);
+  }
+
+  /* Scrollbar corner */
+  .merchants-table-scroll::-webkit-scrollbar-corner {
+    background: transparent;
+  }
 }

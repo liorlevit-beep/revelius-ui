@@ -31,11 +31,16 @@ export function GlassMerchantsTable({ merchants }: GlassMerchantsTableProps) {
 
   return (
     <GlassChartWrapper title="Merchants needing attention">
-      <div className="overflow-x-auto overflow-y-auto -mx-6" style={{ maxHeight: 'calc(100vh - 420px)' }}>
+      <div 
+        className="overflow-x-auto overflow-y-auto -mx-6 merchants-table-scroll" 
+        style={{ maxHeight: 'calc(100vh - 420px)' }}
+      >
         <table className="w-full table-fixed">
-          <thead className="backdrop-blur-sm border-b sticky top-0 z-10" style={{ 
-            backgroundColor: 'rgba(30, 27, 75, 0.6)',
-            borderColor: 'var(--glass-border)'
+          <thead className="border-b sticky top-0 z-10" style={{ 
+            background: 'rgba(255, 255, 255, 0.08)',
+            backdropFilter: 'blur(12px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(12px) saturate(180%)',
+            borderColor: 'rgba(255, 255, 255, 0.18)',
           }}>
             <tr>
               <SortableTableHeader

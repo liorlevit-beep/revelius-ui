@@ -18,6 +18,15 @@ export const ProductsAPI = {
   },
 
   /**
+   * Get all products
+   */
+  async getAllProducts(sessionId?: string): Promise<ApiEnvelope<unknown>> {
+    return apiFetch<ApiEnvelope<unknown>>('/products/all', {
+      ...(sessionId && { sessionId }),
+    });
+  },
+
+  /**
    * Get the current routing table configuration
    */
   async getRoutingTable(): Promise<ApiEnvelope<RoutingTable>> {

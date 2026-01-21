@@ -79,7 +79,7 @@ export function Merchants() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-transparent">
       <Header title="Merchants" timeRange="7" onTimeRangeChange={() => {}} />
 
       <main className="p-8">

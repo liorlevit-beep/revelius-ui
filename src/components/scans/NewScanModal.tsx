@@ -111,12 +111,12 @@ export function NewScanModal({ isOpen, onClose, onSuccess }: NewScanModalProps) 
     <>
       {/* Backdrop */}
       <div 
-        className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 transition-opacity"
+        className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[9999] transition-opacity"
         onClick={onClose}
       />
 
       {/* Modal */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 pointer-events-none">
         <div 
           className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl pointer-events-auto transform transition-all"
           onClick={(e) => e.stopPropagation()}

@@ -383,6 +383,13 @@ export default function ApiConsole() {
     }
   };
 
+  const handleGetAllProducts = async () => {
+    const result = await executeRequest('getAllProducts', 'GET', '/products/all', () => ProductsAPI.getAllProducts(productsSessionId || undefined));
+    if (result) {
+      setResponse(JSON.stringify(result, null, 2));
+    }
+  };
+
   const handleGetRoutingTable = async () => {
     const result = await executeRequest('getRoutingTable', 'GET', '/products/routing_table', ProductsAPI.getRoutingTable);
     if (result) {
@@ -668,6 +675,25 @@ export default function ApiConsole() {
                   className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
                 >
                   GET /products/categories
+                </button>
+              </Card>
+
+              {/* All Products */}
+              <Card className="p-4">
+                <h3 className="font-semibold mb-3">Get All Products</h3>
+                <input
+                  type="text"
+                  value={productsSessionId}
+                  onChange={(e) => setProductsSessionId(e.target.value)}
+                  placeholder="Session ID (optional)"
+                  className="w-full px-3 py-2 border rounded-lg mb-2"
+                />
+                <button
+                  onClick={handleGetAllProducts}
+                  disabled={loading}
+                  className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                >
+                  GET /products/all
                 </button>
               </Card>
 

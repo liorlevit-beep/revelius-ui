@@ -34,7 +34,7 @@ export function Providers() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-transparent">
       <Header title="Payment Providers" />
 
       <main className="p-8">

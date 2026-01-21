@@ -12,7 +12,16 @@ interface HeaderProps {
 export function Header({ title, timeRange, onTimeRangeChange, glassTheme = false, onThemeToggle }: HeaderProps) {
   if (glassTheme) {
     return (
-      <header className="backdrop-blur-xl bg-white/[0.03] border-b px-8 py-5" style={{ borderColor: 'var(--glass-border)' }}>
+      <header 
+        className="border-b px-8 py-5" 
+        style={{
+          background: 'rgba(255, 255, 255, 0.05)',
+          backdropFilter: 'blur(16px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(16px) saturate(180%)',
+          borderColor: 'rgba(255, 255, 255, 0.18)',
+          boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+        }}
+      >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <h2 className="text-2xl font-bold" style={{ color: 'var(--color-silver-mist)' }}>{title}</h2>
@@ -25,30 +34,39 @@ export function Header({ title, timeRange, onTimeRangeChange, glassTheme = false
             {onThemeToggle && (
               <button
                 onClick={onThemeToggle}
-                className="w-10 h-10 backdrop-blur-md bg-white/[0.05] border rounded-lg transition-all hover:bg-white/[0.08] flex items-center justify-center group"
-                style={{ borderColor: 'var(--glass-border)' }}
+                className="w-10 h-10 rounded-lg transition-all hover:-translate-y-0.5 flex items-center justify-center group"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  backdropFilter: 'blur(10px) saturate(180%)',
+                  WebkitBackdropFilter: 'blur(10px) saturate(180%)',
+                  border: '1px solid rgba(255, 255, 255, 0.18)',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+                }}
                 title="Switch to Light Mode"
               >
                 <Sun className="w-5 h-5 text-amber-400 group-hover:rotate-180 transition-transform duration-500" />
               </button>
             )}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--color-silver-mist-dim)' }} />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 type="text"
                 placeholder="Search merchants, domains, scan IDs…"
-                className="pl-10 pr-4 py-2.5 w-96 backdrop-blur-md bg-white/[0.05] border rounded-xl text-sm transition-all"
+                className="pl-10 pr-4 py-2.5 w-96 rounded-xl text-sm transition-all text-gray-200 placeholder:text-gray-500"
                 style={{ 
-                  borderColor: 'var(--glass-border)',
-                  color: 'var(--color-silver-mist)',
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  backdropFilter: 'blur(10px) saturate(180%)',
+                  WebkitBackdropFilter: 'blur(10px) saturate(180%)',
+                  border: '1px solid rgba(255, 255, 255, 0.18)',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
                 }}
                 onFocus={(e) => {
                   e.target.style.borderColor = 'rgba(6, 182, 212, 0.4)';
-                  e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
+                  e.target.style.background = 'rgba(255, 255, 255, 0.08)';
                 }}
                 onBlur={(e) => {
-                  e.target.style.borderColor = 'var(--glass-border)';
-                  e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+                  e.target.style.borderColor = 'rgba(255, 255, 255, 0.18)';
+                  e.target.style.background = 'rgba(255, 255, 255, 0.05)';
                 }}
               />
             </div>
@@ -59,10 +77,13 @@ export function Header({ title, timeRange, onTimeRangeChange, glassTheme = false
             <select
               value={timeRange}
               onChange={(e) => onTimeRangeChange(e.target.value)}
-              className="px-4 py-2.5 backdrop-blur-md bg-white/[0.05] border rounded-xl text-sm font-medium transition-all cursor-pointer [&>option]:bg-gray-900 [&>option]:text-white"
+              className="px-4 py-2.5 rounded-xl text-sm font-medium transition-all cursor-pointer text-gray-200 [&>option]:bg-gray-900 [&>option]:text-white"
               style={{ 
-                borderColor: 'var(--glass-border)',
-                color: 'var(--color-silver-mist)',
+                background: 'rgba(255, 255, 255, 0.05)',
+                backdropFilter: 'blur(10px) saturate(180%)',
+                WebkitBackdropFilter: 'blur(10px) saturate(180%)',
+                border: '1px solid rgba(255, 255, 255, 0.18)',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
               }}
             >
               <option value="7">Last 7 days</option>

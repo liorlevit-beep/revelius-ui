@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { 
   Check, Copy, Search, Plus, Settings, Trash2, Edit, Download, Upload, 
   ChevronDown, ChevronUp, X, AlertCircle, CheckCircle, Info, Loader2,
-  ExternalLink, Eye, EyeOff, Calendar, Filter, MoreVertical
+  ExternalLink, Eye, EyeOff, Calendar, Filter, MoreVertical, Sparkles, Home, Zap
 } from 'lucide-react';
 import { Header } from '../components/Header';
+import { TiltCard } from '../components/ui/TiltCard';
+import { IridescentButton } from '../components/ui/IridescentButton';
 
 export function UiModules() {
   const [copiedSnippet, setCopiedSnippet] = useState<string | null>(null);
@@ -20,10 +22,12 @@ export function UiModules() {
   };
 
   const sections = [
+    { id: 'iridescent-buttons', label: 'Iridescent Buttons' },
     { id: 'buttons', label: 'Buttons' },
     { id: 'inputs', label: 'Inputs' },
     { id: 'badges', label: 'Badges' },
     { id: 'cards', label: 'Cards' },
+    { id: 'tilt-cards', label: '3D Tilt Cards' },
     { id: 'tables', label: 'Tables' },
     { id: 'tabs', label: 'Tabs' },
     { id: 'dialogs', label: 'Dialogs/Modals' },
@@ -37,7 +41,7 @@ export function UiModules() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-transparent">
       <Header title="UI Modules" timeRange="7" onTimeRangeChange={() => {}} />
 
       <main className="p-8">
@@ -77,6 +81,169 @@ export function UiModules() {
               <div className="space-y-2">
                 <div className="w-full h-16 bg-blue-600 rounded-lg"></div>
                 <p className="text-xs font-mono text-gray-600">Blue: #2563EB</p>
+              </div>
+            </div>
+          </section>
+
+          {/* Iridescent Buttons */}
+          <section id="iridescent-buttons" className="bg-white dark:bg-white/5 dark:backdrop-blur-xl dark:border-white/10 rounded-2xl border border-gray-200 p-8 shadow-sm">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Iridescent Glass Buttons</h2>
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  Glassmorphism buttons with iridescent glow effects, perfect for navigation and dark mode UIs.
+                </p>
+              </div>
+              <button
+                onClick={() => copyToClipboard('<IridescentButton>Label</IridescentButton>', 'iridescent')}
+                className="flex items-center gap-2 px-3 py-1.5 text-xs text-gray-600 hover:text-emerald-600 transition-colors"
+              >
+                {copiedSnippet === 'iridescent' ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                {copiedSnippet === 'iridescent' ? 'Copied!' : 'Copy Usage'}
+              </button>
+            </div>
+            
+            <div className="space-y-8">
+              <div>
+                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-4">States & Variants</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                  Hover to see the iridescent glow and sheen sweep effect. Click to see the press animation.
+                </p>
+                
+                {/* Dark background showcase */}
+                <div className="bg-gray-950 rounded-xl p-8 space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl">
+                    <IridescentButton icon={<Home className="w-4 h-4" />}>
+                      Default Button
+                    </IridescentButton>
+                    
+                    <IridescentButton active icon={<Sparkles className="w-4 h-4" />}>
+                      Active State
+                    </IridescentButton>
+                    
+                    <IridescentButton icon={<Settings className="w-4 h-4" />}>
+                      With Icon
+                    </IridescentButton>
+                    
+                    <IridescentButton icon={<Zap className="w-4 h-4" />}>
+                      Hover Me
+                    </IridescentButton>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-4">Text Overflow Handling</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                  Long labels are automatically truncated with ellipsis.
+                </p>
+                
+                <div className="bg-gray-950 rounded-xl p-8">
+                  <div className="max-w-xs space-y-4">
+                    <IridescentButton icon={<AlertCircle className="w-4 h-4" />}>
+                      This is a very long button label that should be truncated with ellipsis
+                    </IridescentButton>
+                    
+                    <IridescentButton active icon={<CheckCircle className="w-4 h-4" />}>
+                      Another extremely long label to demonstrate text overflow behavior in this component
+                    </IridescentButton>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-4">Navigation Example</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                  Perfect for sidebar navigation items. Active state indicates current page.
+                </p>
+                
+                <div className="bg-gray-950 rounded-xl p-8">
+                  <div className="max-w-xs space-y-2">
+                    <IridescentButton active icon={<Home className="w-4 h-4" />}>
+                      Dashboard
+                    </IridescentButton>
+                    
+                    <IridescentButton icon={<Settings className="w-4 h-4" />}>
+                      Settings
+                    </IridescentButton>
+                    
+                    <IridescentButton icon={<Search className="w-4 h-4" />}>
+                      Search
+                    </IridescentButton>
+                    
+                    <IridescentButton icon={<Plus className="w-4 h-4" />}>
+                      Create New
+                    </IridescentButton>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-4">Usage Example</h3>
+                <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-4">
+                  <pre className="text-xs text-gray-800 dark:text-gray-200 overflow-x-auto">
+{`import { IridescentButton } from '../components/ui/IridescentButton';
+import { Home } from 'lucide-react';
+
+// Basic usage
+<IridescentButton icon={<Home />}>
+  Dashboard
+</IridescentButton>
+
+// Active state
+<IridescentButton active icon={<Home />}>
+  Dashboard
+</IridescentButton>
+
+// As link
+<IridescentButton as="a" href="/dashboard" icon={<Home />}>
+  Dashboard
+</IridescentButton>
+
+// With custom className
+<IridescentButton className="my-custom-class" icon={<Home />}>
+  Dashboard
+</IridescentButton>`}
+                  </pre>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-4">Features</h3>
+                <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
+                    <span>Iridescent rainbow gradient glow on hover (purple → blue → green → orange → pink)</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
+                    <span>Animated sheen sweep effect on hover</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
+                    <span>Drop shadow "aura" that intensifies on hover and active state</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
+                    <span>Glassmorphism background with backdrop blur</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
+                    <span>Keyboard navigation support with focus-visible ring</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
+                    <span>Respects prefers-reduced-motion for accessibility</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
+                    <span>Automatic text truncation with ellipsis</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
+                    <span>Can render as button or link (a tag)</span>
+                  </li>
+                </ul>
               </div>
             </div>
           </section>
@@ -391,6 +558,99 @@ export function UiModules() {
                 <p className="text-sm text-gray-600">
                   Use a colored border to highlight important cards.
                 </p>
+              </div>
+            </div>
+          </section>
+
+          {/* 3D Tilt Cards */}
+          <section id="tilt-cards" className="bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">3D Tilt Cards (Apple TV Style)</h2>
+              <button
+                onClick={() => copyToClipboard('<TiltCard><div className="p-6">Card content</div></TiltCard>', 'tiltcard')}
+                className="flex items-center gap-2 px-3 py-1.5 text-xs text-gray-600 hover:text-emerald-600 transition-colors"
+              >
+                {copiedSnippet === 'tiltcard' ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                {copiedSnippet === 'tiltcard' ? 'Copied!' : 'Copy Usage'}
+              </button>
+            </div>
+            
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-sm font-semibold text-gray-700 mb-4">Interactive 3D Tilt Effect</h3>
+                <p className="text-sm text-gray-600 mb-6">
+                  Hover over these cards to see the Apple TV-style 3D tilt effect with glare. The cards rotate based on your mouse position.
+                </p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <TiltCard>
+                    <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-6 text-white">
+                      <h3 className="text-lg font-semibold mb-2">Premium Card</h3>
+                      <p className="text-sm text-emerald-50">
+                        Hover to see the 3D tilt effect with glare overlay.
+                      </p>
+                    </div>
+                  </TiltCard>
+
+                  <TiltCard>
+                    <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white">
+                      <div className="flex items-center gap-2 mb-2">
+                        <CheckCircle className="w-5 h-5" />
+                        <h3 className="text-lg font-semibold">With Icon</h3>
+                      </div>
+                      <p className="text-sm text-purple-50">
+                        Interactive 3D perspective on mouse movement.
+                      </p>
+                    </div>
+                  </TiltCard>
+
+                  <TiltCard>
+                    <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white">
+                      <h3 className="text-lg font-semibold mb-2">Dynamic Glare</h3>
+                      <p className="text-sm text-blue-50">
+                        The glare follows your mouse cursor for realism.
+                      </p>
+                    </div>
+                  </TiltCard>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-sm font-semibold text-gray-700 mb-4">Without Glare</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <TiltCard glare={false}>
+                    <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">No Glare Effect</h3>
+                      <p className="text-sm text-gray-600">
+                        Set <code className="px-1.5 py-0.5 bg-gray-100 rounded text-xs">glare={'{false}'}</code> to disable the glare overlay.
+                      </p>
+                    </div>
+                  </TiltCard>
+
+                  <TiltCard glare={false} rotationLimit={15}>
+                    <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-6 text-white">
+                      <h3 className="text-lg font-semibold mb-2">Higher Rotation</h3>
+                      <p className="text-sm text-orange-50">
+                        Increased <code className="px-1.5 py-0.5 bg-orange-700 rounded text-xs">rotationLimit={'{15}'}</code> for more dramatic tilt.
+                      </p>
+                    </div>
+                  </TiltCard>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-sm font-semibold text-gray-700 mb-4">Usage Example</h3>
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <pre className="text-xs text-gray-800 overflow-x-auto">
+{`import { TiltCard } from '../components/ui/TiltCard';
+
+<TiltCard rotationLimit={8} glare={true}>
+  <div className="p-6">
+    Your card content here
+  </div>
+</TiltCard>`}
+                  </pre>
+                </div>
               </div>
             </div>
           </section>

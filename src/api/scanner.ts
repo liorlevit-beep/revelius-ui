@@ -32,9 +32,12 @@ export const ScannerAPI = {
    * Get the status of a scanning session
    */
   async getSessionStatus(sessionId: string): Promise<ApiEnvelope<SessionStatusResponse>> {
-    return apiFetch<ApiEnvelope<SessionStatusResponse>>('/scanner/session/status', {
+    console.log(`[ScannerAPI] Getting session status for: ${sessionId}`);
+    const response = await apiFetch<ApiEnvelope<SessionStatusResponse>>('/scanner/session/status', {
       sessionId,
     });
+    console.log(`[ScannerAPI] Session status response:`, response);
+    return response;
   },
 
   /**

@@ -98,29 +98,30 @@ export function GenerateTransactionFromScanModal({
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-8"
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-8"
       onClick={() => onOpenChange(false)}
+      style={{ left: 0, right: 0, top: 0, bottom: 0 }}
     >
       <div
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[80vh] flex flex-col"
+        className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[80vh] flex flex-col relative"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-100">
+        <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-800">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900">Generate Transaction from Scan</h2>
-            <p className="text-sm text-gray-500 mt-1">Select a scan session to create a new transaction</p>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Generate Transaction from Scan</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Select a scan session to create a new transaction</p>
           </div>
           <button
             onClick={() => onOpenChange(false)}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
           >
-            <X className="w-5 h-5 text-gray-500" />
+            <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
           </button>
         </div>
 
         {/* Search */}
-        <div className="p-6 border-b border-gray-100">
+        <div className="p-6 border-b border-gray-100 dark:border-gray-800">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
@@ -128,7 +129,7 @@ export function GenerateTransactionFromScanModal({
               placeholder="Search by session ID or domain…"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:bg-white transition-all"
+              className="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:bg-white dark:focus:bg-gray-700 transition-all"
             />
           </div>
         </div>
@@ -136,11 +137,11 @@ export function GenerateTransactionFromScanModal({
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6 relative">
           {generating && (
-            <div className="absolute inset-0 bg-white bg-opacity-90 flex items-center justify-center z-10">
+            <div className="absolute inset-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm flex items-center justify-center z-10">
               <div className="text-center">
                 <Loader2 className="w-12 h-12 text-emerald-600 animate-spin mx-auto mb-3" />
-                <p className="text-sm font-medium text-gray-900">Generating transaction...</p>
-                <p className="text-xs text-gray-500 mt-1">Analyzing scan report and building cart</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-white">Generating transaction...</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Analyzing scan report and building cart</p>
               </div>
             </div>
           )}
@@ -169,11 +170,11 @@ export function GenerateTransactionFromScanModal({
 
           {!loading && !error && filteredSessions.length === 0 && (
             <div className="text-center py-12">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Search className="w-8 h-8 text-gray-400" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">No sessions found</h3>
-              <p className="text-gray-500 text-sm">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No sessions found</h3>
+              <p className="text-gray-500 dark:text-gray-400 text-sm">
                 {searchQuery ? 'Try adjusting your search criteria' : 'No scan sessions available'}
               </p>
             </div>
@@ -185,19 +186,19 @@ export function GenerateTransactionFromScanModal({
                 <button
                   key={session.session_id}
                   onClick={() => handleSelectSession(session)}
-                  className="w-full text-left p-4 border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-emerald-500 transition-all group"
+                  className="w-full text-left p-4 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 hover:border-emerald-500 transition-all group"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-sm font-mono font-semibold text-gray-900 truncate">
+                        <span className="text-sm font-mono font-semibold text-gray-900 dark:text-white truncate">
                           {session.session_id}
                         </span>
                         {selectedSessionId === session.session_id && (
                           <Check className="w-4 h-4 text-emerald-600 flex-shrink-0" />
                         )}
                       </div>
-                      <p className="text-sm text-gray-600 truncate mb-2">{session.url}</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 truncate mb-2">{session.url}</p>
                       <div className="flex items-center gap-3 text-xs text-gray-500">
                         {session.status && (
                           <span
@@ -227,13 +228,13 @@ export function GenerateTransactionFromScanModal({
         </div>
 
         {/* Footer */}
-        <div className="p-6 border-t border-gray-100 flex items-center justify-between">
-          <p className="text-sm text-gray-600">
+        <div className="p-6 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
             {filteredSessions.length} {filteredSessions.length === 1 ? 'session' : 'sessions'} available
           </p>
           <button
             onClick={() => onOpenChange(false)}
-            className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-xl text-sm font-semibold transition-colors"
+            className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl text-sm font-semibold transition-colors"
           >
             Cancel
           </button>

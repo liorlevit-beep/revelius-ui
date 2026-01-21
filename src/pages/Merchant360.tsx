@@ -46,7 +46,7 @@ export function Merchant360() {
 
   if (!merchant) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 dark:bg-transparent">
         <Header title="Merchant Not Found" timeRange="7" onTimeRangeChange={() => {}} />
         <main className="p-8">
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center">
@@ -78,7 +78,7 @@ export function Merchant360() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-transparent">
       <Header title={merchant.name} timeRange="7" onTimeRangeChange={() => {}} />
 
       <main className="p-8">

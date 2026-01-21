@@ -17,7 +17,8 @@ export type ScanWebsiteResponse = {
 };
 
 export type SessionStatusResponse = {
-  status: string;
+  status: string; // "active" | "inactive"
+  success?: boolean; // true = completed successfully, false = failed (only present when status is "inactive")
   progress?: number;
   message?: string;
 };

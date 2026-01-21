@@ -1,13 +1,12 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, TrendingUp, Columns3, ChevronUp, ChevronDown, RefreshCw, Copy, Check, Plus, Loader2, AlertCircle } from 'lucide-react';
-import { Header } from '../components/Header';
 import { Chip } from '../components/Badges';
 import { TransactionDetailPanel } from '../components/TransactionDetailPanel';
 import { UpliftKpis, UpliftChart, BreakdownTable } from '../components/UpliftComponents';
 import { useTableSort } from '../hooks/useTableSort';
 import { CountryFlag } from '../components/CountryFlag';
-import { GenerateTransactionFromScanModal } from '../components/transactions/GenerateTransactionFromScanModal';
+import { SelectScanModal } from '../components/transactions/SelectScanModal';
 import { buildTransactionFromSession } from '../lib/transactions/buildTransactionFromScan';
 import { transactionsStore } from '../lib/transactions/transactionsStore';
 import { useRoutingTable } from '../hooks/useRoutingTable';
@@ -355,19 +354,17 @@ export function Transactions() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header title="Transactions" timeRange="7" onTimeRangeChange={() => {}} />
-
-      <main className="p-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-transparent">
+      <div className="p-8">
         {/* Tabs */}
-        <div className="bg-white rounded-t-2xl border border-gray-100 border-b-0">
+        <div className="bg-white dark:bg-white/5 dark:backdrop-blur-xl rounded-t-2xl border border-gray-100 dark:border-white/10 border-b-0">
           <nav className="flex gap-8 px-6">
             <button
               onClick={() => setActiveTab('feed')}
               className={`py-4 text-sm font-semibold border-b-2 transition-colors ${
                 activeTab === 'feed'
                   ? 'border-emerald-600 text-emerald-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
+                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
               }`}
             >
               Feed
@@ -377,7 +374,7 @@ export function Transactions() {
               className={`py-4 text-sm font-semibold border-b-2 transition-colors ${
                 activeTab === 'uplift'
                   ? 'border-emerald-600 text-emerald-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
+                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
               }`}
             >
               Uplift
@@ -387,20 +384,20 @@ export function Transactions() {
 
         {/* Feed Tab */}
         {activeTab === 'feed' && (
-          <div className="bg-white rounded-b-2xl border border-gray-100 shadow-sm">
+          <div className="bg-white dark:bg-white/5 dark:backdrop-blur-xl rounded-b-2xl border border-gray-100 dark:border-white/10 shadow-sm">
             {/* Controls */}
-            <div className="p-6 border-b border-gray-100">
+            <div className="p-6 border-b border-gray-100 dark:border-white/10">
               <div className="flex flex-col gap-4">
                 {/* Search and Generate Button Row */}
                 <div className="flex items-center gap-3">
                   <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
                     <input
                       type="text"
                       placeholder="Search by txn ID, merchant, country…"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:bg-white transition-all"
+                      className="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:bg-white dark:focus:bg-white/10 transition-all"
                     />
                   </div>
                   <button
@@ -427,7 +424,7 @@ export function Transactions() {
                   <select
                     value={merchantFilter}
                     onChange={(e) => setMerchantFilter(e.target.value)}
-                    className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+                    className="px-4 py-2 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer [&>option]:bg-white [&>option]:dark:bg-gray-900 [&>option]:text-gray-900 [&>option]:dark:text-white"
                   >
                     <option value="All">All Merchants</option>
                     {merchants.slice(0, 10).map((m) => (
@@ -440,7 +437,7 @@ export function Transactions() {
                   <select
                     value={outcomeFilter}
                     onChange={(e) => setOutcomeFilter(e.target.value)}
-                    className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+                    className="px-4 py-2 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer [&>option]:bg-white [&>option]:dark:bg-gray-900 [&>option]:text-gray-900 [&>option]:dark:text-white"
                   >
                     <option value="All">All Outcomes</option>
                     <option value="Approved">Approved</option>
@@ -450,7 +447,7 @@ export function Transactions() {
                   <select
                     value={methodFilter}
                     onChange={(e) => setMethodFilter(e.target.value)}
-                    className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+                    className="px-4 py-2 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer [&>option]:bg-white [&>option]:dark:bg-gray-900 [&>option]:text-gray-900 [&>option]:dark:text-white"
                   >
                     <option value="All">All Methods</option>
                     <option value="Card">Card</option>
@@ -462,7 +459,7 @@ export function Transactions() {
                   <select
                     value={routeFilter}
                     onChange={(e) => setRouteFilter(e.target.value)}
-                    className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+                    className="px-4 py-2 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer [&>option]:bg-white [&>option]:dark:bg-gray-900 [&>option]:text-gray-900 [&>option]:dark:text-white"
                   >
                     <option value="All">All Routes</option>
                     {providers.map((provider) => (
@@ -475,7 +472,7 @@ export function Transactions() {
                   {/* Fallback indicator */}
                   {routingTableError && (
                     <span 
-                      className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-amber-100 text-amber-700"
+                      className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400"
                       title={`Using fallback providers: ${routingTableError}`}
                     >
                       <AlertCircle className="w-3 h-3 mr-1" />
@@ -486,24 +483,24 @@ export function Transactions() {
                   <select
                     value={dateRange}
                     onChange={(e) => setDateRange(e.target.value)}
-                    className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+                    className="px-4 py-2 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer [&>option]:bg-white [&>option]:dark:bg-gray-900 [&>option]:text-gray-900 [&>option]:dark:text-white"
                   >
                     <option value="24">Last 24 hours</option>
                     <option value="7">Last 7 days</option>
                     <option value="30">Last 30 days</option>
                   </select>
 
-                  <label className="flex items-center gap-2 px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors">
+                  <label className="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
                     <input
                       type="checkbox"
                       checked={showOptimizationsOnly}
                       onChange={(e) => setShowOptimizationsOnly(e.target.checked)}
-                      className="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                      className="rounded border-gray-300 dark:border-gray-600 text-emerald-600 focus:ring-emerald-500"
                     />
                     Optimizations only
                   </label>
 
-                  <div className="text-sm text-gray-600">
+                  <div className="text-sm text-gray-600 dark:text-gray-400">
                     {filteredAndSortedTransactions.length} {filteredAndSortedTransactions.length === 1 ? 'transaction' : 'transactions'}
                   </div>
 
@@ -511,7 +508,7 @@ export function Transactions() {
                   <div className="relative" ref={columnsMenuRef}>
                     <button
                       onClick={() => setShowColumnsMenu(!showColumnsMenu)}
-                      className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors flex items-center gap-2"
+                      className="px-4 py-2 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors flex items-center gap-2"
                       title="Toggle columns"
                     >
                       <Columns3 className="w-4 h-4" />
@@ -519,22 +516,22 @@ export function Transactions() {
                     </button>
 
                     {showColumnsMenu && (
-                      <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl border border-gray-200 shadow-lg z-20 py-2">
-                        <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-100">
+                      <div className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-gray-900 dark:backdrop-blur-xl rounded-xl border border-gray-200 dark:border-white/10 shadow-lg z-20 py-2">
+                        <div className="px-3 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-white/10">
                           Show Columns
                         </div>
                         {Object.entries(columnVisibility).map(([key, value]) => (
                           <label
                             key={key}
-                            className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors"
+                            className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-white/5 cursor-pointer transition-colors"
                           >
                             <input
                               type="checkbox"
                               checked={value}
                               onChange={() => toggleColumn(key as keyof ColumnVisibility)}
-                              className="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500"
+                              className="w-4 h-4 text-emerald-600 border-gray-300 dark:border-gray-600 rounded focus:ring-emerald-500"
                             />
-                            <span className="text-sm text-gray-700 capitalize">
+                            <span className="text-sm text-gray-700 dark:text-gray-300 capitalize">
                               {key === 'id' ? 'Txn ID' : key === 'created' ? 'Created' : key}
                             </span>
                           </label>
@@ -547,7 +544,7 @@ export function Transactions() {
                   <button
                     onClick={handleRefresh}
                     disabled={loading}
-                    className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-4 py-2 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     title="Refresh transactions"
                   >
                     <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
@@ -560,12 +557,12 @@ export function Transactions() {
             {/* Transactions Table */}
             <div className="overflow-x-auto overflow-y-auto" style={{ maxHeight: 'calc(100vh - 450px)' }}>
               <table className="w-full table-fixed">
-                <thead className="bg-gray-50/95 backdrop-blur-sm border-b border-gray-100 sticky top-0 z-10">
+                <thead className="bg-gray-50/70 dark:bg-gray-900/70 backdrop-blur-xl border-b border-gray-100 dark:border-white/10 sticky top-0 z-10">
                   <tr>
                     {columnVisibility.id && (
                       <th 
                         onClick={() => handleSort('id')}
-                        className="group text-left text-xs font-semibold text-gray-500 uppercase tracking-wider py-3 px-4 whitespace-nowrap cursor-pointer hover:bg-gray-100/80 transition-colors relative select-none w-[15%]"
+                        className="group text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider py-3 px-4 whitespace-nowrap cursor-pointer hover:bg-gray-100/80 dark:hover:bg-white/5 transition-colors relative select-none w-[15%]"
                       >
                         <div className="flex items-center gap-2">
                           Txn ID
@@ -584,7 +581,7 @@ export function Transactions() {
                     {columnVisibility.merchant && (
                       <th 
                         onClick={() => handleSort('merchantName')}
-                        className="group text-left text-xs font-semibold text-gray-500 uppercase tracking-wider py-3 px-4 whitespace-nowrap cursor-pointer hover:bg-gray-100/80 transition-colors relative select-none w-[15%]"
+                        className="group text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider py-3 px-4 whitespace-nowrap cursor-pointer hover:bg-gray-100/80 dark:hover:bg-white/5 transition-colors relative select-none w-[15%]"
                       >
                         <div className="flex items-center gap-2">
                           Merchant
@@ -603,7 +600,7 @@ export function Transactions() {
                     {columnVisibility.amount && (
                       <th 
                         onClick={() => handleSort('amount')}
-                        className="group text-left text-xs font-semibold text-gray-500 uppercase tracking-wider py-3 px-4 whitespace-nowrap cursor-pointer hover:bg-gray-100/80 transition-colors relative select-none w-[10%]"
+                        className="group text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider py-3 px-4 whitespace-nowrap cursor-pointer hover:bg-gray-100/80 dark:hover:bg-white/5 transition-colors relative select-none w-[10%]"
                       >
                         <div className="flex items-center gap-2">
                           Amount
@@ -622,7 +619,7 @@ export function Transactions() {
                     {columnVisibility.country && (
                       <th 
                         onClick={() => handleSort('country')}
-                        className="group text-left text-xs font-semibold text-gray-500 uppercase tracking-wider py-3 px-4 whitespace-nowrap cursor-pointer hover:bg-gray-100/80 transition-colors relative select-none w-[10%]"
+                        className="group text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider py-3 px-4 whitespace-nowrap cursor-pointer hover:bg-gray-100/80 dark:hover:bg-white/5 transition-colors relative select-none w-[10%]"
                       >
                         <div className="flex items-center gap-2">
                           Country
@@ -641,7 +638,7 @@ export function Transactions() {
                     {columnVisibility.method && (
                       <th 
                         onClick={() => handleSort('method')}
-                        className="group text-left text-xs font-semibold text-gray-500 uppercase tracking-wider py-3 px-4 whitespace-nowrap cursor-pointer hover:bg-gray-100/80 transition-colors relative select-none w-[12%]"
+                        className="group text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider py-3 px-4 whitespace-nowrap cursor-pointer hover:bg-gray-100/80 dark:hover:bg-white/5 transition-colors relative select-none w-[12%]"
                       >
                         <div className="flex items-center gap-2">
                           Method
@@ -660,7 +657,7 @@ export function Transactions() {
                     {columnVisibility.route && (
                       <th 
                         onClick={() => handleSort('currentRoute')}
-                        className="group text-left text-xs font-semibold text-gray-500 uppercase tracking-wider py-3 px-4 whitespace-nowrap cursor-pointer hover:bg-gray-100/80 transition-colors relative select-none w-[13%]"
+                        className="group text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider py-3 px-4 whitespace-nowrap cursor-pointer hover:bg-gray-100/80 dark:hover:bg-white/5 transition-colors relative select-none w-[13%]"
                       >
                         <div className="flex items-center gap-2">
                           Route
@@ -679,7 +676,7 @@ export function Transactions() {
                     {columnVisibility.outcome && (
                       <th 
                         onClick={() => handleSort('currentOutcome')}
-                        className="group text-left text-xs font-semibold text-gray-500 uppercase tracking-wider py-3 px-4 whitespace-nowrap cursor-pointer hover:bg-gray-100/80 transition-colors relative select-none w-[10%]"
+                        className="group text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider py-3 px-4 whitespace-nowrap cursor-pointer hover:bg-gray-100/80 dark:hover:bg-white/5 transition-colors relative select-none w-[10%]"
                       >
                         <div className="flex items-center gap-2">
                           Outcome
@@ -698,7 +695,7 @@ export function Transactions() {
                     {columnVisibility.created && (
                       <th 
                         onClick={() => handleSort('createdAt')}
-                        className="group text-left text-xs font-semibold text-gray-500 uppercase tracking-wider py-3 px-4 whitespace-nowrap cursor-pointer hover:bg-gray-100/80 transition-colors relative select-none w-[14%]"
+                        className="group text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider py-3 px-4 whitespace-nowrap cursor-pointer hover:bg-gray-100/80 dark:hover:bg-white/5 transition-colors relative select-none w-[14%]"
                       >
                         <div className="flex items-center gap-2">
                           Created
@@ -715,33 +712,33 @@ export function Transactions() {
                       </th>
                     )}
                     {columnVisibility.signals && (
-                      <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider py-3 px-4 whitespace-nowrap w-[15%]">
+                      <th className="text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider py-3 px-4 whitespace-nowrap w-[15%]">
                         Signals
                       </th>
                     )}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
+                <tbody className="divide-y divide-gray-50 dark:divide-white/5">
                   {paginatedTransactions.map((txn, idx) => {
                     const hasOptimization = txn.suggestedRoute !== txn.currentRoute;
                     return (
                       <tr
                         key={`${txn.id}-${idx}`}
-                        className={`group relative hover:bg-gray-50/80 cursor-pointer transition-all duration-150 active:scale-[0.998] ${
-                          selectedTransaction?.id === txn.id ? 'bg-emerald-50' : ''
+                        className={`group relative hover:bg-gray-50/80 dark:hover:bg-white/5 cursor-pointer transition-all duration-150 active:scale-[0.998] ${
+                          selectedTransaction?.id === txn.id ? 'bg-emerald-50 dark:bg-emerald-500/10' : ''
                         }`}
                         onClick={() => setSelectedTransaction(txn)}
                       >
                         {columnVisibility.id && (
                           <td className="py-3 px-4 whitespace-nowrap relative border-l-2 border-transparent group-hover:border-emerald-500 transition-colors duration-150 w-[15%]">
                             <div className="flex items-center gap-2 whitespace-nowrap overflow-hidden">
-                              <span className="text-sm font-mono text-gray-900 truncate">{txn.id}</span>
+                              <span className="text-sm font-mono text-gray-900 dark:text-white truncate">{txn.id}</span>
                               {hasOptimization && (
-                                <TrendingUp className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" title="Optimization opportunity" />
+                                <TrendingUp className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" title="Optimization opportunity" />
                               )}
                               {txn.evidence_session_id && (
                                 <span 
-                                  className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-700 flex-shrink-0"
+                                  className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400 flex-shrink-0"
                                   title={`Bound to scan session ${txn.evidence_session_id}`}
                                 >
                                   Evidence
@@ -749,13 +746,13 @@ export function Transactions() {
                               )}
                               <button
                                 onClick={(e) => handleCopyId(txn.id, e)}
-                                className="p-1 hover:bg-gray-200 rounded transition-colors flex-shrink-0"
+                                className="p-1 hover:bg-gray-200 dark:hover:bg-white/10 rounded transition-colors flex-shrink-0"
                                 title="Copy transaction ID"
                               >
                                 {copiedId === txn.id ? (
-                                  <Check className="w-3 h-3 text-emerald-600" />
+                                  <Check className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
                                 ) : (
-                                  <Copy className="w-3 h-3 text-gray-400" />
+                                  <Copy className="w-3 h-3 text-gray-400 dark:text-gray-500" />
                                 )}
                               </button>
                             </div>
@@ -769,12 +766,12 @@ export function Transactions() {
                                   e.stopPropagation();
                                   navigate(`/merchants/${txn.merchantId}`);
                                 }}
-                                className="text-sm font-medium text-gray-900 hover:text-emerald-600 transition-colors block truncate max-w-full text-left"
+                                className="text-sm font-medium text-gray-900 dark:text-white hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors block truncate max-w-full text-left"
                               >
                                 {txn.merchantName}
                               </button>
                               {txn.evidence_summary && (
-                                <span className="text-xs text-gray-500 truncate">
+                                <span className="text-xs text-gray-500 dark:text-gray-400 truncate">
                                   {txn.evidence_summary.total_scanned_items} items scanned
                                 </span>
                               )}
@@ -783,7 +780,7 @@ export function Transactions() {
                         )}
                         {columnVisibility.amount && (
                           <td className="py-3 px-4 whitespace-nowrap w-[10%]">
-                            <span className="text-sm font-semibold text-gray-900 block truncate">
+                            <span className="text-sm font-semibold text-gray-900 dark:text-white block truncate">
                               {txn.amount} {txn.currency}
                             </span>
                           </td>
@@ -797,12 +794,12 @@ export function Transactions() {
                         )}
                         {columnVisibility.method && (
                           <td className="py-3 px-4 whitespace-nowrap w-[12%]">
-                            <span className="text-sm text-gray-700 block truncate">{txn.method}</span>
+                            <span className="text-sm text-gray-700 dark:text-gray-300 block truncate">{txn.method}</span>
                           </td>
                         )}
                         {columnVisibility.route && (
                           <td className="py-3 px-4 whitespace-nowrap w-[13%]">
-                            <span className="text-sm font-medium text-gray-900 block truncate">{txn.currentRoute}</span>
+                            <span className="text-sm font-medium text-gray-900 dark:text-white block truncate">{txn.currentRoute}</span>
                           </td>
                         )}
                         {columnVisibility.outcome && (
@@ -810,8 +807,8 @@ export function Transactions() {
                             <span
                               className={`inline-flex items-center px-2 py-1 rounded text-xs font-semibold whitespace-nowrap ${
                                 txn.currentOutcome === 'Approved'
-                                  ? 'bg-emerald-50 text-emerald-700'
-                                  : 'bg-red-50 text-red-700'
+                                  ? 'bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400'
+                                  : 'bg-red-50 dark:bg-red-500/20 text-red-700 dark:text-red-400'
                               }`}
                             >
                               {txn.currentOutcome}
@@ -820,7 +817,7 @@ export function Transactions() {
                         )}
                         {columnVisibility.created && (
                           <td className="py-3 px-4 whitespace-nowrap w-[14%]">
-                            <span className="text-sm text-gray-700 block truncate">
+                            <span className="text-sm text-gray-700 dark:text-gray-300 block truncate">
                               {txn.createdAt.toLocaleString()}
                             </span>
                           </td>
@@ -832,7 +829,7 @@ export function Transactions() {
                                 <Chip key={i} label={signal} />
                               ))}
                               {txn.riskSignals.length > 1 && (
-                                <span className="text-xs text-gray-500 flex-shrink-0">+{txn.riskSignals.length - 1}</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0">+{txn.riskSignals.length - 1}</span>
                               )}
                             </div>
                           </td>
@@ -846,19 +843,19 @@ export function Transactions() {
 
             {/* Pagination */}
             {filteredAndSortedTransactions.length > 0 && (
-              <div className="border-t border-gray-100 px-6 py-4 flex items-center justify-between">
+              <div className="border-t border-gray-100 dark:border-white/10 px-6 py-4 flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
                     Showing {(currentPage - 1) * pageSize + 1} to{' '}
                     {Math.min(currentPage * pageSize, filteredAndSortedTransactions.length)} of{' '}
                     {filteredAndSortedTransactions.length} transactions
                   </p>
                   <div className="flex items-center gap-2">
-                    <label className="text-sm text-gray-600">Rows per page:</label>
+                    <label className="text-sm text-gray-600 dark:text-gray-400">Rows per page:</label>
                     <select
                       value={pageSize}
                       onChange={(e) => setPageSize(Number(e.target.value))}
-                      className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+                      className="px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg hover:bg-gray-50 dark:hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer [&>option]:bg-white [&>option]:dark:bg-gray-900"
                     >
                       <option value={10}>10</option>
                       <option value={25}>25</option>
@@ -869,20 +866,20 @@ export function Transactions() {
                 </div>
                 {totalPages > 1 && (
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-600 mr-2">
+                    <span className="text-sm text-gray-600 dark:text-gray-400 mr-2">
                       Page {currentPage} of {totalPages}
                     </span>
                     <button
                       onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                       disabled={currentPage === 1}
-                      className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      className="px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg hover:bg-gray-50 dark:hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                       Previous
                     </button>
                     <button
                       onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                       disabled={currentPage === totalPages}
-                      className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      className="px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg hover:bg-gray-50 dark:hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                       Next
                     </button>
@@ -895,7 +892,7 @@ export function Transactions() {
 
         {/* Uplift Tab */}
         {activeTab === 'uplift' && (
-          <div className="bg-white rounded-b-2xl border border-gray-100 shadow-sm p-6 space-y-6">
+          <div className="bg-white dark:bg-white/5 dark:backdrop-blur-xl rounded-b-2xl border border-gray-100 dark:border-white/10 shadow-sm p-6 space-y-6">
             {/* KPI Cards */}
             <UpliftKpis
               baselineRate={upliftMetrics.baselineRate}
@@ -916,16 +913,24 @@ export function Transactions() {
             </div>
           </div>
         )}
-      </main>
+      </div>
 
       {/* Transaction Detail Modal */}
       {selectedTransaction && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-8"
+          className="fixed bg-black/50 backdrop-blur-sm flex items-center justify-center p-8"
           onClick={() => setSelectedTransaction(null)}
+          style={{ 
+            position: 'fixed',
+            left: 0, 
+            right: 0, 
+            top: 0, 
+            bottom: 0,
+            zIndex: 99999
+          }}
         >
           <div 
-            className="bg-white rounded-2xl shadow-2xl max-w-6xl w-full h-[90vh] flex flex-col overflow-hidden"
+            className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-6xl w-full h-[90vh] flex flex-col overflow-hidden relative"
             onClick={(e) => e.stopPropagation()}
           >
             <TransactionDetailPanel
@@ -936,11 +941,10 @@ export function Transactions() {
         </div>
       )}
 
-      {/* Generate Transaction Modal */}
-      <GenerateTransactionFromScanModal
-        open={showGenerateModal}
-        onOpenChange={setShowGenerateModal}
-        onSessionSelected={handleSessionSelected}
+      {/* Select Scan Modal */}
+      <SelectScanModal
+        isOpen={showGenerateModal}
+        onClose={() => setShowGenerateModal(false)}
       />
     </div>
   );
