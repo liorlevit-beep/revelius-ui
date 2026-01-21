@@ -26,6 +26,7 @@ import { PaymentProvidersPage } from './pages/PaymentProvidersPage';
 import { Developers } from './pages/Developers';
 import SdkDemo from './pages/SdkDemo';
 import ApiConsole from './pages/ApiConsole';
+import ApiPlayground from './pages/ApiPlayground';
 import Demo from './pages/Demo';
 import DemoLab from './pages/DemoLab';
 import Categories from './pages/Categories';
@@ -108,7 +109,7 @@ function AppContent() {
           <Route path="/payment-providers" element={<PaymentProvidersPage />} />
           <Route path="/developers" element={<Developers />} />
           <Route path="/sdk-demo" element={<SdkDemo />} />
-          <Route path="/api-playground" element={<ApiConsole />} />
+          <Route path="/api-playground" element={<ApiPlayground />} />
           <Route path="/demo" element={<Demo />} />
           <Route path="/demo-lab" element={<DemoLab />} />
           <Route path="/ui-modules" element={<UiModules />} />
