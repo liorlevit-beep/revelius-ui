@@ -26,7 +26,6 @@ import { PaymentProvidersPage } from './pages/PaymentProvidersPage';
 import { Developers } from './pages/Developers';
 import SdkDemo from './pages/SdkDemo';
 import ApiConsole from './pages/ApiConsole';
-import ApiPlayground from './pages/ApiPlayground';
 import Demo from './pages/Demo';
 import DemoLab from './pages/DemoLab';
 import Categories from './pages/Categories';
