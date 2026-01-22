@@ -32,6 +32,7 @@ import Categories from './pages/Categories';
 import { UiModules } from './pages/UiModules';
 import ProviderCategoriesCMS from './pages/ProviderCategoriesCMS';
 import AuthPage from './pages/AuthPage';
+import { ProtectedRoute } from './components/ProtectedRoute';
 import { useSidebar } from './contexts/SidebarContext';
 
 function AppContent() {
@@ -72,9 +73,9 @@ function AppContent() {
       );
     }
 
-    // Render main app with sidebar/header
+    // Render main app with sidebar/header (protected)
     return (
-      <>
+      <ProtectedRoute>
         {/* Dark mode animated gradient background - z-index 0, behind everything */}
         <DarkGradientBackground intensity="normal" />
         
@@ -134,7 +135,7 @@ function AppContent() {
         
         {/* Global Floating Scan Indicator */}
         <FloatingScansIndicator />
-      </>
+      </ProtectedRoute>
     );
   };
 

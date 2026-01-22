@@ -1,5 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { DarkGradientBackground } from '../components/ui/DarkGradientBackground';
+import { getEnvConfig } from '../config/env';
+import { loadGoogleScript, initializeGoogleSignIn, isGISLoaded } from '../lib/auth/googleAuth';
+import { verifyAuthWithRefresh } from '../lib/auth/api';
+import { authLogger } from '../lib/auth/logger';
 import styles from './AuthPage.module.css';
 
 // Declare particlesJS on window
@@ -10,8 +15,19 @@ declare global {
 }
 
 export default function AuthPage() {
-  const [isLoading] = useState(false);
-  const [error] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [gisReady, setGisReady] = useState(false);
+
+  // Check for session expiry reason
+  useEffect(() => {
+    const reason = searchParams.get('reason');
+    if (reason === 'expired') {
+      setError('Your session expired. Please log in again.');
+    }
+  }, [searchParams]);
 
   // Ensure dark mode is active for the animated background
   useEffect(() => {
@@ -28,6 +44,95 @@ export default function AuthPage() {
       }
     };
   }, []);
+
+  // Load Google Identity Services
+  useEffect(() => {
+    const env = getEnvConfig();
+    const clientId = env.googleClientId;
+
+    if (!clientId) {
+      setError('Google Client ID not configured. Please set VITE_GOOGLE_CLIENT_ID in your environment.');
+      return;
+    }
+
+    loadGoogleScript()
+      .then(() => {
+        // Initialize Google Sign-In
+        initializeGoogleSignIn(
+          clientId,
+          handleAuthSuccess,
+          handleAuthError
+        );
+        setGisReady(true);
+      })
+      .catch((err) => {
+        console.error('Failed to load Google Identity Services:', err);
+        setError('Failed to load Google Sign-In. Please refresh the page.');
+      });
+  }, []);
+
+  // Handle successful authentication
+  async function handleAuthSuccess() {
+    setIsLoading(true);
+    setError(null);
+
+    // Verify auth status before redirecting
+    const authenticated = await verifyAuthWithRefresh();
+
+    if (authenticated) {
+      authLogger.redirecting('/dashboard');
+      navigate('/dashboard');
+    } else {
+      setError('Authentication verification failed. Please try again.');
+      setIsLoading(false);
+    }
+  }
+
+  // Handle authentication error
+  function handleAuthError(errorMessage: string) {
+    setError(errorMessage);
+    setIsLoading(false);
+  }
+
+  // Handle button click
+  async function handleGoogleSignIn() {
+    authLogger.buttonClicked();
+    setError(null);
+
+    // Check if GIS is loaded
+    if (!isGISLoaded()) {
+      authLogger.gisNotLoaded();
+      setError('Google Sign-In is not ready. Please refresh the page.');
+      return;
+    }
+
+    setIsLoading(true);
+
+    // The actual sign-in is handled by GIS
+    // The callback (handleAuthSuccess/handleAuthError) will be triggered
+    // For now, we trigger One Tap or let the button handle it
+    // Since we're using a custom button, we need to trigger the popup manually
+    try {
+      const env = getEnvConfig();
+      const clientId = env.googleClientId;
+      
+      if (!clientId) {
+        setError('Google Client ID not configured');
+        setIsLoading(false);
+        return;
+      }
+
+      // Note: With custom button, we need to use popup flow
+      // For simplicity, we'll use One Tap prompt which triggers our callback
+      if (window.google?.accounts?.id) {
+        window.google.accounts.id.prompt();
+      }
+    } catch (err) {
+      authLogger.popupBlocked();
+      setError('Sign-in was blocked. Please allow popups for this site.');
+      setIsLoading(false);
+    }
+  }
 
   // Initialize particles.js
   useEffect(() => {
@@ -189,16 +294,26 @@ export default function AuthPage() {
             </p>
           </div>
 
-          {/* Error message */}
+          {/* Error message (dismissible) */}
           {error && (
-            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
-              <p className="text-sm text-red-400 text-center">{error}</p>
+            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl relative">
+              <button
+                onClick={() => setError(null)}
+                className="absolute top-2 right-2 text-red-400 hover:text-red-300 transition-colors"
+                aria-label="Dismiss error"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+              <p className="text-sm text-red-400 text-center pr-6">{error}</p>
             </div>
           )}
 
           {/* Google Sign-in Button */}
           <button
-            disabled={isLoading}
+            onClick={handleGoogleSignIn}
+            disabled={isLoading || !gisReady}
             className={`w-full disabled:cursor-not-allowed disabled:opacity-50 font-semibold py-4 px-6 rounded-xl flex items-center justify-center gap-3 relative overflow-hidden ${styles.googleButton}`}
             style={isLoading ? {} : {
               color: '#0a0a0a',
