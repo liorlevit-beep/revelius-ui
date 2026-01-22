@@ -173,7 +173,31 @@ export default function AuthPage() {
 
       {/* Auth Modal Card - above particles */}
       <div className="w-full max-w-md relative z-[10]">
-        <div className="bg-[#2a2a2a] backdrop-blur-xl rounded-3xl border border-white/10 shadow-2xl p-10">
+        <div 
+          className="rounded-3xl p-10"
+          style={{
+            background: `
+              linear-gradient(to bottom, 
+                hsl(257, 70%, 94%, 0.12),
+                hsl(257, 75%, 90%, 0.10) 33%,
+                hsl(257, 65%, 97%, 0.08)) padding-box,
+              linear-gradient(165deg, 
+                hsl(257, 80%, 93%, 0.15) 25%,
+                hsl(240, 70%, 94%, 0.12)) border-box
+            `,
+            backdropFilter: 'blur(20px) saturate(1.3) contrast(1.1)',
+            WebkitBackdropFilter: 'blur(20px) saturate(1.3) contrast(1.1)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            boxShadow: `
+              inset 0 0 0 0 hsl(257, 50%, 100%, 0),
+              inset -0.35em -0.35em 0.25em -0.25em hsl(257, 70%, 96%, 0.1),
+              inset -0.33em -1em 0.75em -0.75em hsl(240, 65%, 94%, 0.1),
+              rgba(168, 85, 247, 0.15) 0px 0.3em 0.8em 0px,
+              rgba(147, 100, 247, 0.12) 0px 0.18em 0.5em 0px,
+              rgba(120, 130, 247, 0.10) 0px 0.05em 0.2em 0px
+            `
+          }}
+        >
           {/* Logo/Icon */}
           <div className="flex justify-center mb-6">
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
@@ -204,12 +228,35 @@ export default function AuthPage() {
           <button
             onClick={handleGoogleSignIn}
             disabled={isLoading}
-            className="w-full bg-white hover:bg-gray-50 disabled:bg-gray-700 disabled:cursor-not-allowed text-gray-900 disabled:text-gray-400 font-semibold py-4 px-6 rounded-xl flex items-center justify-center gap-3 transition-all duration-200 shadow-lg hover:shadow-xl disabled:shadow-none"
+            className="w-full disabled:cursor-not-allowed disabled:opacity-50 font-semibold py-4 px-6 rounded-xl flex items-center justify-center gap-3 transition-all duration-200"
+            style={isLoading ? {} : {
+              color: '#0a0a0a',
+              background: `
+                linear-gradient(to bottom, 
+                  hsl(257, 70%, 94%),
+                  hsl(257, 75%, 90%, 0.9) 33%,
+                  hsl(257, 65%, 97%, 0.9)) padding-box,
+                linear-gradient(165deg, 
+                  hsl(257, 80%, 93%, 0.95) 25%,
+                  hsl(240, 70%, 94%, 0.9)) border-box
+              `,
+              backdropFilter: 'blur(12px) saturate(1.5) contrast(1.1)',
+              WebkitBackdropFilter: 'blur(12px) saturate(1.5) contrast(1.1)',
+              border: '1px solid transparent',
+              boxShadow: `
+                inset 0 0 0 0 hsl(257, 50%, 100%, 0),
+                inset -0.35em -0.35em 0.25em -0.25em hsl(257, 70%, 96%),
+                inset -0.33em -1em 0.75em -0.75em hsl(240, 65%, 94%),
+                rgba(168, 85, 247, 0.22) 0px 0.3em 0.3em 0px,
+                rgba(147, 100, 247, 0.18) 0px 0.18em 0.18em 0px,
+                rgba(120, 130, 247, 0.15) 0px 0.05em 0.05em 0px
+              `
+            }}
           >
             {isLoading ? (
               <>
-                <div className="w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
-                <span>Connecting...</span>
+                <div className="w-5 h-5 border-2 border-gray-800 border-t-transparent rounded-full animate-spin"></div>
+                <span className="text-gray-900">Connecting...</span>
               </>
             ) : (
               <>
