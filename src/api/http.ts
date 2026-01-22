@@ -75,6 +75,13 @@ export async function apiFetch<T>(
     });
 
     clearTimeout(timeoutId);
+    
+    // Log response headers to debug truncation
+    console.log(`[${method} ${path}] Response Headers:`);
+    console.log(`  Content-Length:`, response.headers.get('content-length'));
+    console.log(`  Content-Type:`, response.headers.get('content-type'));
+    console.log(`  Transfer-Encoding:`, response.headers.get('transfer-encoding'));
+    console.log(`  Content-Encoding:`, response.headers.get('content-encoding'));
 
     // Handle non-OK responses
     if (!response.ok) {
@@ -114,12 +121,15 @@ export async function apiFetch<T>(
     // Get raw text first to help debug JSON parsing errors
     const rawText = await response.text();
     
+    console.log(`[${method} ${path}] ⚠️  Response length: ${rawText.length} bytes`);
+    console.log(`[${method} ${path}] ⚠️  Last 200 chars:`, rawText.substring(Math.max(0, rawText.length - 200)));
+    
     try {
       const jsonData = JSON.parse(rawText) as T;
-      console.log(`[${method} ${path}] Response:`, jsonData);
+      console.log(`[${method} ${path}] ✅ Response parsed successfully:`, jsonData);
       return jsonData;
     } catch (parseError) {
-      console.error(`[${method} ${path}] JSON Parse Error:`, parseError);
+      console.error(`[${method} ${path}] ❌ JSON Parse Error:`, parseError);
       console.error(`[${method} ${path}] Raw response text (first 1000 chars):`, rawText.substring(0, 1000));
       console.error(`[${method} ${path}] Raw response text (around error position):`, rawText.substring(Math.max(0, 5733 - 100), 5733 + 100));
       console.error(`[${method} ${path}] Full raw text:`, rawText);
