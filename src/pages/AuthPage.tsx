@@ -174,27 +174,24 @@ export default function AuthPage() {
       {/* Auth Modal Card - above particles */}
       <div className="w-full max-w-md relative z-[10]">
         <div 
-          className="rounded-3xl p-10"
+          className="rounded-3xl p-10 relative"
           style={{
             background: `
               linear-gradient(to bottom, 
-                hsl(257, 70%, 94%, 0.12),
-                hsl(257, 75%, 90%, 0.10) 33%,
-                hsl(257, 65%, 97%, 0.08)) padding-box,
-              linear-gradient(165deg, 
-                hsl(257, 80%, 93%, 0.15) 25%,
-                hsl(240, 70%, 94%, 0.12)) border-box
+                rgba(20, 20, 30, 0.85),
+                rgba(25, 20, 35, 0.90) 33%,
+                rgba(18, 18, 28, 0.88)
+              )
             `,
             backdropFilter: 'blur(20px) saturate(1.3) contrast(1.1)',
             WebkitBackdropFilter: 'blur(20px) saturate(1.3) contrast(1.1)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
             boxShadow: `
-              inset 0 0 0 0 hsl(257, 50%, 100%, 0),
-              inset -0.35em -0.35em 0.25em -0.25em hsl(257, 70%, 96%, 0.1),
-              inset -0.33em -1em 0.75em -0.75em hsl(240, 65%, 94%, 0.1),
-              rgba(168, 85, 247, 0.15) 0px 0.3em 0.8em 0px,
-              rgba(147, 100, 247, 0.12) 0px 0.18em 0.5em 0px,
-              rgba(120, 130, 247, 0.10) 0px 0.05em 0.2em 0px
+              0 0 0 0.5px rgba(168, 85, 247, 0.4),
+              inset -0.35em -0.35em 0.25em -0.25em hsl(257, 70%, 96%, 0.05),
+              inset -0.33em -1em 0.75em -0.75em hsl(240, 65%, 94%, 0.05),
+              rgba(168, 85, 247, 0.2) 0px 0.3em 0.8em 0px,
+              rgba(147, 100, 247, 0.15) 0px 0.18em 0.5em 0px,
+              rgba(120, 130, 247, 0.12) 0px 0.05em 0.2em 0px
             `
           }}
         >
