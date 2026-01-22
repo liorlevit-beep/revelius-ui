@@ -178,9 +178,9 @@ export default function AuthPage() {
           style={{
             background: `
               linear-gradient(to bottom, 
-                rgba(20, 20, 30, 0.85),
-                rgba(25, 20, 35, 0.90) 33%,
-                rgba(18, 18, 28, 0.88)
+                rgba(20, 20, 30, 0.65),
+                rgba(25, 20, 35, 0.70) 33%,
+                rgba(18, 18, 28, 0.68)
               )
             `,
             backdropFilter: 'blur(20px) saturate(1.3) contrast(1.1)',
