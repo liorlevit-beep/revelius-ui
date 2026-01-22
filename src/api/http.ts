@@ -130,10 +130,17 @@ export async function apiFetch<T>(
       return jsonData;
     } catch (parseError) {
       console.error(`[${method} ${path}] ❌ JSON Parse Error:`, parseError);
-      console.error(`[${method} ${path}] Raw response text (first 1000 chars):`, rawText.substring(0, 1000));
-      console.error(`[${method} ${path}] Raw response text (around error position):`, rawText.substring(Math.max(0, 5733 - 100), 5733 + 100));
-      console.error(`[${method} ${path}] Full raw text:`, rawText);
-      throw new ApiError(`Invalid JSON response: ${parseError instanceof Error ? parseError.message : 'Unknown parse error'}`, 0);
+      console.error(`[${method} ${path}] Response length: ${rawText.length} bytes`);
+      console.error(`[${method} ${path}] Last 100 chars:`, rawText.slice(-100));
+      console.error(`[${method} ${path}] First 500 chars:`, rawText.substring(0, 500));
+      console.error(`[${method} ${path}] ⚠️  LIKELY CAUSE: Backend using Transfer-Encoding: chunked without Content-Length`);
+      console.error(`[${method} ${path}] ⚠️  Backend must either:`);
+      console.error(`[${method} ${path}]     1) Add Content-Length header (recommended), OR`);
+      console.error(`[${method} ${path}]     2) Properly terminate chunked response with 0\\r\\n\\r\\n`);
+      throw new ApiError(
+        `Server sent incomplete JSON (${rawText.length} bytes, truncated). Backend issue: chunked encoding not properly terminated. Works in Postman because Postman is more forgiving.`,
+        0
+      );
     }
   } catch (error) {
     clearTimeout(timeoutId);
