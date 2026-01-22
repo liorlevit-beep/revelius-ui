@@ -165,14 +165,14 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Animated Gradient Background (from dashboard) */}
+      {/* Animated Gradient Background (from dashboard) - z-index: 0 in its CSS */}
       <DarkGradientBackground enabled={true} intensity="strong" />
 
-      {/* Particles Layer */}
-      <div id="particles-js" className="absolute inset-0 z-[1]"></div>
+      {/* Particles Layer - above gradient, needs pointer events for interactivity */}
+      <div id="particles-js" className="fixed inset-0 z-[5]"></div>
 
-      {/* Auth Modal Card */}
-      <div className="w-full max-w-md relative z-10">
+      {/* Auth Modal Card - above particles */}
+      <div className="w-full max-w-md relative z-[10]">
         <div className="bg-[#2a2a2a] backdrop-blur-xl rounded-3xl border border-white/10 shadow-2xl p-10">
           {/* Logo/Icon */}
           <div className="flex justify-center mb-6">
