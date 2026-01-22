@@ -1,0 +1,17 @@
+/* Auth Page Styles */
+
+.googleButton:hover:not(:disabled) {
+  transform: scale(1.02);
+  box-shadow: 
+    inset 0 0 0 0 hsl(257, 50%, 100%, 0),
+    inset -0.35em -0.35em 0.25em -0.25em hsl(257, 70%, 98%),
+    inset -0.33em -1em 0.75em -0.75em hsl(240, 65%, 96%),
+    rgba(168, 85, 247, 0.35) 0px 0.5em 1em 0px,
+    rgba(147, 100, 247, 0.30) 0px 0.3em 0.8em 0px,
+    rgba(120, 130, 247, 0.25) 0px 0.1em 0.4em 0px,
+    0 0 40px rgba(168, 85, 247, 0.3) !important;
+}
+
+.googleButton:active:not(:disabled) {
+  transform: scale(0.98);
+}

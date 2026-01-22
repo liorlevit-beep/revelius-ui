@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { openGoogleSignInPopup } from '../lib/auth';
 import { DarkGradientBackground } from '../components/ui/DarkGradientBackground';
+import styles from './AuthPage.module.css';
 
 // Declare particlesJS on window
 declare global {
@@ -225,7 +226,7 @@ export default function AuthPage() {
           <button
             onClick={handleGoogleSignIn}
             disabled={isLoading}
-            className="w-full disabled:cursor-not-allowed disabled:opacity-50 font-semibold py-4 px-6 rounded-xl flex items-center justify-center gap-3 transition-all duration-200"
+            className={`w-full disabled:cursor-not-allowed disabled:opacity-50 font-semibold py-4 px-6 rounded-xl flex items-center justify-center gap-3 transition-all duration-200 relative overflow-hidden group ${styles.googleButton}`}
             style={isLoading ? {} : {
               color: '#0a0a0a',
               background: `
@@ -250,6 +251,16 @@ export default function AuthPage() {
               `
             }}
           >
+            {/* Shimmer effect on hover */}
+            {!isLoading && (
+              <div 
+                className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out"
+                style={{
+                  background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent)',
+                  pointerEvents: 'none'
+                }}
+              />
+            )}
             {isLoading ? (
               <>
                 <div className="w-5 h-5 border-2 border-gray-800 border-t-transparent rounded-full animate-spin"></div>
