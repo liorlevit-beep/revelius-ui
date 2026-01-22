@@ -2,8 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Moon, Sun, User, LogOut, ChevronDown } from 'lucide-react';
 import { ScanActivityIndicator } from './scans/ScanActivityIndicator';
-import { logout } from '../lib/auth/api';
-import { authLogger } from '../lib/auth/logger';
+import { logout } from '../auth/auth';
 
 interface HeaderProps {
   title: string;
@@ -35,7 +34,9 @@ export function Header({ title, timeRange, onTimeRangeChange, glassTheme = false
   async function handleSignOut() {
     try {
       await logout();
-      authLogger.redirecting('/auth');
+      if (import.meta.env.DEV) {
+        console.log('[Auth] Redirecting to /auth after sign out');
+      }
       navigate('/auth');
     } catch (error) {
       console.error('Sign out error:', error);

@@ -32,7 +32,7 @@ import Categories from './pages/Categories';
 import { UiModules } from './pages/UiModules';
 import ProviderCategoriesCMS from './pages/ProviderCategoriesCMS';
 import AuthPage from './pages/AuthPage';
-import { ProtectedRoute } from './components/ProtectedRoute';
+import { ProtectedRoute } from './auth/ProtectedRoute';
 import { useSidebar } from './contexts/SidebarContext';
 
 function AppContent() {
