@@ -85,20 +85,50 @@ export async function openGoogleSignInPopup(options: OAuthPopupOptions = {}): Pr
     onError,
   } = options;
 
-  // Step 1: Call /auth/login API to get OAuth URL
-  let oauthUrl: string;
+  // Step 1: Call /auth/login API
+  console.log('[openGoogleSignInPopup] Step 1: Calling startLogin() API...');
+  let loginResponse: LoginResponse;
+  
   try {
-    console.log('[openGoogleSignInPopup] Step 1: Calling startLogin() API...');
-    const loginResponse = await startLogin();
-    oauthUrl = loginResponse.url || `${env.baseUrl}/auth/login`;
-    console.log('[openGoogleSignInPopup] ✅ Got OAuth URL:', oauthUrl);
+    loginResponse = await startLogin();
+    console.log('[openGoogleSignInPopup] ✅ Login response received:', loginResponse);
   } catch (error) {
-    console.error('[openGoogleSignInPopup] ❌ Failed to get OAuth URL:', error);
-    // Fallback: Try passing token as query parameter since browser navigation can't send headers
-    const token = getToken() || HARDCODED_TOKEN;
-    oauthUrl = `${env.baseUrl}/auth/login?token=${encodeURIComponent(token)}`;
-    console.warn('[openGoogleSignInPopup] ⚠️  Using fallback URL with token query param:', oauthUrl);
+    console.error('[openGoogleSignInPopup] ❌ Failed to call /auth/login:', error);
+    onError?.(error instanceof Error ? error.message : 'Authentication failed');
+    throw error;
   }
+  
+  // Check if backend directly authenticated us (returned tokens instead of OAuth URL)
+  const sessionToken = loginResponse.data?.session_token || loginResponse.session_token || loginResponse.token || loginResponse.access_token;
+  const refreshToken = loginResponse.data?.refresh_token || loginResponse.refresh_token;
+  
+  if (sessionToken) {
+    console.log('[openGoogleSignInPopup] ✅ Backend directly authenticated! Got session token.');
+    console.log('[openGoogleSignInPopup] Session token:', sessionToken);
+    console.log('[openGoogleSignInPopup] Refresh token:', refreshToken || 'none');
+    
+    // Store the session token
+    setToken(sessionToken);
+    
+    // Store refresh token if provided
+    if (refreshToken) {
+      localStorage.setItem('revelius_refresh_token', refreshToken);
+    }
+    
+    onSuccess?.(sessionToken);
+    return sessionToken;
+  }
+  
+  // If no token, we need an OAuth URL to continue
+  if (!loginResponse.url) {
+    const error = 'Backend returned neither tokens nor OAuth URL';
+    console.error('[openGoogleSignInPopup]', error);
+    onError?.(error);
+    throw new Error(error);
+  }
+  
+  // Step 2: Open OAuth popup (only if we didn't get tokens directly)
+  const oauthUrl = loginResponse.url;
 
   return new Promise((resolve, reject) => {
     // Center the popup
@@ -194,7 +224,15 @@ interface LoginResponse {
   url?: string;
   token?: string;
   access_token?: string;
+  session_token?: string;
+  refresh_token?: string;
   expires_in?: number;
+  data?: {
+    session_token?: string;
+    refresh_token?: string;
+    email?: string;
+    name?: string;
+  };
 }
 
 interface StatusResponse {
