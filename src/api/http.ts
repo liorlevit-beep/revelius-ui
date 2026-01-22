@@ -1,5 +1,7 @@
 import { getEnvConfig } from '../config/env';
 import { getSignedHeaders } from './signer';
+import { getToken } from '../lib/auth';
+import { getToken } from '../lib/auth';
 
 /**
  * Custom API error with status code and optional details
@@ -56,10 +58,14 @@ export async function apiFetch<T>(
     ...signedHeaders,
   };
 
-  // Add Authorization header if token exists
+  // Add Authorization header if token exists (required for /auth/* and /portal/* endpoints)
   const token = getToken();
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
+    console.log(`[apiFetch] ✓ Authorization header added (token: ${token.substring(0, 20)}...)`);
+  } else {
+    console.log('[apiFetch] ⚠ No token found - Authorization header NOT added');
+    console.log('[apiFetch] ℹ Set token via: window.setReveliusToken("your-token")');
   }
 
   // Add Content-Type for JSON requests
