@@ -30,6 +30,7 @@ import Demo from './pages/Demo';
 import DemoLab from './pages/DemoLab';
 import Categories from './pages/Categories';
 import { UiModules } from './pages/UiModules';
+import ProviderCategoriesCMS from './pages/ProviderCategoriesCMS';
 import { useSidebar } from './contexts/SidebarContext';
 
 function AppContent() {
@@ -112,6 +113,7 @@ function AppContent() {
           <Route path="/demo" element={<Demo />} />
           <Route path="/demo-lab" element={<DemoLab />} />
           <Route path="/ui-modules" element={<UiModules />} />
+          <Route path="/cms/provider-categories" element={<ProviderCategoriesCMS />} />
         </Routes>
       </main>
       
