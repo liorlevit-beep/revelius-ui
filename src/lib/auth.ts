@@ -72,7 +72,7 @@ interface OAuthPopupOptions {
  * Open Google OAuth in a popup window
  * Returns a promise that resolves with the token
  */
-export function openGoogleSignInPopup(options: OAuthPopupOptions = {}): Promise<string> {
+export async function openGoogleSignInPopup(options: OAuthPopupOptions = {}): Promise<string> {
   const {
     width = 500,
     height = 600,
@@ -80,14 +80,25 @@ export function openGoogleSignInPopup(options: OAuthPopupOptions = {}): Promise<
     onError,
   } = options;
 
+  // Step 1: Call /auth/login API to get OAuth URL
+  let oauthUrl: string;
+  try {
+    const loginResponse = await startLogin();
+    oauthUrl = loginResponse.url || `${env.baseUrl}/auth/login`;
+  } catch (error) {
+    console.error('[Auth] Failed to get OAuth URL:', error);
+    // Fallback to direct URL
+    oauthUrl = `${env.baseUrl}/auth/login`;
+  }
+
   return new Promise((resolve, reject) => {
     // Center the popup
     const left = window.screenX + (window.outerWidth - width) / 2;
     const top = window.screenY + (window.outerHeight - height) / 2;
 
-    // Open popup
+    // Open popup with OAuth URL
     const popup = window.open(
-      `${env.baseUrl}/auth/login`,
+      oauthUrl,
       'google-signin',
       `width=${width},height=${height},left=${left},top=${top},toolbar=0,location=0,menubar=0`
     );
@@ -168,6 +179,13 @@ export function openGoogleSignInPopup(options: OAuthPopupOptions = {}): Promise<
 // Auth API Calls
 // ============================================================================
 
+interface LoginResponse {
+  url?: string;
+  token?: string;
+  access_token?: string;
+  expires_in?: number;
+}
+
 interface StatusResponse {
   authenticated?: boolean;
   valid?: boolean;
@@ -178,6 +196,29 @@ interface RefreshResponse {
   token?: string;
   access_token?: string;
   expires_in?: number;
+}
+
+/**
+ * Start OAuth login - calls /auth/login to get redirect URL
+ */
+async function startLogin(): Promise<LoginResponse> {
+  // Use mock token for /auth/login call
+  const token = getToken() || 'test-mock-token-12345';
+  
+  const response = await fetch(`${env.baseUrl}/auth/login`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    throw new Error(`Login API failed: ${response.statusText}`);
+  }
+
+  return response.json();
 }
 
 /**
