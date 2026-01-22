@@ -44,22 +44,8 @@ export async function apiFetch<T>(
   // Build full URL
   const url = `${env.baseUrl}${path.startsWith('/') ? '' : '/'}${path}`;
 
-  // Debug logging for routing_table endpoint
-  if (path.includes('routing_table')) {
-    console.log('[apiFetch] === ROUTING TABLE REQUEST DEBUG ===');
-    console.log('[apiFetch] Full URL:', url);
-    console.log('[apiFetch] Access Key (first 10 chars):', env.accessKey.substring(0, 10) + '...');
-    console.log('[apiFetch] Secret Key (first 10 chars):', env.secretKey.substring(0, 10) + '...');
-    console.log('[apiFetch] Session ID:', sessionId || 'none');
-  }
-
   // Get signed headers
   const signedHeaders = getSignedHeaders(env.accessKey, env.secretKey, sessionId);
-
-  // Debug logging for routing_table endpoint
-  if (path.includes('routing_table')) {
-    console.log('[apiFetch] Signed Headers:', signedHeaders);
-  }
 
   // Build request headers
   const headers: Record<string, string> = {
@@ -88,35 +74,25 @@ export async function apiFetch<T>(
 
     // Handle non-OK responses
     if (!response.ok) {
-      console.log('[apiFetch] ========================================');
-      console.log('[apiFetch] ERROR RESPONSE');
-      console.log('[apiFetch] URL:', url);
-      console.log('[apiFetch] Method:', method);
-      console.log('[apiFetch] Status:', response.status, response.statusText);
-      
       let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
       let errorDetails: unknown;
 
       try {
         const errorData = await response.json();
-        console.log('[apiFetch] Error Data (JSON):', errorData);
-        console.log('[apiFetch] Error Data (stringified):', JSON.stringify(errorData, null, 2));
+        console.log(`[${method} ${path}] Error Response:`, errorData);
         errorMessage = errorData.message || errorData.error || errorMessage;
         errorDetails = errorData;
       } catch {
         try {
           const errorText = await response.text();
-          console.log('[apiFetch] Error Data (Text):', errorText);
+          console.log(`[${method} ${path}] Error Response (text):`, errorText);
           if (errorText) {
             errorMessage = errorText;
           }
         } catch {
-          console.log('[apiFetch] Could not parse error response');
+          // Use default error message
         }
       }
-      
-      console.log('[apiFetch] Final Error Message:', errorMessage);
-      console.log('[apiFetch] ========================================');
 
       throw new ApiError(errorMessage, response.status, errorDetails);
     }
@@ -133,49 +109,21 @@ export async function apiFetch<T>(
     // Default: JSON
     const jsonData = await response.json() as T;
     
-    // Debug logging for ALL responses
-    console.log('[apiFetch] ========================================');
-    console.log('[apiFetch] URL:', url);
-    console.log('[apiFetch] Method:', method);
-    console.log('[apiFetch] Status:', response.status);
-    console.log('[apiFetch] Response Data:', jsonData);
-    console.log('[apiFetch] Response Data (stringified):', JSON.stringify(jsonData, null, 2));
-    console.log('[apiFetch] ========================================');
-    
-    // Additional debug logging for routing_table endpoint
-    if (path.includes('routing_table')) {
-      const data = (jsonData as any)?.data ?? jsonData;
-      const mappingKeys = data?.mapping ? Object.keys(data.mapping) : [];
-      console.log('[apiFetch] [routing_table] Number of providers in mapping:', mappingKeys.length);
-      console.log('[apiFetch] [routing_table] Provider keys:', mappingKeys);
-    }
+    // Log all API responses
+    console.log(`[${method} ${path}] Response:`, jsonData);
     
     return jsonData;
   } catch (error) {
     clearTimeout(timeoutId);
-
-    console.log('[apiFetch] ========================================');
-    console.log('[apiFetch] EXCEPTION CAUGHT');
-    console.log('[apiFetch] URL:', url);
-    console.log('[apiFetch] Error:', error);
-    console.log('[apiFetch] Error Type:', error instanceof Error ? error.constructor.name : typeof error);
-    if (error instanceof Error) {
-      console.log('[apiFetch] Error Name:', error.name);
-      console.log('[apiFetch] Error Message:', error.message);
-      console.log('[apiFetch] Error Stack:', error.stack);
-    }
-    console.log('[apiFetch] ========================================');
 
     if (error instanceof ApiError) {
       throw error;
     }
 
     if (error instanceof Error) {
+      console.log(`[${method} ${path}] Exception:`, error.message);
       if (error.name === 'AbortError') {
         throw new ApiError('Request timeout after 20 seconds', 408);
-      }
-      if (error.name === 'TypeError' && error.message.includes('fetch')) {
-        throw new ApiError('Network error or CORS issue: ' + error.message, 0);
       }
       throw new ApiError(error.message, 0);
     }
