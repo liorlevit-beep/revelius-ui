@@ -1,9 +1,124 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { openGoogleSignInPopup } from '../lib/auth';
+
+// Declare particlesJS on window
+declare global {
+  interface Window {
+    particlesJS: any;
+  }
+}
 
 export default function AuthPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Load particles.js from CDN
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js';
+    script.async = true;
+    script.onload = () => {
+      // Initialize particles with purple/blue theme
+      if (window.particlesJS) {
+        window.particlesJS('particles-js', {
+          particles: {
+            number: {
+              value: 80,
+              density: {
+                enable: true,
+                value_area: 800
+              }
+            },
+            color: {
+              value: ['#8b5cf6', '#6366f1', '#3b82f6', '#a855f7']
+            },
+            shape: {
+              type: 'circle',
+              stroke: {
+                width: 0,
+                color: '#000000'
+              }
+            },
+            opacity: {
+              value: 0.5,
+              random: false,
+              anim: {
+                enable: false,
+                speed: 1,
+                opacity_min: 0.1,
+                sync: false
+              }
+            },
+            size: {
+              value: 3,
+              random: true,
+              anim: {
+                enable: false,
+                speed: 40,
+                size_min: 0.1,
+                sync: false
+              }
+            },
+            line_linked: {
+              enable: true,
+              distance: 150,
+              color: '#8b5cf6',
+              opacity: 0.4,
+              width: 1
+            },
+            move: {
+              enable: true,
+              speed: 2,
+              direction: 'none',
+              random: false,
+              straight: false,
+              out_mode: 'out',
+              bounce: false,
+              attract: {
+                enable: false,
+                rotateX: 600,
+                rotateY: 1200
+              }
+            }
+          },
+          interactivity: {
+            detect_on: 'canvas',
+            events: {
+              onhover: {
+                enable: true,
+                mode: 'grab'
+              },
+              onclick: {
+                enable: true,
+                mode: 'push'
+              },
+              resize: true
+            },
+            modes: {
+              grab: {
+                distance: 140,
+                line_linked: {
+                  opacity: 1
+                }
+              },
+              push: {
+                particles_nb: 4
+              }
+            }
+          },
+          retina_detect: true
+        });
+      }
+    };
+    document.body.appendChild(script);
+
+    return () => {
+      // Cleanup
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
+    };
+  }, []);
 
   async function handleGoogleSignIn() {
     setIsLoading(true);
@@ -31,9 +146,12 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900/20 to-indigo-900/30 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900/20 to-indigo-900/30 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Particles Background */}
+      <div id="particles-js" className="absolute inset-0 z-0"></div>
+
       {/* Auth Modal Card */}
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-md relative z-10">
         <div className="bg-[#2a2a2a] backdrop-blur-xl rounded-3xl border border-white/10 shadow-2xl p-10">
           {/* Logo/Icon */}
           <div className="flex justify-center mb-6">
