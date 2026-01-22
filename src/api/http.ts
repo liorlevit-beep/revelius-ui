@@ -1,7 +1,5 @@
 import { getEnvConfig } from '../config/env';
 import { getSignedHeaders } from './signer';
-import { getToken } from '../lib/auth';
-import { getToken } from '../lib/auth';
 
 /**
  * Custom API error with status code and optional details
