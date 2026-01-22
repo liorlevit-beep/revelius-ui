@@ -20,6 +20,9 @@ import { env } from '../config/env';
 const TOKEN_KEY = 'revelius_auth_token';
 const EXPIRES_KEY = 'revelius_auth_expires_at';
 
+// TEMPORARY: Hardcoded JWT token for testing
+const HARDCODED_TOKEN = 'eyJhbGciOiJSUzI1NiIsImtpZCI6Ijk1NDRkMGZmMDU5MGYwMjUzMDE2NDNmMzI3NWJmNjg3NzY3NjU4MjIiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJhenAiOiI0MDc0MDg3MTgxOTIuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJhdWQiOiI0MDc0MDg3MTgxOTIuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJzdWIiOiIxMDA1Njc4Mjc1MTcyODU2Mzc0NDIiLCJoZCI6InJldmVsaXVzLmNvbSIsImVtYWlsIjoibGlvckByZXZlbGl1cy5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiYXRfaGFzaCI6ImI1dHlyaTdvaEVFeXpkZlFUVUZuNGciLCJuYW1lIjoiTGlvciBMZXZpdCIsInBpY3R1cmUiOiJodHRwczovL2xoMy5nb29nbGV1c2VyY29udGVudC5jb20vYS9BQ2c4b2NLRjNnZm5ONlJoelh5LWdGeUo1ZjBlbUhNbkhVQlVWOFExQlI0TFpZSm5LempMZWc9czk2LWMiLCJnaXZlbl9uYW1lIjoiTGlvciIsImZhbWlseV9uYW1lIjoiTGV2aXQiLCJpYXQiOjE3NjkwODE5ODUsImV4cCI6MTc2OTA4NTU4NX0.Kyxxjcdzs7IDbYoUkP-4W32s8NC62FlYydrHpMUonx8Joxnq4Dl8YPR-ANx3TiSUwizcMp5Jiddv_8TXNQvmcOGVy2AKdRI_ElglgX6iT3LCIvu1W_WH1D7JsjHpuWLn88msGu1ufYCSMpQP95MvCVdkmLzoilXnv36VY4OMQxMM-SV0G-d8IYy8dGipUtnML4q3OoYehvwGG7DaUgtiaDz-MeZp47Lq4TWMcRu8qAojRFd98nWbGqono3lGr8sVpyps8T5hydFff8lA0u_qxWqZ2NqsYBRqQ4n0C1jBcmI8S62HSC5PuKU9G1iLPh8ATqg-r6gqLitktg4UW6ugXQ';
+
 // ============================================================================
 // Token Storage
 // ============================================================================
@@ -92,7 +95,7 @@ export async function openGoogleSignInPopup(options: OAuthPopupOptions = {}): Pr
   } catch (error) {
     console.error('[openGoogleSignInPopup] ❌ Failed to get OAuth URL:', error);
     // Fallback: Try passing token as query parameter since browser navigation can't send headers
-    const token = getToken() || '123';
+    const token = getToken() || HARDCODED_TOKEN;
     oauthUrl = `${env.baseUrl}/auth/login?token=${encodeURIComponent(token)}`;
     console.warn('[openGoogleSignInPopup] ⚠️  Using fallback URL with token query param:', oauthUrl);
   }
@@ -210,8 +213,8 @@ interface RefreshResponse {
  * Start OAuth login - calls /auth/login to get redirect URL
  */
 async function startLogin(): Promise<LoginResponse> {
-  // TEMPORARY: Use hardcoded token "123" for testing
-  const token = getToken() || '123';
+  // TEMPORARY: Use real JWT token for testing
+  const token = getToken() || HARDCODED_TOKEN;
   
   console.log('[startLogin] 🔐 Calling /auth/login with Authorization header');
   console.log('[startLogin] Token being used:', token);
