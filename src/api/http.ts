@@ -4,8 +4,6 @@ import { getToken } from '../lib/auth';
 
 // TEMPORARY: Mock token for testing Authorization header
 const MOCK_TOKEN = 'test-mock-token-12345';
-import { getToken } from '../lib/auth';
-import { getToken } from '../lib/auth';
 
 /**
  * Custom API error with status code and optional details
