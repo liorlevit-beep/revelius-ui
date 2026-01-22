@@ -73,6 +73,8 @@ interface OAuthPopupOptions {
  * Returns a promise that resolves with the token
  */
 export async function openGoogleSignInPopup(options: OAuthPopupOptions = {}): Promise<string> {
+  console.log('[openGoogleSignInPopup] 🚀 Starting OAuth popup flow');
+  
   const {
     width = 500,
     height = 600,
@@ -83,12 +85,15 @@ export async function openGoogleSignInPopup(options: OAuthPopupOptions = {}): Pr
   // Step 1: Call /auth/login API to get OAuth URL
   let oauthUrl: string;
   try {
+    console.log('[openGoogleSignInPopup] Step 1: Calling startLogin() API...');
     const loginResponse = await startLogin();
     oauthUrl = loginResponse.url || `${env.baseUrl}/auth/login`;
+    console.log('[openGoogleSignInPopup] ✅ Got OAuth URL:', oauthUrl);
   } catch (error) {
-    console.error('[Auth] Failed to get OAuth URL:', error);
+    console.error('[openGoogleSignInPopup] ❌ Failed to get OAuth URL:', error);
     // Fallback to direct URL
     oauthUrl = `${env.baseUrl}/auth/login`;
+    console.warn('[openGoogleSignInPopup] ⚠️  Using fallback URL:', oauthUrl);
   }
 
   return new Promise((resolve, reject) => {
@@ -96,6 +101,8 @@ export async function openGoogleSignInPopup(options: OAuthPopupOptions = {}): Pr
     const left = window.screenX + (window.outerWidth - width) / 2;
     const top = window.screenY + (window.outerHeight - height) / 2;
 
+    console.log('[openGoogleSignInPopup] Step 2: Opening popup window with URL:', oauthUrl);
+    
     // Open popup with OAuth URL
     const popup = window.open(
       oauthUrl,
@@ -205,20 +212,34 @@ async function startLogin(): Promise<LoginResponse> {
   // Use mock token for /auth/login call
   const token = getToken() || 'test-mock-token-12345';
   
+  console.log('[startLogin] 🔐 Calling /auth/login with Authorization header');
+  console.log('[startLogin] Token being used:', token);
+  console.log('[startLogin] URL:', `${env.baseUrl}/auth/login`);
+  
+  const headers = {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`,
+  };
+  
+  console.log('[startLogin] Headers:', headers);
+  
   const response = await fetch(`${env.baseUrl}/auth/login`, {
     method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-    },
+    headers,
     credentials: 'include',
   });
 
+  console.log('[startLogin] Response status:', response.status);
+  
   if (!response.ok) {
+    const errorText = await response.text();
+    console.error('[startLogin] ❌ Login API failed:', errorText);
     throw new Error(`Login API failed: ${response.statusText}`);
   }
 
-  return response.json();
+  const data = await response.json();
+  console.log('[startLogin] ✅ Login API success:', data);
+  return data;
 }
 
 /**
