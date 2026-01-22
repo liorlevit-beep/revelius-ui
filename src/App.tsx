@@ -10,8 +10,8 @@ import { ApiKeysModal } from './components/ApiKeysModal';
 import { FloatingScansIndicator } from './components/scans/FloatingScansIndicator';
 import { DarkGradientBackground } from './components/ui/DarkGradientBackground';
 import { DashboardLiquidGlassTheme } from './theme/DashboardLiquidGlassTheme';
+import { ProtectedRoute } from './components/ProtectedRoute';
 import AuthPage from './pages/AuthPage';
-import AuthCallbackPage from './pages/AuthCallbackPage';
 import { Dashboard } from './pages/Dashboard';
 import { Merchants } from './pages/Merchants';
 import { Merchant360 } from './pages/Merchant360';
@@ -69,14 +69,13 @@ function AppContent() {
       return (
         <Routes>
           <Route path="/auth" element={<AuthPage />} />
-          <Route path="/auth/callback" element={<AuthCallbackPage />} />
         </Routes>
       );
     }
 
-    // Render main app with sidebar/header
+    // Render main app with sidebar/header (protected)
     return (
-      <>
+      <ProtectedRoute>
         {/* Dark mode animated gradient background - z-index 0, behind everything */}
         <DarkGradientBackground intensity="normal" />
         
@@ -137,7 +136,7 @@ function AppContent() {
         
         {/* Global Floating Scan Indicator */}
         <FloatingScansIndicator />
-      </>
+      </ProtectedRoute>
     );
   };
 
