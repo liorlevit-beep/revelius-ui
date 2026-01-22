@@ -1,17 +1,15 @@
 /**
- * Revelius Authentication Service
+ * Revelius Authentication Service - Popup-based OAuth
  * 
  * How it works:
- * 1. User clicks "Sign in with Google" -> calls /auth/login -> redirects to Google OAuth
- * 2. Google redirects back to /auth/callback?token=... -> we store token in localStorage
- * 3. All API requests include Authorization: Bearer <token>
- * 4. On 401/403, we attempt /auth/refresh once, retry original request
- * 5. If refresh fails or token missing, redirect to /auth?reason=expired
- * 6. User can sign out via /auth/logout -> clears token -> redirects to /auth
- * 
- * Token storage:
- * - revelius_auth_token: JWT or opaque token from backend
- * - revelius_auth_expires_at: optional timestamp if backend provides expires_in
+ * 1. User clicks "Sign in with Google" -> opens popup to /auth/login
+ * 2. Popup redirects to Google OAuth -> user authenticates
+ * 3. Google redirects back to /auth/callback in popup
+ * 4. Popup closes and sends token via postMessage to parent window
+ * 5. Parent window stores token and navigates to dashboard
+ * 6. All API requests include Authorization: Bearer <token>
+ * 7. On 401/403, we attempt /auth/refresh once
+ * 8. If refresh fails, clear token (no redirect since we're not using route protection)
  */
 
 import { env } from '../config/env';
@@ -43,20 +41,127 @@ export function clearToken(): void {
 
 export function isTokenExpired(): boolean {
   const expiresAt = localStorage.getItem(EXPIRES_KEY);
-  if (!expiresAt) return false; // No expiry set, assume valid
+  if (!expiresAt) return false;
   return Date.now() > parseInt(expiresAt, 10);
+}
+
+export function isAuthenticated(): boolean {
+  const token = getToken();
+  if (!token) return false;
+  if (isTokenExpired()) return false;
+  return true;
+}
+
+// ============================================================================
+// Popup OAuth Flow
+// ============================================================================
+
+interface OAuthPopupOptions {
+  width?: number;
+  height?: number;
+  onSuccess?: (token: string) => void;
+  onError?: (error: string) => void;
+}
+
+/**
+ * Open Google OAuth in a popup window
+ * Returns a promise that resolves with the token
+ */
+export function openGoogleSignInPopup(options: OAuthPopupOptions = {}): Promise<string> {
+  const {
+    width = 500,
+    height = 600,
+    onSuccess,
+    onError,
+  } = options;
+
+  return new Promise((resolve, reject) => {
+    // Center the popup
+    const left = window.screenX + (window.outerWidth - width) / 2;
+    const top = window.screenY + (window.outerHeight - height) / 2;
+
+    // Open popup
+    const popup = window.open(
+      `${env.baseUrl}/auth/login`,
+      'google-signin',
+      `width=${width},height=${height},left=${left},top=${top},toolbar=0,location=0,menubar=0`
+    );
+
+    if (!popup) {
+      const error = 'Failed to open popup. Please allow popups for this site.';
+      onError?.(error);
+      reject(new Error(error));
+      return;
+    }
+
+    // Poll to check if popup is closed
+    const pollTimer = setInterval(() => {
+      if (popup.closed) {
+        clearInterval(pollTimer);
+        window.removeEventListener('message', messageHandler);
+        const error = 'Sign-in popup was closed';
+        onError?.(error);
+        reject(new Error(error));
+      }
+    }, 500);
+
+    // Listen for messages from popup
+    const messageHandler = (event: MessageEvent) => {
+      // Security check: verify origin matches our backend
+      const allowedOrigins = [
+        env.baseUrl,
+        window.location.origin,
+      ];
+
+      if (!allowedOrigins.includes(event.origin)) {
+        console.warn('[Auth] Message from unknown origin:', event.origin);
+        return;
+      }
+
+      // Check for auth success message
+      if (event.data?.type === 'REVELIUS_AUTH_SUCCESS' && event.data?.token) {
+        clearInterval(pollTimer);
+        window.removeEventListener('message', messageHandler);
+        
+        const token = event.data.token;
+        const expiresIn = event.data.expires_in;
+
+        // Store token
+        setToken(token, expiresIn);
+
+        // Close popup
+        if (!popup.closed) {
+          popup.close();
+        }
+
+        onSuccess?.(token);
+        resolve(token);
+      }
+
+      // Check for auth error message
+      if (event.data?.type === 'REVELIUS_AUTH_ERROR') {
+        clearInterval(pollTimer);
+        window.removeEventListener('message', messageHandler);
+
+        const error = event.data.error || 'Authentication failed';
+
+        // Close popup
+        if (!popup.closed) {
+          popup.close();
+        }
+
+        onError?.(error);
+        reject(new Error(error));
+      }
+    };
+
+    window.addEventListener('message', messageHandler);
+  });
 }
 
 // ============================================================================
 // Auth API Calls
 // ============================================================================
-
-interface LoginResponse {
-  url?: string;
-  token?: string;
-  access_token?: string;
-  expires_in?: number;
-}
 
 interface StatusResponse {
   authenticated?: boolean;
@@ -68,23 +173,6 @@ interface RefreshResponse {
   token?: string;
   access_token?: string;
   expires_in?: number;
-}
-
-/**
- * Start OAuth login flow
- * Returns either a redirect URL or a token (depending on backend implementation)
- */
-export async function startLogin(): Promise<LoginResponse> {
-  const response = await fetch(`${env.baseUrl}/auth/login`, {
-    method: 'GET',
-    credentials: 'include', // Include cookies if backend uses them
-  });
-
-  if (!response.ok) {
-    throw new Error(`Login failed: ${response.statusText}`);
-  }
-
-  return response.json();
 }
 
 /**
@@ -119,7 +207,6 @@ export async function checkAuthStatus(): Promise<StatusResponse> {
 
 /**
  * Refresh the current token
- * Returns new token if successful
  */
 export async function refreshToken(): Promise<RefreshResponse> {
   const token = getToken();
@@ -173,14 +260,14 @@ export async function logout(): Promise<void> {
 }
 
 // ============================================================================
-// Helper Functions
+// Helper for OAuth Callback Page (runs in popup)
 // ============================================================================
 
 /**
- * Parse token from URL query string or hash fragment
- * Supports: ?token=..., ?access_token=..., #token=..., #access_token=...
+ * Extract token from URL and send to parent window
+ * Call this in the OAuth callback page that opens in the popup
  */
-export function extractTokenFromUrl(): { token: string | null; expiresIn: number | null } {
+export function sendTokenToParent(): void {
   const urlParams = new URLSearchParams(window.location.search);
   const hashParams = new URLSearchParams(window.location.hash.slice(1));
   
@@ -194,17 +281,39 @@ export function extractTokenFromUrl(): { token: string | null; expiresIn: number
     urlParams.get('expires_in') ||
     hashParams.get('expires_in');
   
-  const expiresIn = expiresInStr ? parseInt(expiresInStr, 10) : null;
-  
-  return { token, expiresIn };
-}
+  const expiresIn = expiresInStr ? parseInt(expiresInStr, 10) : undefined;
 
-/**
- * Check if user should be authenticated (has token and not expired)
- */
-export function isAuthenticated(): boolean {
-  const token = getToken();
-  if (!token) return false;
-  if (isTokenExpired()) return false;
-  return true;
+  if (token) {
+    // Send success message to parent window
+    if (window.opener) {
+      window.opener.postMessage(
+        {
+          type: 'REVELIUS_AUTH_SUCCESS',
+          token,
+          expires_in: expiresIn,
+        },
+        window.location.origin
+      );
+    }
+    
+    // Close popup after short delay
+    setTimeout(() => {
+      window.close();
+    }, 500);
+  } else {
+    // Send error message
+    if (window.opener) {
+      window.opener.postMessage(
+        {
+          type: 'REVELIUS_AUTH_ERROR',
+          error: 'No token found in callback URL',
+        },
+        window.location.origin
+      );
+    }
+    
+    setTimeout(() => {
+      window.close();
+    }, 1000);
+  }
 }

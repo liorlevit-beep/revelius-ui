@@ -1,51 +1,27 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { extractTokenFromUrl, setToken } from '../lib/auth';
+import { sendTokenToParent } from '../lib/auth';
 
 /**
- * OAuth Callback Handler
+ * OAuth Callback Handler (runs in popup)
  * 
- * Handles redirect from Google OAuth with token in URL
- * Supports: ?token=..., ?access_token=..., #token=..., #access_token=...
+ * This page opens in the popup window after Google OAuth completes.
+ * It extracts the token from the URL and sends it to the parent window via postMessage.
  */
 export default function AuthCallbackPage() {
-  const navigate = useNavigate();
   const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing');
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     handleCallback();
   }, []);
 
-  async function handleCallback() {
+  function handleCallback() {
     try {
-      // Extract token from URL
-      const { token, expiresIn } = extractTokenFromUrl();
-
-      if (!token) {
-        throw new Error('No token found in callback URL');
-      }
-
-      console.log('[AuthCallback] Token received, storing...');
-      
-      // Store token
-      setToken(token, expiresIn || undefined);
-
+      // Extract token and send to parent window
+      sendTokenToParent();
       setStatus('success');
-
-      // Redirect to dashboard after short delay
-      setTimeout(() => {
-        navigate('/dashboard', { replace: true });
-      }, 1000);
     } catch (error) {
-      console.error('[AuthCallback] Callback handling failed:', error);
+      console.error('[AuthCallback] Failed to send token:', error);
       setStatus('error');
-      setErrorMessage(error instanceof Error ? error.message : 'Authentication failed');
-
-      // Redirect to auth page after delay
-      setTimeout(() => {
-        navigate('/auth', { replace: true });
-      }, 3000);
     }
   }
 
@@ -62,7 +38,7 @@ export default function AuthCallbackPage() {
                 Completing sign in...
               </h2>
               <p className="text-gray-400">
-                Please wait while we verify your credentials
+                This window will close automatically
               </p>
             </>
           )}
@@ -90,7 +66,7 @@ export default function AuthCallbackPage() {
                 Sign in successful!
               </h2>
               <p className="text-gray-400">
-                Redirecting to dashboard...
+                Closing window...
               </p>
             </>
           )}
@@ -118,11 +94,14 @@ export default function AuthCallbackPage() {
                 Authentication failed
               </h2>
               <p className="text-gray-400 mb-4">
-                {errorMessage || 'Unable to complete sign in'}
+                Please close this window and try again
               </p>
-              <p className="text-sm text-gray-500">
-                Redirecting to login page...
-              </p>
+              <button
+                onClick={() => window.close()}
+                className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors"
+              >
+                Close Window
+              </button>
             </>
           )}
         </div>

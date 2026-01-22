@@ -1,92 +1,38 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { startLogin, setToken } from '../lib/auth';
-import { env } from '../config/env';
+import { useState } from 'react';
+import { openGoogleSignInPopup } from '../lib/auth';
 
 export default function AuthPage() {
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showBanner, setShowBanner] = useState(false);
-
-  const reason = searchParams.get('reason');
-
-  useEffect(() => {
-    if (reason === 'expired') {
-      setShowBanner(true);
-    }
-  }, [reason]);
 
   async function handleGoogleSignIn() {
     setIsLoading(true);
     setError(null);
 
     try {
-      const response = await startLogin();
+      const token = await openGoogleSignInPopup({
+        onSuccess: (token) => {
+          console.log('[Auth] Successfully authenticated, token stored');
+          // Redirect to dashboard or reload page
+          window.location.href = '/dashboard';
+        },
+        onError: (err) => {
+          console.error('[Auth] Authentication failed:', err);
+          setError(err);
+          setIsLoading(false);
+        },
+      });
 
-      // Case 1: Backend returns redirect URL
-      if (response.url) {
-        console.log('[Auth] Redirecting to OAuth URL:', response.url);
-        window.location.href = response.url;
-        return;
-      }
-
-      // Case 2: Backend returns token directly (unlikely but supported)
-      const token = response.token || response.access_token;
-      if (token) {
-        console.log('[Auth] Token received directly, storing and redirecting to dashboard');
-        setToken(token, response.expires_in);
-        navigate('/dashboard');
-        return;
-      }
-
-      // Case 3: Fallback - redirect to backend endpoint directly
-      console.log('[Auth] No URL or token in response, redirecting to backend login endpoint');
-      window.location.href = `${env.baseUrl}/auth/login`;
+      console.log('[Auth] Token received:', token.substring(0, 20) + '...');
     } catch (err) {
-      console.error('[Auth] Login failed:', err);
-      setError(err instanceof Error ? err.message : 'Login failed. Please try again.');
+      console.error('[Auth] Sign-in error:', err);
+      setError(err instanceof Error ? err.message : 'Sign-in failed. Please try again.');
       setIsLoading(false);
     }
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex">
-      {/* Expired session banner */}
-      {showBanner && (
-        <div className="fixed top-0 left-0 right-0 z-50 bg-amber-500/10 border-b border-amber-500/20 backdrop-blur-sm">
-          <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <svg
-                className="w-5 h-5 text-amber-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                />
-              </svg>
-              <p className="text-sm text-amber-200">
-                Your session expired. Please log in again.
-              </p>
-            </div>
-            <button
-              onClick={() => setShowBanner(false)}
-              className="text-amber-400 hover:text-amber-300 transition-colors"
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Left side - Branding */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
         {/* Animated gradient background */}
@@ -191,7 +137,7 @@ export default function AuthPage() {
               {isLoading ? (
                 <>
                   <div className="w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
-                  <span>Redirecting...</span>
+                  <span>Opening sign-in...</span>
                 </>
               ) : (
                 <>
