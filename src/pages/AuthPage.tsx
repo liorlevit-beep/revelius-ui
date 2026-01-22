@@ -1,8 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
 import { DarkGradientBackground } from '../components/ui/DarkGradientBackground';
-import { ensureGoogleLoaded, requestGoogleIdToken } from '../auth/googleIdentity';
-import { exchangeGoogleIdToken, status } from '../auth/auth';
 import styles from './AuthPage.module.css';
 
 // Declare particlesJS on window
@@ -13,18 +10,8 @@ declare global {
 }
 
 export default function AuthPage() {
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  // Check for session expiry reason
-  useEffect(() => {
-    const reason = searchParams.get('reason');
-    if (reason === 'expired') {
-      setError('Your session expired. Please log in again.');
-    }
-  }, [searchParams]);
+  const [isLoading] = useState(false);
+  const [error] = useState<string | null>(null);
 
   // Ensure dark mode is active for the animated background
   useEffect(() => {
@@ -151,48 +138,6 @@ export default function AuthPage() {
     };
   }, []);
 
-  /**
-   * Handle Google Sign-In button click
-   * Developer note: Requires VITE_GOOGLE_CLIENT_ID in .env.local
-   * Example: VITE_GOOGLE_CLIENT_ID=123456789.apps.googleusercontent.com
-   */
-  async function handleGoogleSignIn() {
-    setError(null);
-    setIsLoading(true);
-
-    try {
-      // Check for client ID
-      const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-      if (!clientId) {
-        setError('Google Client ID not configured. Please set VITE_GOOGLE_CLIENT_ID.');
-        setIsLoading(false);
-        return;
-      }
-
-      // Ensure Google Identity Services is loaded
-      await ensureGoogleLoaded();
-
-      // Request Google ID token (shows Google sign-in prompt)
-      const idToken = await requestGoogleIdToken(clientId);
-
-      // Exchange with backend for Revelius session token
-      await exchangeGoogleIdToken(idToken);
-
-      // Optional: Verify session status
-      const isAuthenticated = await status();
-      if (!isAuthenticated) {
-        throw new Error('Authentication verification failed');
-      }
-
-      // Navigate to dashboard
-      navigate('/dashboard');
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Sign-in failed. Please try again.';
-      setError(message);
-      setIsLoading(false);
-    }
-  }
-
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
       {/* Animated Gradient Background (from dashboard) */}
@@ -253,7 +198,6 @@ export default function AuthPage() {
 
           {/* Google Sign-in Button */}
           <button
-            onClick={handleGoogleSignIn}
             disabled={isLoading}
             className={`w-full disabled:cursor-not-allowed disabled:opacity-50 font-semibold py-4 px-6 rounded-xl flex items-center justify-center gap-3 relative overflow-hidden ${styles.googleButton}`}
             style={isLoading ? {} : {
