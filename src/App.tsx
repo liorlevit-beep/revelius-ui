@@ -23,8 +23,6 @@ import { PolicyPackDetail } from './pages/PolicyPackDetail';
 import { Providers } from './pages/Providers';
 import { ProviderDetail } from './pages/ProviderDetail';
 import { PaymentProvidersPage } from './pages/PaymentProvidersPage';
-import ProviderCategoriesPage from './pages/ProviderCategoriesPage';
-import ProviderCategoriesCMS from './pages/ProviderCategoriesCMS';
 import { Developers } from './pages/Developers';
 import SdkDemo from './pages/SdkDemo';
 import ApiConsole from './pages/ApiConsole';
@@ -114,8 +112,6 @@ function AppContent() {
           <Route path="/demo" element={<Demo />} />
           <Route path="/demo-lab" element={<DemoLab />} />
           <Route path="/ui-modules" element={<UiModules />} />
-          <Route path="/provider-categories" element={<ProviderCategoriesPage />} />
-          <Route path="/cms/provider-categories" element={<ProviderCategoriesCMS />} />
         </Routes>
       </main>
       
@@ -154,3 +150,4 @@ function App() {
 }
 
 export default App;
+
