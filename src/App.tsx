@@ -31,8 +31,6 @@ import DemoLab from './pages/DemoLab';
 import Categories from './pages/Categories';
 import { UiModules } from './pages/UiModules';
 import ProviderCategoriesCMS from './pages/ProviderCategoriesCMS';
-import AuthPage from './pages/AuthPage';
-import { ProtectedRoute } from './auth/ProtectedRoute';
 import { useSidebar } from './contexts/SidebarContext';
 
 function AppContent() {
@@ -60,24 +58,10 @@ function AppContent() {
     return 'Revelius';
   };
 
-  // Check if we're on the auth page (no sidebar/header)
-  const isAuthPage = location.pathname === '/auth';
-
-  const renderContent = () => {
-    // Render auth page without sidebar/header
-    if (isAuthPage) {
-      return (
-        <Routes>
-          <Route path="/auth" element={<AuthPage />} />
-        </Routes>
-      );
-    }
-
-    // Render main app with sidebar/header (protected)
-    return (
-      <ProtectedRoute>
-        {/* Dark mode animated gradient background - z-index 0, behind everything */}
-        <DarkGradientBackground intensity="normal" />
+  const renderContent = () => (
+    <>
+      {/* Dark mode animated gradient background - z-index 0, behind everything */}
+      <DarkGradientBackground intensity="normal" />
         
         {/* API Keys Modal - needs high z-index */}
         <ApiKeysModal />
@@ -133,11 +117,10 @@ function AppContent() {
           </Routes>
         </main>
         
-        {/* Global Floating Scan Indicator */}
-        <FloatingScansIndicator />
-      </ProtectedRoute>
-    );
-  };
+      {/* Global Floating Scan Indicator */}
+      <FloatingScansIndicator />
+    </>
+  );
 
   return (
     <div className="relative w-full h-screen overflow-x-hidden">

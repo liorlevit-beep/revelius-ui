@@ -1,8 +1,5 @@
-import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Search, Moon, Sun, User, LogOut, ChevronDown } from 'lucide-react';
+import { Search, Moon, Sun } from 'lucide-react';
 import { ScanActivityIndicator } from './scans/ScanActivityIndicator';
-import { logout } from '../auth/auth';
 
 interface HeaderProps {
   title: string;
@@ -13,38 +10,6 @@ interface HeaderProps {
 }
 
 export function Header({ title, timeRange, onTimeRangeChange, glassTheme = false, onThemeToggle }: HeaderProps) {
-  const navigate = useNavigate();
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setDropdownOpen(false);
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
-  async function handleSignOut() {
-    try {
-      await logout();
-      if (import.meta.env.DEV) {
-        console.log('[Auth] Redirecting to /auth after sign out');
-      }
-      navigate('/auth');
-    } catch (error) {
-      console.error('Sign out error:', error);
-      // Even if logout fails, redirect to auth page
-      navigate('/auth');
-    }
-  }
-
   if (glassTheme) {
     return (
       <header 
@@ -65,50 +30,6 @@ export function Header({ title, timeRange, onTimeRangeChange, glassTheme = false
             </span>
           </div>
           <div className="flex items-center gap-4">
-            {/* User Dropdown */}
-            <div className="relative" ref={dropdownRef}>
-              <button
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="w-10 h-10 rounded-lg transition-all hover:-translate-y-0.5 flex items-center justify-center group"
-                style={{
-                  background: 'rgba(255, 255, 255, 0.08)',
-                  backdropFilter: 'blur(10px) saturate(180%)',
-                  WebkitBackdropFilter: 'blur(10px) saturate(180%)',
-                  border: '1px solid rgba(255, 255, 255, 0.18)',
-                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
-                }}
-              >
-                <User className="w-5 h-5 text-gray-300" />
-              </button>
-
-              {dropdownOpen && (
-                <div
-                  className="absolute right-0 mt-2 w-48 rounded-xl shadow-2xl z-50"
-                  style={{
-                    background: 'rgba(17, 24, 39, 0.95)',
-                    backdropFilter: 'blur(16px) saturate(180%)',
-                    WebkitBackdropFilter: 'blur(16px) saturate(180%)',
-                    border: '1px solid rgba(255, 255, 255, 0.18)',
-                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
-                  }}
-                >
-                  <div className="p-3 border-b border-white/10">
-                    <p className="text-sm font-medium text-gray-200">Account</p>
-                    <p className="text-xs text-gray-400">Signed in with Google</p>
-                  </div>
-                  <div className="p-1">
-                    <button
-                      onClick={handleSignOut}
-                      className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      <span>Sign out</span>
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-
             {/* Theme Toggle Button */}
             {onThemeToggle && (
               <button
@@ -185,34 +106,6 @@ export function Header({ title, timeRange, onTimeRangeChange, glassTheme = false
           </span>
         </div>
         <div className="flex items-center gap-4">
-          {/* User Dropdown */}
-          <div className="relative" ref={dropdownRef}>
-            <button
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="w-10 h-10 bg-gray-50 border border-gray-200 rounded-lg transition-all hover:bg-gray-100 flex items-center justify-center"
-            >
-              <User className="w-5 h-5 text-gray-600" />
-            </button>
-
-            {dropdownOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl border border-gray-200 shadow-xl z-50">
-                <div className="p-3 border-b border-gray-100">
-                  <p className="text-sm font-medium text-gray-900">Account</p>
-                  <p className="text-xs text-gray-500">Signed in with Google</p>
-                </div>
-                <div className="p-1">
-                  <button
-                    onClick={handleSignOut}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    <span>Sign out</span>
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-
           {/* Theme Toggle Button */}
           {onThemeToggle && (
             <button
