@@ -2,8 +2,8 @@ import { getEnvConfig } from '../config/env';
 import { getSignedHeaders } from './signer';
 import { getToken } from '../lib/auth';
 
-// TEMPORARY: Mock token for testing Authorization header
-const MOCK_TOKEN = 'test-mock-token-12345';
+// TEMPORARY: Hardcoded token for testing
+const MOCK_TOKEN = '123';
 
 /**
  * Custom API error with status code and optional details

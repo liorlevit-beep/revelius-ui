@@ -92,7 +92,7 @@ export async function openGoogleSignInPopup(options: OAuthPopupOptions = {}): Pr
   } catch (error) {
     console.error('[openGoogleSignInPopup] ❌ Failed to get OAuth URL:', error);
     // Fallback: Try passing token as query parameter since browser navigation can't send headers
-    const token = getToken() || 'test-mock-token-12345';
+    const token = getToken() || '123';
     oauthUrl = `${env.baseUrl}/auth/login?token=${encodeURIComponent(token)}`;
     console.warn('[openGoogleSignInPopup] ⚠️  Using fallback URL with token query param:', oauthUrl);
   }
@@ -208,16 +208,18 @@ interface RefreshResponse {
 
 /**
  * Start OAuth login - calls /auth/login to get redirect URL
- * NOTE: /auth/login should NOT require Authorization for initial login request
  */
 async function startLogin(): Promise<LoginResponse> {
-  console.log('[startLogin] 🔓 Calling /auth/login WITHOUT Authorization header');
-  console.log('[startLogin] (Initial login should not require auth)');
+  // TEMPORARY: Use hardcoded token "123" for testing
+  const token = getToken() || '123';
+  
+  console.log('[startLogin] 🔐 Calling /auth/login with Authorization header');
+  console.log('[startLogin] Token being used:', token);
   console.log('[startLogin] URL:', `${env.baseUrl}/auth/login`);
   
-  // Don't send Authorization header for initial login request
   const headers = {
     'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`,
   };
   
   console.log('[startLogin] Headers:', headers);
