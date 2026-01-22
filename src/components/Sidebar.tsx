@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Store, Tags, ScanLine, CreditCard, FileText, Wallet, Code, ChevronLeft, ChevronRight, Layers, ChevronDown, Building2, ShoppingCart } from 'lucide-react';
+import { LayoutDashboard, Store, Tags, ScanLine, CreditCard, FileText, Wallet, Code, ChevronLeft, ChevronRight, Layers, ChevronDown, Building2, ShoppingCart, Settings } from 'lucide-react';
 import { useSidebar } from '../contexts/SidebarContext';
 import { useMode } from '../contexts/ModeContext';
 import { IridescentButton } from './ui/IridescentButton';
@@ -26,6 +26,7 @@ const navigationSections = [
     items: [
       { name: 'Policies', href: '/policies', icon: FileText },
       { name: 'Payment Providers', href: '/payment-providers', icon: Wallet },
+      { name: 'Provider Categories CMS', href: '/cms/provider-categories', icon: Settings },
     ],
   },
   {
