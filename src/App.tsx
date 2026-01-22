@@ -31,6 +31,7 @@ import DemoLab from './pages/DemoLab';
 import Categories from './pages/Categories';
 import { UiModules } from './pages/UiModules';
 import ProviderCategoriesCMS from './pages/ProviderCategoriesCMS';
+import Auth2 from './pages/Auth2';
 import { useSidebar } from './contexts/SidebarContext';
 
 function AppContent() {
@@ -114,6 +115,7 @@ function AppContent() {
             <Route path="/demo-lab" element={<DemoLab />} />
             <Route path="/ui-modules" element={<UiModules />} />
             <Route path="/cms/provider-categories" element={<ProviderCategoriesCMS />} />
+            <Route path="/auth2" element={<Auth2 />} />
           </Routes>
         </main>
         
