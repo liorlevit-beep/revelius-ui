@@ -1,121 +1,23 @@
 import { useState, useEffect } from 'react';
 import { openGoogleSignInPopup } from '../lib/auth';
-
-// Declare particlesJS on window
-declare global {
-  interface Window {
-    particlesJS: any;
-  }
-}
+import { DarkGradientBackground } from '../components/ui/DarkGradientBackground';
 
 export default function AuthPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Ensure dark mode is active for the animated background
   useEffect(() => {
-    // Load particles.js from CDN
-    const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js';
-    script.async = true;
-    script.onload = () => {
-      // Initialize particles with purple/blue theme
-      if (window.particlesJS) {
-        window.particlesJS('particles-js', {
-          particles: {
-            number: {
-              value: 80,
-              density: {
-                enable: true,
-                value_area: 800
-              }
-            },
-            color: {
-              value: '#ffffff'
-            },
-            shape: {
-              type: 'circle',
-              stroke: {
-                width: 0,
-                color: '#000000'
-              }
-            },
-            opacity: {
-              value: 0.3,
-              random: true,
-              anim: {
-                enable: false,
-                speed: 1,
-                opacity_min: 0.1,
-                sync: false
-              }
-            },
-            size: {
-              value: 3,
-              random: true,
-              anim: {
-                enable: false,
-                speed: 40,
-                size_min: 0.1,
-                sync: false
-              }
-            },
-            line_linked: {
-              enable: true,
-              distance: 150,
-              color: '#ffffff',
-              opacity: 0.2,
-              width: 1
-            },
-            move: {
-              enable: true,
-              speed: 2,
-              direction: 'none',
-              random: false,
-              straight: false,
-              out_mode: 'out',
-              bounce: false,
-              attract: {
-                enable: false,
-                rotateX: 600,
-                rotateY: 1200
-              }
-            }
-          },
-          interactivity: {
-            detect_on: 'canvas',
-            events: {
-              onhover: {
-                enable: true,
-                mode: 'grab'
-              },
-              onclick: {
-                enable: true,
-                mode: 'push'
-              },
-              resize: true
-            },
-            modes: {
-              grab: {
-                distance: 140,
-                line_linked: {
-                  opacity: 1
-                }
-              },
-              push: {
-                particles_nb: 4
-              }
-            }
-          },
-          retina_detect: true
-        });
-      }
-    };
-    document.body.appendChild(script);
+    const html = document.documentElement;
+    const wasDark = html.classList.contains('dark');
+    
+    // Add dark class for the auth page
+    html.classList.add('dark');
 
+    // Cleanup: restore previous state
     return () => {
-      // Cleanup
-      if (document.body.contains(script)) {
-        document.body.removeChild(script);
+      if (!wasDark) {
+        html.classList.remove('dark');
       }
     };
   }, []);
@@ -146,9 +48,9 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-t from-purple-600 via-purple-900/50 to-[#0f0f0f] flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Particles Background */}
-      <div id="particles-js" className="absolute inset-0 z-0"></div>
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Animated Gradient Background (from dashboard) */}
+      <DarkGradientBackground enabled={true} intensity="strong" />
 
       {/* Auth Modal Card */}
       <div className="w-full max-w-md relative z-10">
