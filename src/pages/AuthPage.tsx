@@ -1,6 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { exchangeGoogleToken, setToken, isAuthenticated } from '../lib/auth';
 import { DarkGradientBackground } from '../components/ui/DarkGradientBackground';
 
 // Declare particlesJS on window
@@ -11,19 +9,8 @@ declare global {
 }
 
 export default function AuthPage() {
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const [googleIdToken, setGoogleIdToken] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const reason = searchParams.get('reason');
-
-  // Redirect if already authenticated
-  useEffect(() => {
-    if (isAuthenticated()) {
-      navigate('/dashboard');
-    }
-  }, [navigate]);
+  const [isLoading] = useState(false);
+  const [error] = useState<string | null>(null);
 
   // Ensure dark mode is active for the animated background
   useEffect(() => {
@@ -150,37 +137,9 @@ export default function AuthPage() {
     };
   }, []);
 
-  async function handleTokenExchange(e: React.FormEvent) {
-    e.preventDefault();
-    
-    if (!googleIdToken.trim()) {
-      setError('Please paste your Google ID token');
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      console.log('[Auth] Exchanging Google ID token for session token');
-      const { token, expiresIn } = await exchangeGoogleToken(googleIdToken.trim());
-      
-      // Store session token
-      setToken(token, expiresIn);
-      console.log('[Auth] Session token stored successfully');
-      
-      // Redirect to dashboard
-      navigate('/dashboard');
-    } catch (err) {
-      console.error('[Auth] Token exchange error:', err);
-      setError(err instanceof Error ? err.message : 'Token exchange failed. Please try again.');
-      setIsLoading(false);
-    }
-  }
-
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Animated Gradient Background (from dashboard) - z-index: 0 in its CSS */}
+      {/* Animated Gradient Background (from dashboard) */}
       <DarkGradientBackground enabled={true} intensity="strong" />
 
       {/* Particles Layer - above gradient, needs pointer events for interactivity */}
@@ -225,16 +184,9 @@ export default function AuthPage() {
               Welcome to Revelius
             </h1>
             <p className="text-gray-400 text-base leading-relaxed">
-              Paste your Google ID token below to sign in.
+              Sign in to access your payment routing dashboard and fraud prevention tools.
             </p>
           </div>
-
-          {/* Session expired banner */}
-          {reason === 'expired' && (
-            <div className="mb-6 p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl">
-              <p className="text-sm text-amber-400 text-center">Your session expired. Please sign in again.</p>
-            </div>
-          )}
 
           {/* Error message */}
           {error && (
@@ -243,32 +195,10 @@ export default function AuthPage() {
             </div>
           )}
 
-          {/* Token Exchange Form */}
-          <form onSubmit={handleTokenExchange}>
-            {/* Google ID Token Input */}
-            <div className="mb-6">
-              <label htmlFor="googleIdToken" className="block text-sm font-medium text-gray-300 mb-2">
-                Google ID Token (JWT)
-              </label>
-              <textarea
-                id="googleIdToken"
-                value={googleIdToken}
-                onChange={(e) => setGoogleIdToken(e.target.value)}
-                placeholder="Paste your Google ID token here..."
-                disabled={isLoading}
-                rows={4}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 transition-all resize-none font-mono text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-              />
-              <p className="text-xs text-gray-500 mt-2">
-                Paste the JWT token you received from Google OAuth
-              </p>
-            </div>
-
-            {/* Sign-in Button */}
-            <button
-              type="submit"
-              disabled={isLoading || !googleIdToken.trim()}
-              className="w-full disabled:cursor-not-allowed disabled:opacity-50 font-semibold py-4 px-6 rounded-xl flex items-center justify-center gap-3 transition-all duration-200 relative overflow-hidden group"
+          {/* Google Sign-in Button */}
+          <button
+            disabled={isLoading}
+            className="w-full disabled:cursor-not-allowed disabled:opacity-50 font-semibold py-4 px-6 rounded-xl flex items-center justify-center gap-3 transition-all duration-200 relative overflow-hidden group"
             style={isLoading ? {} : {
               color: '#0a0a0a',
               background: `
@@ -296,18 +226,32 @@ export default function AuthPage() {
             {isLoading ? (
               <>
                 <div className="w-5 h-5 border-2 border-gray-800 border-t-transparent rounded-full animate-spin"></div>
-                <span className="text-gray-900">Exchanging token...</span>
+                <span className="text-gray-900">Connecting...</span>
               </>
             ) : (
               <>
-                <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                <svg className="w-5 h-5" viewBox="0 0 24 24">
+                  <path
+                    fill="#4285F4"
+                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                  />
+                  <path
+                    fill="#34A853"
+                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                  />
+                  <path
+                    fill="#FBBC05"
+                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                  />
+                  <path
+                    fill="#EA4335"
+                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                  />
                 </svg>
-                <span>Sign In</span>
+                <span>Continue with Google</span>
               </>
             )}
           </button>
-          </form>
 
           {/* Footer */}
           <p className="mt-8 text-center text-xs text-gray-500 leading-relaxed">
