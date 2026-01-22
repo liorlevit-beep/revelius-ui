@@ -10,6 +10,9 @@
  * 6. All API requests include Authorization: Bearer <token>
  * 7. On 401/403, we attempt /auth/refresh once
  * 8. If refresh fails, clear token (no redirect since we're not using route protection)
+ * 
+ * FOR TESTING: Set token manually via browser console:
+ * window.setReveliusToken('your-token-here')
  */
 
 import { env } from '../config/env';
@@ -32,6 +35,8 @@ export function setToken(token: string, expiresIn?: number): void {
     const expiresAt = Date.now() + expiresIn * 1000;
     localStorage.setItem(EXPIRES_KEY, expiresAt.toString());
   }
+  
+  console.log('[Auth] Token stored successfully');
 }
 
 export function clearToken(): void {
@@ -316,4 +321,36 @@ export function sendTokenToParent(): void {
       window.close();
     }, 1000);
   }
+}
+
+// ============================================================================
+// Development Helper (exposed globally for testing)
+// ============================================================================
+
+/**
+ * Expose token setter globally for easy testing via console
+ * Usage: window.setReveliusToken('your-token-here')
+ */
+if (typeof window !== 'undefined') {
+  (window as any).setReveliusToken = (token: string, expiresIn?: number) => {
+    setToken(token, expiresIn);
+    console.log('✅ Revelius token set! API requests will now include Authorization header.');
+    console.log('Token preview:', token.substring(0, 20) + '...');
+  };
+  
+  (window as any).clearReveliusToken = () => {
+    clearToken();
+    console.log('✅ Revelius token cleared!');
+  };
+  
+  (window as any).getReveliusToken = () => {
+    const token = getToken();
+    if (token) {
+      console.log('Current token:', token.substring(0, 20) + '...');
+      return token;
+    } else {
+      console.log('No token set');
+      return null;
+    }
+  };
 }

@@ -1,5 +1,6 @@
 import { getEnvConfig } from '../config/env';
 import { getSignedHeaders } from './signer';
+import { getToken } from '../lib/auth';
 
 /**
  * Custom API error with status code and optional details
@@ -55,6 +56,12 @@ export async function apiFetch<T>(
   const headers: Record<string, string> = {
     ...signedHeaders,
   };
+
+  // Add Authorization header if token exists
+  const token = getToken();
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
 
   // Add Content-Type for JSON requests
   if (body && responseType !== 'blob') {
