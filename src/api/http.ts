@@ -1,9 +1,5 @@
 import { getEnvConfig } from '../config/env';
 import { getSignedHeaders } from './signer';
-import { getToken } from '../lib/auth';
-
-// TEMPORARY: Hardcoded token for testing
-const MOCK_TOKEN = '123';
 
 /**
  * Custom API error with status code and optional details
@@ -59,18 +55,6 @@ export async function apiFetch<T>(
   const headers: Record<string, string> = {
     ...signedHeaders,
   };
-
-  // Add Authorization header (use mock token for testing if no real token exists)
-  const realToken = getToken();
-  const token = realToken || MOCK_TOKEN;
-  headers['Authorization'] = `Bearer ${token}`;
-  
-  if (realToken) {
-    console.log(`[apiFetch] 🔐 Using REAL token: ${token.substring(0, 20)}...`);
-  } else {
-    console.log(`[apiFetch] 🧪 Using MOCK token for testing: ${token}`);
-    console.log(`[apiFetch] ℹ️  Set real token via: window.setReveliusToken("your-token")`);
-  }
 
   // Add Content-Type for JSON requests
   if (body && responseType !== 'blob') {
