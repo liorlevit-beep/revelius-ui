@@ -30,7 +30,7 @@ export default function AuthPage() {
               }
             },
             color: {
-              value: ['#8b5cf6', '#6366f1', '#3b82f6', '#a855f7']
+              value: '#ffffff'
             },
             shape: {
               type: 'circle',
@@ -40,8 +40,8 @@ export default function AuthPage() {
               }
             },
             opacity: {
-              value: 0.5,
-              random: false,
+              value: 0.3,
+              random: true,
               anim: {
                 enable: false,
                 speed: 1,
@@ -62,8 +62,8 @@ export default function AuthPage() {
             line_linked: {
               enable: true,
               distance: 150,
-              color: '#8b5cf6',
-              opacity: 0.4,
+              color: '#ffffff',
+              opacity: 0.2,
               width: 1
             },
             move: {
@@ -146,7 +146,7 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900/20 to-indigo-900/30 flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-t from-purple-600 via-purple-900/50 to-[#0f0f0f] flex items-center justify-center p-4 relative overflow-hidden">
       {/* Particles Background */}
       <div id="particles-js" className="absolute inset-0 z-0"></div>
 
