@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { DarkGradientBackground } from '../components/ui/DarkGradientBackground';
+import styles from './AuthPage.module.css';
 
 // Declare particlesJS on window
 declare global {
@@ -198,7 +199,7 @@ export default function AuthPage() {
           {/* Google Sign-in Button */}
           <button
             disabled={isLoading}
-            className="w-full disabled:cursor-not-allowed disabled:opacity-50 font-semibold py-4 px-6 rounded-xl flex items-center justify-center gap-3 transition-all duration-200 relative overflow-hidden group"
+            className={`w-full disabled:cursor-not-allowed disabled:opacity-50 font-semibold py-4 px-6 rounded-xl flex items-center justify-center gap-3 relative overflow-hidden ${styles.googleButton}`}
             style={isLoading ? {} : {
               color: '#0a0a0a',
               background: `
