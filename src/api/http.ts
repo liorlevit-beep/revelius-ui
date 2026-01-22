@@ -44,6 +44,10 @@ export async function apiFetch<T>(
   // Build full URL
   const url = `${env.baseUrl}${path.startsWith('/') ? '' : '/'}${path}`;
 
+  // Log the actual request method we're sending (GET or POST only)
+  // Note: Browser may send OPTIONS preflight automatically for CORS - that's not from our code
+  console.log(`[apiFetch] Making ${method} request to ${path}`);
+
   // Get signed headers
   const signedHeaders = getSignedHeaders(env.accessKey, env.secretKey, sessionId);
 
