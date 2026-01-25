@@ -97,9 +97,10 @@ async function refreshAuthToken(): Promise<boolean> {
         
         // Redirect to auth page using relative path (React Router will handle it)
         const basePath = import.meta.env.BASE_URL || '/';
-        const authPath = `${basePath}auth?reason=expired`.replace(/\/+/g, '/'); // Remove double slashes
-        console.error('[refreshAuthToken] Redirecting to:', authPath);
-        window.location.pathname = authPath;
+        const cleanBasePath = basePath.replace(/\/+/g, '/');
+        const authPath = `${cleanBasePath}auth`.replace(/\/+/g, '/');
+        console.error('[refreshAuthToken] Redirecting to:', authPath + '?reason=expired');
+        window.location.href = `${window.location.origin}${authPath}?reason=expired`;
         
         return false;
       }
@@ -154,9 +155,10 @@ async function refreshAuthToken(): Promise<boolean> {
       
       // Redirect to auth page using relative path (React Router will handle it)
       const basePath = import.meta.env.BASE_URL || '/';
-      const authPath = `${basePath}auth?reason=expired`.replace(/\/+/g, '/'); // Remove double slashes
-      console.error('[refreshAuthToken] Redirecting to:', authPath);
-      window.location.pathname = authPath;
+      const cleanBasePath = basePath.replace(/\/+/g, '/');
+      const authPath = `${cleanBasePath}auth`.replace(/\/+/g, '/');
+      console.error('[refreshAuthToken] Redirecting to:', authPath + '?reason=expired');
+      window.location.href = `${window.location.origin}${authPath}?reason=expired`;
       
       return false;
     } finally {
@@ -179,9 +181,10 @@ function handleAuthFailure(reason: string = 'expired') {
   
   // Redirect using relative path (React Router will handle it)
   const basePath = import.meta.env.BASE_URL || '/';
-  const authPath = `${basePath}auth?reason=${reason}`.replace(/\/+/g, '/'); // Remove double slashes
-  console.log('[handleAuthFailure] Redirecting to:', authPath);
-  window.location.pathname = authPath;
+  const cleanBasePath = basePath.replace(/\/+/g, '/');
+  const authPath = `${cleanBasePath}auth`.replace(/\/+/g, '/');
+  console.log('[handleAuthFailure] Redirecting to:', authPath + `?reason=${reason}`);
+  window.location.href = `${window.location.origin}${authPath}?reason=${reason}`;
 }
 
 /**
