@@ -14,6 +14,9 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useTheme } from '../contexts/ThemeContext';
 import { ProductsAPI } from '../api';
 import type { ProductCategory } from '../types/products';
+import { PaymentProviderLogo } from '../components/paymentProviders/PaymentProviderLogo';
+import { getProviderDisplayName } from '../data/providerRegions';
+import { getProviderBrandColor } from '../utils/providerLogoResolver';
 import {
   type ProviderCategoriesData,
   type ProviderMapping,
@@ -413,14 +416,15 @@ export function ProviderCategoriesCMS() {
             </div>
 
             <div className="flex-1 overflow-y-auto">
-              {filteredProviders.map((provider) => {
+              {filteredProviders.map((provider, index) => {
                 const isSelected = selectedProviderId === provider.id;
+                const brandColor = getProviderBrandColor(provider.payment_provider, index);
                 
                 return (
                   <button
                     key={provider.id}
                     onClick={() => setSelectedProviderId(provider.id)}
-                    className={`w-full px-4 py-3 flex items-center justify-between border-l-4 transition-all text-left ${
+                    className={`w-full px-4 py-3 flex items-center gap-3 border-l-4 transition-all text-left ${
                       isSelected
                         ? darkMode
                           ? 'bg-emerald-900/30 border-emerald-500'
@@ -429,7 +433,20 @@ export function ProviderCategoriesCMS() {
                         ? 'bg-transparent border-transparent hover:bg-gray-800/50'
                         : 'bg-transparent border-transparent hover:bg-gray-50'
                     }`}
+                    style={isSelected ? {} : { borderLeftColor: brandColor }}
                   >
+                    {/* Logo */}
+                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center shadow-sm">
+                      <PaymentProviderLogo
+                        provider={{ 
+                          key: provider.payment_provider, 
+                          name: getProviderDisplayName(provider.payment_provider) 
+                        }}
+                        size={32}
+                        className="object-contain"
+                      />
+                    </div>
+                    
                     <div className="flex-1 min-w-0">
                       <div className="font-semibold text-sm truncate capitalize">
                         {provider.payment_provider.replace(/_/g, ' ')}
@@ -450,11 +467,25 @@ export function ProviderCategoriesCMS() {
               <>
                 <div className="p-6 border-b border-gray-200 dark:border-gray-800">
                   <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <h2 className="text-xl font-bold capitalize">{selectedProvider.payment_provider.replace(/_/g, ' ')}</h2>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {selectedProvider.categories.length} accepted {selectedProvider.categories.length === 1 ? 'category' : 'categories'}
-                      </p>
+                    <div className="flex items-center gap-4">
+                      {/* Provider Logo */}
+                      <div className="flex-shrink-0 w-14 h-14 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center shadow-lg">
+                        <PaymentProviderLogo
+                          provider={{ 
+                            key: selectedProvider.payment_provider, 
+                            name: getProviderDisplayName(selectedProvider.payment_provider) 
+                          }}
+                          size={48}
+                          className="object-contain"
+                        />
+                      </div>
+                      
+                      <div>
+                        <h2 className="text-xl font-bold capitalize">{selectedProvider.payment_provider.replace(/_/g, ' ')}</h2>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          {selectedProvider.categories.length} accepted {selectedProvider.categories.length === 1 ? 'category' : 'categories'}
+                        </p>
+                      </div>
                     </div>
                     
                     <div className="flex gap-2">
