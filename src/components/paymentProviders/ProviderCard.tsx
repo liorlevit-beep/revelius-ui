@@ -30,6 +30,8 @@ export function ProviderCard({ provider, totalCategories, onClick, showDebugInfo
       
       if (result.type === 'svg' && result.src) {
         setLogoSrc(result.src);
+        // Reset error state when we get a new logo
+        setLogoError(false);
       } else {
         setLogoError(true);
       }
@@ -110,26 +112,28 @@ export function ProviderCard({ provider, totalCategories, onClick, showDebugInfo
           <div className="flex items-start gap-4 mb-4">
             {/* Logo */}
             <motion.div
-              className="flex-shrink-0 w-14 h-14 rounded-full flex items-center justify-center shadow-lg overflow-hidden bg-white"
+              className="flex-shrink-0 w-14 h-14 rounded-full flex items-center justify-center shadow-lg overflow-hidden"
               whileHover={{ rotate: 5, scale: 1.05 }}
               transition={{ type: 'spring', stiffness: 400, damping: 10 }}
             >
               {logoSrc && !logoError ? (
-                <img
-                  src={logoSrc}
-                  alt={`${provider.name} logo`}
-                  className="w-full h-full object-contain p-2"
-                  onError={() => {
-                    console.warn(`[ProviderCard] ❌ Failed to load: ${logoSrc}`);
-                    setLogoError(true);
-                  }}
-                  onLoad={() => {
-                    if (import.meta.env.DEV) {
-                      console.log(`[ProviderCard] ✅ Loaded: ${logoSrc}`);
-                    }
-                  }}
-                  loading="lazy"
-                />
+                <div className="w-full h-full bg-white rounded-full flex items-center justify-center relative">
+                  <img
+                    src={logoSrc}
+                    alt={`${provider.name} logo`}
+                    className="w-full h-full object-contain p-2 relative z-10"
+                    onError={() => {
+                      console.warn(`[ProviderCard] ❌ Failed to load: ${logoSrc}`);
+                      setLogoError(true);
+                    }}
+                    onLoad={() => {
+                      if (import.meta.env.DEV) {
+                        console.log(`[ProviderCard] ✅ Loaded: ${logoSrc}`);
+                      }
+                    }}
+                    loading="lazy"
+                  />
+                </div>
               ) : (
                 <div className={`w-full h-full rounded-full bg-gradient-to-br ${fromColor} ${toColor} flex items-center justify-center text-white font-bold text-lg`}>
                   {initials}
