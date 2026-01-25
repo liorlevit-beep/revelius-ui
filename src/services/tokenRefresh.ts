@@ -106,10 +106,23 @@ async function refreshToken(): Promise<boolean> {
       localStorage.removeItem('revelius_refresh_token');
       localStorage.removeItem('revelius_auth_expires_at');
       
-      // Redirect to auth page using relative path (React Router will handle it)
-      const basePath = import.meta.env.BASE_URL || '/';
-      const cleanBasePath = basePath.replace(/\/+/g, '/');
-      const authPath = `${cleanBasePath}auth`.replace(/\/+/g, '/');
+      // Redirect to auth page - detect base path from current URL
+      const currentPath = window.location.pathname;
+      const isGitHubPages = window.location.hostname.includes('github.io');
+      
+      let basePath = '/';
+      if (isGitHubPages) {
+        // On GitHub Pages: /revelius-ui/dashboard -> extract first segment as base
+        const pathParts = currentPath.split('/').filter(p => p);
+        if (pathParts.length > 0) {
+          basePath = `/${pathParts[0]}/`;
+        }
+      }
+      
+      const authPath = `${basePath}auth`.replace(/\/+/g, '/');
+      console.error('[TokenRefresh] Current pathname:', currentPath);
+      console.error('[TokenRefresh] Is GitHub Pages:', isGitHubPages);
+      console.error('[TokenRefresh] Detected base path:', basePath);
       console.error('[TokenRefresh] Redirecting to:', authPath + '?reason=expired');
       window.location.href = `${window.location.origin}${authPath}?reason=expired`;
       
@@ -170,10 +183,22 @@ async function refreshToken(): Promise<boolean> {
     localStorage.removeItem('revelius_refresh_token');
     localStorage.removeItem('revelius_auth_expires_at');
     
-    // Redirect to auth page using relative path (React Router will handle it)
-    const basePath = import.meta.env.BASE_URL || '/';
-    const cleanBasePath = basePath.replace(/\/+/g, '/');
-    const authPath = `${cleanBasePath}auth`.replace(/\/+/g, '/');
+    // Redirect to auth page - detect base path from current URL
+    const currentPath = window.location.pathname;
+    const isGitHubPages = window.location.hostname.includes('github.io');
+    
+    let basePath = '/';
+    if (isGitHubPages) {
+      const pathParts = currentPath.split('/').filter(p => p);
+      if (pathParts.length > 0) {
+        basePath = `/${pathParts[0]}/`;
+      }
+    }
+    
+    const authPath = `${basePath}auth`.replace(/\/+/g, '/');
+    console.error('[TokenRefresh] Current pathname:', currentPath);
+    console.error('[TokenRefresh] Is GitHub Pages:', isGitHubPages);
+    console.error('[TokenRefresh] Detected base path:', basePath);
     console.error('[TokenRefresh] Redirecting to:', authPath + '?reason=expired');
     window.location.href = `${window.location.origin}${authPath}?reason=expired`;
     
