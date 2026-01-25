@@ -66,31 +66,22 @@ async function refreshToken(): Promise<boolean> {
     const requestUrl = `${env.baseUrl}/auth/refresh`;
     const requestHeaders = {
       'Authorization': `Bearer ${refreshToken || currentToken}`,
-      'Content-Type': 'application/json',
-    };
-    const requestBody = {
-      refresh_token: refreshToken || currentToken,
     };
     
     console.log('[TokenRefresh] ========================================');
     console.log('[TokenRefresh] 📤 SENDING REFRESH REQUEST');
     console.log('[TokenRefresh] URL:', requestUrl);
-    console.log('[TokenRefresh] Method: POST');
+    console.log('[TokenRefresh] Method: GET');
     console.log('[TokenRefresh] Has refresh_token in localStorage:', !!refreshToken);
     console.log('[TokenRefresh] Using token (first 20 chars):', (refreshToken || currentToken).substring(0, 20) + '...');
     console.log('[TokenRefresh] Headers:', {
       'Authorization': 'Bearer ' + (refreshToken || currentToken).substring(0, 20) + '...',
-      'Content-Type': 'application/json',
-    });
-    console.log('[TokenRefresh] Body:', {
-      refresh_token: (refreshToken || currentToken).substring(0, 20) + '...'
     });
     console.log('[TokenRefresh] ========================================');
     
     const response = await fetch(requestUrl, {
-      method: 'POST',
+      method: 'GET',
       headers: requestHeaders,
-      body: JSON.stringify(requestBody),
     });
     
     console.log('[TokenRefresh] ========================================');

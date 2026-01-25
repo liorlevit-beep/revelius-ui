@@ -57,31 +57,22 @@ async function refreshAuthToken(): Promise<boolean> {
       const requestUrl = `${env.baseUrl}/auth/refresh`;
       const requestHeaders = {
         'Authorization': `Bearer ${refreshToken || currentToken}`,
-        'Content-Type': 'application/json',
-      };
-      const requestBody = {
-        refresh_token: refreshToken || currentToken,
       };
       
       console.log('[refreshAuthToken] ========================================');
       console.log('[refreshAuthToken] 📤 SENDING REFRESH REQUEST');
       console.log('[refreshAuthToken] URL:', requestUrl);
-      console.log('[refreshAuthToken] Method: POST');
+      console.log('[refreshAuthToken] Method: GET');
       console.log('[refreshAuthToken] Has refresh_token in localStorage:', !!refreshToken);
       console.log('[refreshAuthToken] Using token (first 20 chars):', (refreshToken || currentToken).substring(0, 20) + '...');
       console.log('[refreshAuthToken] Headers:', {
         'Authorization': 'Bearer ' + (refreshToken || currentToken).substring(0, 20) + '...',
-        'Content-Type': 'application/json',
-      });
-      console.log('[refreshAuthToken] Body:', {
-        refresh_token: (refreshToken || currentToken).substring(0, 20) + '...'
       });
       console.log('[refreshAuthToken] ========================================');
       
       const response = await fetch(requestUrl, {
-        method: 'POST',
+        method: 'GET',
         headers: requestHeaders,
-        body: JSON.stringify(requestBody),
       });
 
       console.log('[refreshAuthToken] ========================================');
