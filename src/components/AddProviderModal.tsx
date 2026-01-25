@@ -163,48 +163,50 @@ export function AddProviderModal({ isOpen, onClose }: AddProviderModalProps) {
               {/* Provider Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {filteredProviders.map((provider) => (
-                  <Card
+                  <div
                     key={provider.id}
-                    className="cursor-pointer hover:shadow-lg transition-shadow"
+                    className="cursor-pointer"
                     onClick={() => handleSelectProvider(provider)}
                   >
-                    <div className="p-6">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-xl flex items-center justify-center text-white font-bold text-sm">
-                            {provider.logoText.substring(0, 2)}
-                          </div>
-                          <div>
-                            <h3 className="text-base font-bold text-gray-900">{provider.name}</h3>
-                          </div>
-                        </div>
-                      </div>
-                      <p className="text-sm text-gray-600 mb-4">{provider.description}</p>
-                      
-                      <div className="space-y-2">
-                        <div>
-                          <span className="text-xs font-semibold text-gray-500 block mb-1">Regions</span>
-                          <div className="flex flex-wrap gap-1">
-                            {provider.regions.slice(0, 4).map((region) => (
-                              <Chip key={region} label={region} />
-                            ))}
-                            {provider.regions.length > 4 && (
-                              <span className="text-xs text-gray-500">+{provider.regions.length - 4}</span>
-                            )}
+                    <Card className="hover:shadow-lg transition-shadow">
+                      <div className="p-6">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-xl flex items-center justify-center text-white font-bold text-sm">
+                              {provider.logoText.substring(0, 2)}
+                            </div>
+                            <div>
+                              <h3 className="text-base font-bold text-gray-900">{provider.name}</h3>
+                            </div>
                           </div>
                         </div>
+                        <p className="text-sm text-gray-600 mb-4">{provider.description}</p>
                         
-                        <div>
-                          <span className="text-xs font-semibold text-gray-500 block mb-1">Specialties</span>
-                          <div className="flex flex-wrap gap-1">
-                            {provider.specialties.map((specialty) => (
-                              <Chip key={specialty} label={specialty} />
-                            ))}
+                        <div className="space-y-2">
+                          <div>
+                            <span className="text-xs font-semibold text-gray-500 block mb-1">Regions</span>
+                            <div className="flex flex-wrap gap-1">
+                              {provider.regions.slice(0, 4).map((region) => (
+                                <Chip key={region} label={region} />
+                              ))}
+                              {provider.regions.length > 4 && (
+                                <span className="text-xs text-gray-500">+{provider.regions.length - 4}</span>
+                              )}
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <span className="text-xs font-semibold text-gray-500 block mb-1">Specialties</span>
+                            <div className="flex flex-wrap gap-1">
+                              {provider.specialties.map((specialty) => (
+                                <Chip key={specialty} label={specialty} />
+                              ))}
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </Card>
+                    </Card>
+                  </div>
                 ))}
               </div>
             </div>

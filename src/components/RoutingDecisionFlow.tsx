@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronDown, ChevronRight, Info } from 'lucide-react';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 import { Chip } from './Badges';
 import { getCountryFlag } from '../utils/countryFlags';
 import type { Transaction, RouteCandidate } from '../demo/transactions';
@@ -12,22 +12,6 @@ interface RoutingDecisionFlowProps {
 export function RoutingDecisionFlow({ transaction }: RoutingDecisionFlowProps) {
   const navigate = useNavigate();
   const [expandedRoute, setExpandedRoute] = useState<string | null>(null);
-
-  const getEligibilityBadge = (eligibility: string) => {
-    if (eligibility === 'eligible') {
-      return 'bg-emerald-50 text-emerald-700 border-emerald-200';
-    }
-    if (eligibility === 'warning') {
-      return 'bg-amber-50 text-amber-700 border-amber-200';
-    }
-    return 'bg-red-50 text-red-700 border-red-200';
-  };
-
-  const getComplianceBadge = (fit: string) => {
-    if (fit === 'good') return 'bg-emerald-50 text-emerald-700';
-    if (fit === 'ok') return 'bg-amber-50 text-amber-700';
-    return 'bg-red-50 text-red-700';
-  };
 
   const baselineCandidate = transaction.routing.candidates.find(c => c.decision === 'baseline');
   const selectedCandidate = transaction.routing.candidates.find(c => c.decision === 'selected');

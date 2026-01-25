@@ -5,13 +5,14 @@ import { getSignedHeaders } from './signer';
  * Custom API error with status code and optional details
  */
 export class ApiError extends Error {
-  constructor(
-    message: string,
-    public status: number,
-    public details?: unknown
-  ) {
+  status: number;
+  details?: unknown;
+
+  constructor(message: string, status: number, details?: unknown) {
     super(message);
     this.name = 'ApiError';
+    this.status = status;
+    this.details = details;
   }
 }
 
@@ -20,7 +21,7 @@ let isRefreshing = false;
 let refreshPromise: Promise<boolean> | null = null;
 
 interface ApiFetchOptions {
-  method?: 'GET' | 'POST';
+  method?: 'GET' | 'POST' | 'DELETE';
   body?: unknown;
   sessionId?: string;
   signal?: AbortSignal;

@@ -62,9 +62,6 @@ function AppContent() {
     return 'Revelius';
   };
 
-  // Check if we're on the auth page (no sidebar/header)
-  const isAuthPage = location.pathname === '/auth' || location.pathname === '/auth/callback';
-
   const renderContent = () => {
     // Render auth pages without sidebar/header
     if (location.pathname === '/auth') {

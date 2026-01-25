@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Key, Copy, Check, AlertCircle } from 'lucide-react';
+import { X, Key, AlertCircle } from 'lucide-react';
 import { CopyButton } from './CopyButton';
 
 interface CreateApiKeyModalProps {
