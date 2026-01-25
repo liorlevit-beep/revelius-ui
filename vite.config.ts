@@ -4,6 +4,8 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  // GitHub Pages deployment base path
+  base: process.env.GITHUB_ACTIONS ? '/revelius-ui/' : '/',
   server: {
     port: 5174,
     proxy: {
