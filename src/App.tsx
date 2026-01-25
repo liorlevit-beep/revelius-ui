@@ -32,6 +32,7 @@ import Categories from './pages/Categories';
 import { UiModules } from './pages/UiModules';
 import ProviderCategoriesCMS from './pages/ProviderCategoriesCMS';
 import Auth2 from './pages/Auth2';
+import AuthPage from './pages/AuthPage';
 import { useSidebar } from './contexts/SidebarContext';
 
 function AppContent() {
@@ -59,42 +60,56 @@ function AppContent() {
     return 'Revelius';
   };
 
-  const renderContent = () => (
-    <>
-      {/* Dark mode animated gradient background - z-index 0, behind everything */}
-      <DarkGradientBackground intensity="normal" />
-        
-        {/* API Keys Modal - needs high z-index */}
-        <ApiKeysModal />
-        
-        {/* Sidebar - z-index 40 (from Sidebar component) */}
-        <Sidebar />
-        
-        {/* Global Header */}
-        <div 
-          className={`fixed top-0 transition-all duration-300 z-30 ${
-            collapsed ? 'left-20' : 'left-64'
-          }`}
-          style={{ right: 0 }}
-        >
-          <Header 
-            title={getPageTitle()} 
-            timeRange={timeRange} 
-            onTimeRangeChange={setTimeRange}
-            glassTheme={darkMode}
-            onThemeToggle={toggleDarkMode}
-          />
-        </div>
-        
-        {/* Main content area - no z-index to allow modals independent stacking */}
-        <main 
-          className={`absolute overflow-y-auto overflow-x-hidden transition-all duration-300 max-w-full ${
-            collapsed ? 'left-20' : 'left-64'
-          }`}
-          style={{ top: '73px', bottom: 0, right: 0 }}
-        >
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
+  // Check if we're on the auth page (no sidebar/header)
+  const isAuthPage = location.pathname === '/auth';
+
+  const renderContent = () => {
+    // Render auth page without sidebar/header
+    if (isAuthPage) {
+      return (
+        <Routes>
+          <Route path="/auth" element={<AuthPage />} />
+        </Routes>
+      );
+    }
+
+    // Render main app with sidebar/header
+    return (
+      <>
+        {/* Dark mode animated gradient background - z-index 0, behind everything */}
+        <DarkGradientBackground intensity="normal" />
+          
+          {/* API Keys Modal - needs high z-index */}
+          <ApiKeysModal />
+          
+          {/* Sidebar - z-index 40 (from Sidebar component) */}
+          <Sidebar />
+          
+          {/* Global Header */}
+          <div 
+            className={`fixed top-0 transition-all duration-300 z-30 ${
+              collapsed ? 'left-20' : 'left-64'
+            }`}
+            style={{ right: 0 }}
+          >
+            <Header 
+              title={getPageTitle()} 
+              timeRange={timeRange} 
+              onTimeRangeChange={setTimeRange}
+              glassTheme={darkMode}
+              onThemeToggle={toggleDarkMode}
+            />
+          </div>
+          
+          {/* Main content area - no z-index to allow modals independent stacking */}
+          <main 
+            className={`absolute overflow-y-auto overflow-x-hidden transition-all duration-300 max-w-full ${
+              collapsed ? 'left-20' : 'left-64'
+            }`}
+            style={{ top: '73px', bottom: 0, right: 0 }}
+          >
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
             <Route path="/merchants" element={<Merchants />} />
             <Route path="/merchants/:id" element={<Merchant360 />} />
             <Route path="/categories" element={<Categories />} />
@@ -115,14 +130,15 @@ function AppContent() {
             <Route path="/demo-lab" element={<DemoLab />} />
             <Route path="/ui-modules" element={<UiModules />} />
             <Route path="/cms/provider-categories" element={<ProviderCategoriesCMS />} />
-            <Route path="/auth2" element={<Auth2 />} />
-          </Routes>
-        </main>
-        
-      {/* Global Floating Scan Indicator */}
-      <FloatingScansIndicator />
-    </>
-  );
+              <Route path="/auth2" element={<Auth2 />} />
+            </Routes>
+          </main>
+          
+        {/* Global Floating Scan Indicator */}
+        <FloatingScansIndicator />
+      </>
+    );
+  };
 
   return (
     <div className="relative w-full h-screen overflow-x-hidden">
