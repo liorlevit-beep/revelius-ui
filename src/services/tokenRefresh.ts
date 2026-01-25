@@ -99,7 +99,15 @@ async function refreshToken(): Promise<boolean> {
       console.error('[TokenRefresh] URL that was called:', response.url);
       console.error('[TokenRefresh] Error response body:', errorText);
       console.error('[TokenRefresh] ========================================');
-      console.error('[TokenRefresh] ⚠️  Token refresh failed, but NOT redirecting. User will stay on current page.');
+      console.error('[TokenRefresh] 🔄 Refresh endpoint failed - clearing tokens and redirecting to auth');
+      
+      // Clear all auth tokens
+      localStorage.removeItem('revelius_auth_token');
+      localStorage.removeItem('revelius_refresh_token');
+      localStorage.removeItem('revelius_auth_expires_at');
+      
+      // Redirect to auth page
+      window.location.assign('/auth?reason=expired');
       
       return false;
     }
@@ -148,7 +156,19 @@ async function refreshToken(): Promise<boolean> {
     
     return true;
   } catch (error) {
-    console.error('[TokenRefresh] ❌ Error refreshing token:', error);
+    console.error('[TokenRefresh] ========================================');
+    console.error('[TokenRefresh] ❌ EXCEPTION during refresh:', error);
+    console.error('[TokenRefresh] 🔄 Clearing tokens and redirecting to auth');
+    console.error('[TokenRefresh] ========================================');
+    
+    // Clear all auth tokens
+    localStorage.removeItem('revelius_auth_token');
+    localStorage.removeItem('revelius_refresh_token');
+    localStorage.removeItem('revelius_auth_expires_at');
+    
+    // Redirect to auth page
+    window.location.assign('/auth?reason=expired');
+    
     return false;
   } finally {
     isRefreshing = false;

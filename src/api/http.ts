@@ -88,6 +88,16 @@ async function refreshAuthToken(): Promise<boolean> {
         console.error('[refreshAuthToken] Status:', response.status, response.statusText);
         console.error('[refreshAuthToken] Error response body:', errorText);
         console.error('[refreshAuthToken] ========================================');
+        console.error('[refreshAuthToken] 🔄 Refresh endpoint failed - clearing tokens and redirecting to auth');
+        
+        // Clear all auth tokens
+        localStorage.removeItem('revelius_auth_token');
+        localStorage.removeItem('revelius_refresh_token');
+        localStorage.removeItem('revelius_auth_expires_at');
+        
+        // Redirect to auth page
+        window.location.assign('/auth?reason=expired');
+        
         return false;
       }
 
@@ -129,7 +139,19 @@ async function refreshAuthToken(): Promise<boolean> {
       console.log('[refreshAuthToken] Token refreshed successfully');
       return true;
     } catch (error) {
-      console.error('[refreshAuthToken] Error:', error);
+      console.error('[refreshAuthToken] ========================================');
+      console.error('[refreshAuthToken] ❌ EXCEPTION during refresh:', error);
+      console.error('[refreshAuthToken] 🔄 Clearing tokens and redirecting to auth');
+      console.error('[refreshAuthToken] ========================================');
+      
+      // Clear all auth tokens
+      localStorage.removeItem('revelius_auth_token');
+      localStorage.removeItem('revelius_refresh_token');
+      localStorage.removeItem('revelius_auth_expires_at');
+      
+      // Redirect to auth page
+      window.location.assign('/auth?reason=expired');
+      
       return false;
     } finally {
       isRefreshing = false;
@@ -260,8 +282,9 @@ export async function apiFetch<T>(
           // Retry the request once with the new token
           return apiFetch<T>(path, { ...opts, _isRetry: true });
         } else {
-          console.log(`[${method} ${path}] ⚠️  Refresh failed, NOT redirecting - throwing error instead`);
-          // Just throw the error, let the calling code handle it
+          console.log(`[${method} ${path}] ⚠️  Refresh failed - the refresh service will handle redirect`);
+          // The refreshAuthToken() function already triggered redirect if refresh endpoint failed
+          // Just throw the error for the calling code
           throw new ApiError('Session expired. Please sign in again.', 401);
         }
       }
