@@ -49,23 +49,23 @@ export function PaymentProviderLogo({ provider, size = 56, className = '' }: Pay
 
   if (showInitials) {
     const initials = generateInitials(provider.name);
-    // Generate gradient colors
-    const colors = [
-      ['from-emerald-400', 'to-emerald-600'],
-      ['from-blue-400', 'to-blue-600'],
-      ['from-purple-400', 'to-purple-600'],
-      ['from-pink-400', 'to-pink-600'],
-      ['from-orange-400', 'to-orange-600'],
-      ['from-cyan-400', 'to-cyan-600'],
-      ['from-indigo-400', 'to-indigo-600'],
-      ['from-teal-400', 'to-teal-600'],
+    // Generate text colors (matching the container's style)
+    const textColors = [
+      'text-emerald-600 dark:text-emerald-400',
+      'text-blue-600 dark:text-blue-400',
+      'text-purple-600 dark:text-purple-400',
+      'text-pink-600 dark:text-pink-400',
+      'text-orange-600 dark:text-orange-400',
+      'text-cyan-600 dark:text-cyan-400',
+      'text-indigo-600 dark:text-indigo-400',
+      'text-teal-600 dark:text-teal-400',
     ];
-    const index = provider.name.charCodeAt(0) % colors.length;
-    const [fromColor, toColor] = colors[index];
+    const index = provider.name.charCodeAt(0) % textColors.length;
+    const textColor = textColors[index];
     
     return (
       <div 
-        className={`w-full h-full rounded-full bg-gradient-to-br ${fromColor} ${toColor} flex items-center justify-center text-white font-bold text-lg ${className}`}
+        className={`w-full h-full rounded-full bg-white dark:bg-gray-800 flex items-center justify-center ${textColor} font-bold text-lg ${className}`}
         style={{ width: size, height: size }}
       >
         {initials}
