@@ -299,9 +299,7 @@ function generateTransaction(
       approvalProb = baselineApprovalProb / 100;
     }
     
-    if (eligibility === 'ineligible') {
-      decision = 'rejected';
-    } else if (decision === 'rejected' && eligibility === 'eligible') {
+    if (decision === 'rejected' && eligibility === 'eligible') {
       reasons.push('Lower approval probability than selected route');
       reasons.push('Not optimal for this transaction profile');
     }

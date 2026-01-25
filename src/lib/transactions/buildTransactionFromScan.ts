@@ -229,7 +229,8 @@ export async function buildTransactionFromSession(sessionId: string): Promise<Pa
   
   // Extract merchant domain from report
   let merchantDomain = 'Unknown Merchant';
-  const rootUrl = report.root_website_url || report.data?.root_website_url || report.url || report.data?.url;
+  const reportData = report as any;
+  const rootUrl = reportData.root_website_url || reportData.data?.root_website_url || reportData.url || reportData.data?.url;
   if (rootUrl) {
     try {
       const urlObj = new URL(rootUrl.startsWith('http') ? rootUrl : `https://${rootUrl}`);

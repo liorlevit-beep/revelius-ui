@@ -6,20 +6,7 @@
 import { authLogger } from './logger';
 import { exchangeGoogleToken } from './api';
 
-// Declare Google Identity Services types
-declare global {
-  interface Window {
-    google?: {
-      accounts: {
-        id: {
-          initialize: (config: GoogleIdConfiguration) => void;
-          renderButton: (parent: HTMLElement, options: GoogleButtonConfiguration) => void;
-          prompt: () => void;
-        };
-      };
-    };
-  }
-}
+// Google Identity Services types are declared in AuthPage.tsx to avoid conflicts
 
 interface GoogleIdConfiguration {
   client_id: string;

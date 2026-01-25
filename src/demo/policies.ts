@@ -43,7 +43,7 @@ export interface PolicyRule {
 export interface RuleCondition {
   field: string;
   operator: string;
-  value: string | number | string[];
+  value: string | number | string[] | boolean;
   logic?: 'AND' | 'OR';
 }
 

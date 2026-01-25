@@ -676,7 +676,7 @@ function RoutingCanvasShell({ selectedTransaction, routingModel, tokens, animati
   const { data: routingTable, providers: availableProviders } = useRoutingTable();
   
   // Port system
-  const { registerPortRef, portsById, recomputePorts } = usePorts(canvasRef);
+  const { registerPortRef, portsById, recomputePorts } = usePorts(canvasRef as React.RefObject<HTMLDivElement>);
   
   const [paths, setPaths] = useState<PathData[]>([]);
   const [tokenPaths, setTokenPaths] = useState<Map<PSPName, Point[]>>(new Map());

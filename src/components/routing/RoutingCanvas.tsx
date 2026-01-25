@@ -220,7 +220,7 @@ export function RoutingCanvas({
   const { data: routingTable, providers: availableProviders } = useRoutingTable();
   
   // Port system
-  const { registerPortRef, portsById, recomputePorts } = usePorts(canvasRef);
+  const { registerPortRef, portsById, recomputePorts } = usePorts(canvasRef as React.RefObject<HTMLDivElement>);
   
   const [paths, setPaths] = useState<PathData[]>([]);
   const [tokenPaths, setTokenPaths] = useState<Map<string, Point[]>>(new Map());
@@ -393,6 +393,10 @@ export function RoutingCanvas({
     if (!modalProvider || !routingTable || !modalCoverage || !routingTable.mapping) return {};
     
     const analysis: Record<string, string[]> = {};
+    if (!routingTable || !routingTable.mapping) {
+      return analysis;
+    }
+    
     skus.forEach(sku => {
       const categoryId = sku.category_id || 'unknown';
       const mapping = routingTable.mapping[modalProvider];
@@ -1086,10 +1090,10 @@ export function RoutingCanvas({
         <ProviderRouteModal
           open={!!modalProvider}
           onOpenChange={(open) => !open && setModalProvider(null)}
-          providerName={getProviderDisplayName(modalProvider)}
+          provider={modalProvider}
           coverage={modalCoverage}
-          skuAnalysis={skuAnalysis}
-          onSelectProvider={() => handleSelectProvider(modalProvider)}
+          items={skus}
+          onSelect={() => handleSelectProvider(modalProvider)}
         />
       )}
     </div>
