@@ -38,8 +38,9 @@ export async function resolveProviderLogo(
     return logoCache.get(providerKey)!;
   }
 
-  // Construct local SVG path
-  const svgPath = `/provider-logos/${providerKey}.svg`;
+  // Construct local SVG path (include base path for GitHub Pages)
+  const basePath = import.meta.env.BASE_URL || '/';
+  const svgPath = `${basePath}provider-logos/${providerKey}.svg`.replace(/\/+/g, '/').replace(':/', '://');
 
   try {
     // Check if file exists
@@ -96,11 +97,14 @@ export function resolveProviderLogoSync(
     return logoCache.get(providerKey)!;
   }
 
-  // Optimistically return SVG path
+  // Optimistically return SVG path (include base path for GitHub Pages)
   // Component will handle onError to fall back to initials
+  const basePath = import.meta.env.BASE_URL || '/';
+  const svgPath = `${basePath}provider-logos/${providerKey}.svg`.replace(/\/+/g, '/').replace(':/', '://');
+  
   return {
     type: 'svg',
-    src: `/provider-logos/${providerKey}.svg`,
+    src: svgPath,
   };
 }
 
