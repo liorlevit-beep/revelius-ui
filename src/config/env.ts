@@ -55,7 +55,18 @@ function getEnv(): EnvConfig {
  * Call this when you need fresh config (e.g., after keys are updated)
  */
 export function getEnvConfig(): EnvConfig {
-  return getEnv();
+  try {
+    return getEnv();
+  } catch (error) {
+    // If validation fails, return fallback config
+    return {
+      baseUrl: import.meta.env.VITE_REVELIUS_API_BASE_URL || 'https://api.revelius.com',
+      accessKey: typeof window !== 'undefined' ? localStorage.getItem('revelius_access_key') || '' : '',
+      secretKey: typeof window !== 'undefined' ? localStorage.getItem('revelius_secret_key') || '' : '',
+      mock: (import.meta.env.VITE_REVELIUS_MOCK || "0") === "1",
+      googleClientId: import.meta.env.VITE_GOOGLE_CLIENT_ID || '118071237449-e1515l6h51el4snq7gspnocuohohtb2j.apps.googleusercontent.com',
+    };
+  }
 }
 
 /**
