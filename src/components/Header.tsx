@@ -36,6 +36,7 @@ export function Header({ title, timeRange, onTimeRangeChange, glassTheme = false
     
     // Clear auth data
     localStorage.removeItem('revelius_auth_token');
+    localStorage.removeItem('revelius_refresh_token');
     localStorage.removeItem('revelius_auth_expires_at');
     
     // Redirect to login

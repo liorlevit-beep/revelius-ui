@@ -60,14 +60,22 @@ async function refreshToken(): Promise<boolean> {
       return false;
     }
     
+    // Check if we have a refresh token
+    const refreshToken = localStorage.getItem('revelius_refresh_token');
+    
     console.log('[TokenRefresh] Calling:', `${env.baseUrl}/auth/refresh`);
-    console.log('[TokenRefresh] Using token:', currentToken.substring(0, 20) + '...');
+    console.log('[TokenRefresh] Has refresh token:', !!refreshToken);
+    console.log('[TokenRefresh] Using token:', (refreshToken || currentToken).substring(0, 20) + '...');
     
     const response = await fetch(`${env.baseUrl}/auth/refresh`, {
-      method: 'GET',
+      method: 'POST',
       headers: {
-        'Authorization': `Bearer ${currentToken}`,
+        'Authorization': `Bearer ${refreshToken || currentToken}`,
+        'Content-Type': 'application/json',
       },
+      body: JSON.stringify({
+        refresh_token: refreshToken || currentToken,
+      }),
     });
     
     console.log('[TokenRefresh] Response status:', response.status);
@@ -82,6 +90,7 @@ async function refreshToken(): Promise<boolean> {
       if (response.status === 401 || response.status === 403) {
         console.log('[TokenRefresh] Session invalid, clearing auth');
         localStorage.removeItem('revelius_auth_token');
+        localStorage.removeItem('revelius_refresh_token');
         localStorage.removeItem('revelius_auth_expires_at');
         window.location.assign('/auth?reason=expired');
       }
@@ -92,14 +101,20 @@ async function refreshToken(): Promise<boolean> {
     const data = await response.json();
     console.log('[TokenRefresh] Success response:', data);
     const newToken = data.session_token || data.token || data.data?.session_token || data.data?.token;
+    const newRefreshToken = data.refresh_token || data.data?.refresh_token;
     
     if (!newToken) {
       console.log('[TokenRefresh] ⚠️ No token in refresh response');
       return false;
     }
     
-    // Update stored token
+    // Update stored tokens
     localStorage.setItem('revelius_auth_token', newToken);
+    
+    if (newRefreshToken) {
+      localStorage.setItem('revelius_refresh_token', newRefreshToken);
+      console.log('[TokenRefresh] New refresh token stored');
+    }
     
     // Update expiry if provided
     const expiresIn = data.expires_in || data.data?.expires_in;
@@ -196,6 +211,7 @@ function checkTokenExpiry() {
   } else if (timeUntilExpiry <= 0) {
     console.log('[TokenRefresh] Token expired, redirecting to login');
     localStorage.removeItem('revelius_auth_token');
+    localStorage.removeItem('revelius_refresh_token');
     localStorage.removeItem('revelius_auth_expires_at');
     window.location.assign('/auth?reason=expired');
   }

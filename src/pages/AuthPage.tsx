@@ -250,8 +250,9 @@ export default function AuthPage() {
       const data = await backendResponse.json();
       console.log('Backend response:', data);
 
-      // Extract session token from response
+      // Extract session token and refresh token from response
       const sessionToken = data.session_token || data.token || data.data?.session_token || data.data?.token;
+      const refreshToken = data.refresh_token || data.data?.refresh_token;
 
       if (!sessionToken) {
         throw new Error('No session token in backend response');
@@ -259,6 +260,12 @@ export default function AuthPage() {
 
       // Store the session token
       localStorage.setItem('revelius_auth_token', sessionToken);
+      
+      // Store the refresh token if provided
+      if (refreshToken) {
+        localStorage.setItem('revelius_refresh_token', refreshToken);
+        console.log('Refresh token stored:', refreshToken.substring(0, 20) + '...');
+      }
       
       // Store expiry time
       const expiresAt = data.expires_at || data.data?.expires_at;

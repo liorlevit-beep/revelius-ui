@@ -101,6 +101,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
         stopTokenRefresh();
         
         localStorage.removeItem('revelius_auth_token');
+        localStorage.removeItem('revelius_refresh_token');
         localStorage.removeItem('revelius_auth_expires_at');
         setIsAuthenticated(false);
         setIsValidating(false);
@@ -111,6 +112,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
         stopTokenRefresh();
         
         localStorage.removeItem('revelius_auth_token');
+        localStorage.removeItem('revelius_refresh_token');
         localStorage.removeItem('revelius_auth_expires_at');
         setIsAuthenticated(false);
         setIsValidating(false);
