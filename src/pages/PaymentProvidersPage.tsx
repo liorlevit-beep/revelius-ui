@@ -9,7 +9,6 @@ import { ProductsAPI } from '../api';
 import type { Provider, ProviderRegion } from '../types/paymentProviders';
 import type { ProductCategory } from '../types/products';
 import { getProviderRegions, getProviderDisplayName } from '../data/providerRegions';
-import { preloadProviderLogos } from '../utils/providerLogoResolver';
 
 const ALL_REGIONS: ProviderRegion[] = [
   'Global',
@@ -217,9 +216,6 @@ export function PaymentProvidersPage() {
         console.log('[PaymentProviders] Providers loaded:', providerList.length);
         console.log('[PaymentProviders] Final provider list:', providerList);
         setProviders(providerList);
-        
-        // Preload provider logos
-        preloadProviderLogos(providerList.map(p => ({ key: p.key, name: p.name })));
       } catch (err: any) {
         console.error('[PaymentProviders] Failed to fetch:', err);
         setError(err.message || 'Failed to load payment providers');

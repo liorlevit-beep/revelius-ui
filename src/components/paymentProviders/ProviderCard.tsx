@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Globe, TrendingUp, ExternalLink, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { Provider } from '../../types/paymentProviders';
-import { resolveProviderLogo, generateInitials } from '../../utils/providerLogoResolver';
+import { PaymentProviderLogo } from './PaymentProviderLogo';
+import { generateInitials } from '../../utils/providerLogoResolver';
 
 interface ProviderCardProps {
   provider: Provider;
@@ -13,32 +14,11 @@ interface ProviderCardProps {
 
 export function ProviderCard({ provider, totalCategories, onClick, showDebugInfo = false }: ProviderCardProps) {
   const [isHovered, setIsHovered] = useState(false);
-  const [logoError, setLogoError] = useState(false);
-  const [logoSrc, setLogoSrc] = useState<string | null>(null);
-  const [resolvedLogoPath, setResolvedLogoPath] = useState<string>('');
 
   // Calculate coverage
   const coverage = totalCategories > 0 ? provider.categoryIds.length / totalCategories : 0;
   const coveragePercent = Math.round(coverage * 100);
   const hasAllCategories = coverage >= 0.98;
-
-  // Resolve logo on mount
-  useEffect(() => {
-    const resolveLogo = async () => {
-      const result = await resolveProviderLogo(provider.key, provider.name);
-      setResolvedLogoPath(result.src || `initials: ${result.initials}`);
-      
-      if (result.type === 'svg' && result.src) {
-        setLogoSrc(result.src);
-        // Reset error state when we get a new logo
-        setLogoError(false);
-      } else {
-        setLogoError(true);
-      }
-    };
-    
-    resolveLogo();
-  }, [provider.key, provider.name]);
 
   // Generate initials for logo placeholder
   const getInitials = (name: string) => {
@@ -112,33 +92,15 @@ export function ProviderCard({ provider, totalCategories, onClick, showDebugInfo
           <div className="flex items-start gap-4 mb-4">
             {/* Logo */}
             <motion.div
-              className="flex-shrink-0 w-14 h-14 rounded-full flex items-center justify-center shadow-lg overflow-hidden"
+              className="flex-shrink-0 w-14 h-14 rounded-full flex items-center justify-center shadow-lg overflow-hidden bg-white"
               whileHover={{ rotate: 5, scale: 1.05 }}
               transition={{ type: 'spring', stiffness: 400, damping: 10 }}
             >
-              {logoSrc && !logoError ? (
-                <div className="w-full h-full bg-white rounded-full flex items-center justify-center relative">
-                  <img
-                    src={logoSrc}
-                    alt={`${provider.name} logo`}
-                    className="w-full h-full object-contain p-2 relative z-10"
-                    onError={() => {
-                      console.warn(`[ProviderCard] ❌ Failed to load: ${logoSrc}`);
-                      setLogoError(true);
-                    }}
-                    onLoad={() => {
-                      if (import.meta.env.DEV) {
-                        console.log(`[ProviderCard] ✅ Loaded: ${logoSrc}`);
-                      }
-                    }}
-                    loading="lazy"
-                  />
-                </div>
-              ) : (
-                <div className={`w-full h-full rounded-full bg-gradient-to-br ${fromColor} ${toColor} flex items-center justify-center text-white font-bold text-lg`}>
-                  {initials}
-                </div>
-              )}
+              <PaymentProviderLogo
+                provider={{ key: provider.key, name: provider.name }}
+                size={56}
+                className="w-full h-full object-contain p-2"
+              />
             </motion.div>
 
             {/* Name + Key */}
@@ -152,13 +114,6 @@ export function ProviderCard({ provider, totalCategories, onClick, showDebugInfo
                 )}
               </div>
               <p className="text-xs text-gray-500 dark:text-gray-400 font-mono truncate">{provider.key}</p>
-              
-              {/* Debug Info - show resolved logo path */}
-              {showDebugInfo && (
-                <p className="text-xs text-orange-600 dark:text-orange-400 font-mono mt-1 break-all">
-                  🔍 {resolvedLogoPath}
-                </p>
-              )}
             </div>
           </div>
 
