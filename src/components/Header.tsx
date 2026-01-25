@@ -1,4 +1,6 @@
-import { Search, Moon, Sun } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Search, Moon, Sun, User, LogOut } from 'lucide-react';
 import { ScanActivityIndicator } from './scans/ScanActivityIndicator';
 
 interface HeaderProps {
@@ -10,6 +12,28 @@ interface HeaderProps {
 }
 
 export function Header({ title, timeRange, onTimeRangeChange, glassTheme = false, onThemeToggle }: HeaderProps) {
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleSignOut = () => {
+    console.log('[Header] Signing out...');
+    localStorage.removeItem('revelius_auth_token');
+    localStorage.removeItem('revelius_auth_expires_at');
+    navigate('/auth');
+  };
+
   if (glassTheme) {
     return (
       <header 
@@ -47,6 +71,45 @@ export function Header({ title, timeRange, onTimeRangeChange, glassTheme = false
                 <Sun className="w-5 h-5 text-amber-400 group-hover:rotate-180 transition-transform duration-500" />
               </button>
             )}
+            
+            {/* User Menu */}
+            <div className="relative" ref={userMenuRef}>
+              <button
+                onClick={() => setUserMenuOpen(!userMenuOpen)}
+                className="w-10 h-10 rounded-lg transition-all hover:-translate-y-0.5 flex items-center justify-center group"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  backdropFilter: 'blur(10px) saturate(180%)',
+                  WebkitBackdropFilter: 'blur(10px) saturate(180%)',
+                  border: '1px solid rgba(255, 255, 255, 0.18)',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+                }}
+                title="User Menu"
+              >
+                <User className="w-5 h-5 text-gray-300 group-hover:text-white transition-colors" />
+              </button>
+              
+              {userMenuOpen && (
+                <div
+                  className="absolute right-0 mt-2 w-56 rounded-xl overflow-hidden shadow-2xl z-50"
+                  style={{
+                    background: 'rgba(30, 30, 40, 0.95)',
+                    backdropFilter: 'blur(16px) saturate(180%)',
+                    WebkitBackdropFilter: 'blur(16px) saturate(180%)',
+                    border: '1px solid rgba(255, 255, 255, 0.18)',
+                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+                  }}
+                >
+                  <button
+                    onClick={handleSignOut}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-left text-sm text-gray-200 hover:bg-white/10 transition-colors"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span>Sign out</span>
+                  </button>
+                </div>
+              )}
+            </div>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
@@ -116,6 +179,29 @@ export function Header({ title, timeRange, onTimeRangeChange, glassTheme = false
               <Moon className="w-5 h-5 text-gray-600 group-hover:rotate-[360deg] transition-transform duration-500" />
             </button>
           )}
+          
+          {/* User Menu */}
+          <div className="relative" ref={userMenuRef}>
+            <button
+              onClick={() => setUserMenuOpen(!userMenuOpen)}
+              className="w-10 h-10 bg-gray-50 border border-gray-200 rounded-lg transition-all hover:bg-gray-100 flex items-center justify-center group"
+              title="User Menu"
+            >
+              <User className="w-5 h-5 text-gray-600 group-hover:text-gray-900 transition-colors" />
+            </button>
+            
+            {userMenuOpen && (
+              <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-xl overflow-hidden shadow-2xl z-50">
+                <button
+                  onClick={handleSignOut}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Sign out</span>
+                </button>
+              </div>
+            )}
+          </div>
           
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />

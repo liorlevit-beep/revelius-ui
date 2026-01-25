@@ -10,6 +10,7 @@ import { ApiKeysModal } from './components/ApiKeysModal';
 import { FloatingScansIndicator } from './components/scans/FloatingScansIndicator';
 import { DarkGradientBackground } from './components/ui/DarkGradientBackground';
 import { DashboardLiquidGlassTheme } from './theme/DashboardLiquidGlassTheme';
+import { ProtectedRoute } from './components/ProtectedRoute';
 import { Dashboard } from './pages/Dashboard';
 import { Merchants } from './pages/Merchants';
 import { Merchant360 } from './pages/Merchant360';
@@ -33,6 +34,7 @@ import { UiModules } from './pages/UiModules';
 import ProviderCategoriesCMS from './pages/ProviderCategoriesCMS';
 import Auth2 from './pages/Auth2';
 import AuthPage from './pages/AuthPage';
+import AuthCallback from './pages/AuthCallback';
 import { useSidebar } from './contexts/SidebarContext';
 
 function AppContent() {
@@ -61,21 +63,20 @@ function AppContent() {
   };
 
   // Check if we're on the auth page (no sidebar/header)
-  const isAuthPage = location.pathname === '/auth';
+  const isAuthPage = location.pathname === '/auth' || location.pathname === '/auth/callback';
 
   const renderContent = () => {
-    // Render auth page without sidebar/header
-    if (isAuthPage) {
-      return (
-        <Routes>
-          <Route path="/auth" element={<AuthPage />} />
-        </Routes>
-      );
+    // Render auth pages without sidebar/header
+    if (location.pathname === '/auth') {
+      return <AuthPage />;
+    }
+    if (location.pathname === '/auth/callback') {
+      return <AuthCallback />;
     }
 
-    // Render main app with sidebar/header
+    // Render main app with sidebar/header (protected)
     return (
-      <>
+      <ProtectedRoute>
         {/* Dark mode animated gradient background - z-index 0, behind everything */}
         <DarkGradientBackground intensity="normal" />
           
@@ -136,7 +137,7 @@ function AppContent() {
           
         {/* Global Floating Scan Indicator */}
         <FloatingScansIndicator />
-      </>
+      </ProtectedRoute>
     );
   };
 

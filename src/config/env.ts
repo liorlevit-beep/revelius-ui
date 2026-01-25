@@ -8,7 +8,7 @@ interface EnvConfig {
   accessKey: string;
   secretKey: string;
   mock: boolean;
-  googleClientId?: string;
+  googleClientId: string;
 }
 
 function getEnv(): EnvConfig {
@@ -21,7 +21,7 @@ function getEnv(): EnvConfig {
   const envAccessKey = import.meta.env.VITE_REVELIUS_ACCESS_KEY;
   const envSecretKey = import.meta.env.VITE_REVELIUS_SECRET_KEY;
   const mockFlag = import.meta.env.VITE_REVELIUS_MOCK || "0";
-  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '118071237449-e1515l6h51el4snq7gspnocuohohtb2j.apps.googleusercontent.com';
 
   // Use localStorage keys if available, otherwise env vars
   const accessKey = localAccessKey || envAccessKey;
@@ -74,7 +74,7 @@ try {
     accessKey: '',
     secretKey: '',
     mock: (import.meta.env.VITE_REVELIUS_MOCK || "0") === "1",
-    googleClientId: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+    googleClientId: import.meta.env.VITE_GOOGLE_CLIENT_ID || '118071237449-e1515l6h51el4snq7gspnocuohohtb2j.apps.googleusercontent.com',
   };
   console.warn('API keys not configured. Please use the API Keys modal to configure.');
 }

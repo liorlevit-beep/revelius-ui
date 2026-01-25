@@ -1,17 +1,47 @@
 import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { DarkGradientBackground } from '../components/ui/DarkGradientBackground';
+import { env } from '../config/env';
 import styles from './AuthPage.module.css';
 
-// Declare particlesJS on window
+// Declare particlesJS and Google Identity Services on window
 declare global {
   interface Window {
     particlesJS: any;
+    google: {
+      accounts: {
+        id: {
+          initialize: (config: any) => void;
+          prompt: (callback?: (notification: any) => void) => void;
+          renderButton: (parent: HTMLElement, options: any) => void;
+          disableAutoSelect: () => void;
+          cancel: () => void;
+        };
+        oauth2: {
+          initTokenClient: (config: any) => any;
+        };
+      };
+    };
   }
 }
 
 export default function AuthPage() {
-  const [isLoading] = useState(false);
-  const [error] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  
+  // Get reason or error from URL
+  const reason = searchParams.get('reason');
+  const urlError = searchParams.get('error');
+  
+  // Set error from URL on mount
+  useEffect(() => {
+    if (urlError) {
+      console.log('[AuthPage] Error from URL:', urlError);
+      setError(urlError);
+    }
+  }, [urlError]);
 
   // Ensure dark mode is active for the animated background
   useEffect(() => {
@@ -138,6 +168,245 @@ export default function AuthPage() {
     };
   }, []);
 
+  // Initialize Google Identity Services
+  useEffect(() => {
+    // Wait for Google Identity Services to load
+    const checkGoogleLoaded = setInterval(() => {
+      if (window.google?.accounts?.id) {
+        clearInterval(checkGoogleLoaded);
+        
+        try {
+          console.log('Initializing Google Identity Services...');
+          
+          // Initialize Google Sign-In
+          window.google.accounts.id.initialize({
+            client_id: env.googleClientId,
+            callback: handleGoogleCredentialResponse,
+            auto_select: false,
+            cancel_on_tap_outside: true,
+          });
+
+          console.log('Google Identity Services initialized successfully');
+        } catch (err) {
+          console.error('Failed to initialize Google Identity Services:', err);
+          setError('Failed to load Google Sign-In. Please refresh the page.');
+        }
+      }
+    }, 100);
+
+    // Cleanup
+    return () => clearInterval(checkGoogleLoaded);
+  }, []);
+
+  // Send user data to backend
+  const authenticateWithBackend = async (idToken: string) => {
+    try {
+      console.log('========================================');
+      console.log('✅ GOOGLE ID TOKEN RECEIVED:');
+      console.log('========================================');
+      console.log(idToken);
+      console.log('========================================');
+      console.log('Token length:', idToken.length, 'characters');
+      console.log('========================================');
+      
+      // Decode the JWT payload (middle part) to show user info
+      try {
+        const parts = idToken.split('.');
+        if (parts.length === 3) {
+          const payload = JSON.parse(atob(parts[1]));
+          console.log('📋 Decoded Token Payload:');
+          console.log('Email:', payload.email);
+          console.log('Name:', payload.name);
+          console.log('Picture:', payload.picture);
+          console.log('Issued At:', new Date(payload.iat * 1000).toLocaleString());
+          console.log('Expires At:', new Date(payload.exp * 1000).toLocaleString());
+          console.log('========================================');
+        }
+      } catch (decodeErr) {
+        console.log('Could not decode token payload');
+      }
+      
+      // Send ID token to backend as Authorization Bearer token
+      console.log('Sending ID token to backend as Bearer token...');
+      const backendResponse = await fetch(`${env.baseUrl}/auth/login`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${idToken}`,
+        },
+      });
+
+      if (!backendResponse.ok) {
+        const errorData = await backendResponse.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP ${backendResponse.status}: ${backendResponse.statusText}`);
+      }
+
+      const data = await backendResponse.json();
+      console.log('Backend response:', data);
+
+      // Extract session token from response
+      const sessionToken = data.session_token || data.token || data.data?.session_token || data.data?.token;
+
+      if (!sessionToken) {
+        throw new Error('No session token in backend response');
+      }
+
+      // Store the session token
+      localStorage.setItem('revelius_auth_token', sessionToken);
+      const expiresAt = data.expires_at || data.data?.expires_at;
+      if (expiresAt) {
+        localStorage.setItem('revelius_auth_expires_at', expiresAt);
+      }
+
+      console.log('Authentication successful, navigating to dashboard');
+      setIsLoading(false);
+      
+      // Navigate to dashboard (route is at '/')
+      navigate('/');
+    } catch (err) {
+      console.error('Failed to authenticate with backend:', err);
+      setError(err instanceof Error ? err.message : 'Authentication failed. Please try again.');
+      setIsLoading(false);
+    }
+  };
+
+  // Handle Google credential response (from One Tap)
+  const handleGoogleCredentialResponse = async (response: any) => {
+    console.log('Received Google credential response from One Tap');
+    
+    if (!response.credential) {
+      setError('No credential received from Google');
+      setIsLoading(false);
+      return;
+    }
+
+    const idToken = response.credential;
+    console.log('Google ID Token received (length):', idToken.length);
+    
+    await authenticateWithBackend(idToken);
+  };
+
+  // Handle Google Sign-in button click - open popup manually
+  const handleGoogleSignIn = () => {
+    setError(null);
+    setIsLoading(true);
+
+    try {
+      const googleClientId = env.googleClientId;
+      if (!googleClientId) {
+        setError('Google Client ID not configured.');
+        setIsLoading(false);
+        return;
+      }
+
+      console.log('========================================');
+      console.log('[AuthPage] Opening Google Sign-In popup');
+      console.log('========================================');
+      
+      // Create OAuth URL for popup
+      const redirectUri = `${window.location.origin}/auth/callback`;
+      const state = Math.random().toString(36).substring(7);
+      const nonce = Math.random().toString(36).substring(7);
+      
+      console.log('[AuthPage] Redirect URI:', redirectUri);
+      console.log('[AuthPage] State:', state);
+      console.log('[AuthPage] Client ID:', googleClientId);
+      
+      sessionStorage.setItem('google_auth_state', state);
+      console.log('[AuthPage] Saved state to sessionStorage');
+      
+      const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
+        `client_id=${encodeURIComponent(googleClientId)}` +
+        `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+        `&response_type=id_token` +
+        `&scope=${encodeURIComponent('openid email profile')}` +
+        `&state=${encodeURIComponent(state)}` +
+        `&nonce=${encodeURIComponent(nonce)}` +
+        `&prompt=select_account`;
+
+      console.log('[AuthPage] Auth URL:', authUrl);
+
+      const width = 500;
+      const height = 600;
+      const left = window.screen.width / 2 - width / 2;
+      const top = window.screen.height / 2 - height / 2;
+      
+      console.log('[AuthPage] Attempting to open popup...');
+      const popup = window.open(
+        authUrl,
+        'Google Sign-In',
+        `width=${width},height=${height},left=${left},top=${top}`
+      );
+
+      console.log('[AuthPage] Popup opened:', !!popup);
+      console.log('[AuthPage] Popup closed?:', popup?.closed);
+
+      if (!popup || popup.closed) {
+        console.error('[AuthPage] Popup was blocked or closed immediately');
+        setError('Popup was blocked. Please allow popups for this site and try again.');
+        setIsLoading(false);
+        return;
+      }
+      
+      console.log('[AuthPage] Popup successfully opened, listening for messages...');
+
+      // Listen for messages from the callback page
+      const handleMessage = async (event: MessageEvent) => {
+        console.log('[AuthPage] Message received:', {
+          origin: event.origin,
+          expectedOrigin: window.location.origin,
+          type: event.data?.type,
+          hasIdToken: !!event.data?.idToken,
+          data: event.data
+        });
+
+        if (event.origin !== window.location.origin) {
+          console.warn('[AuthPage] Message origin mismatch, ignoring');
+          return;
+        }
+
+        if (event.data.type === 'GOOGLE_AUTH_SUCCESS' && event.data.idToken) {
+          console.log('[AuthPage] ✅ Received ID token from popup, authenticating...');
+          window.removeEventListener('message', handleMessage);
+          
+          if (popup) {
+            popup.close();
+          }
+          
+          await authenticateWithBackend(event.data.idToken);
+        } else if (event.data.type === 'GOOGLE_AUTH_ERROR' || event.data.type === 'AUTH_ERROR') {
+          console.error('[AuthPage] ❌ Auth error from popup:', event.data.error);
+          window.removeEventListener('message', handleMessage);
+          
+          if (popup) {
+            popup.close();
+          }
+          
+          setError(event.data.error || 'Authentication failed');
+          setIsLoading(false);
+        }
+      };
+
+      window.addEventListener('message', handleMessage);
+      console.log('[AuthPage] Message listener attached');
+
+      // Monitor popup closure
+      const checkPopup = setInterval(() => {
+        if (popup.closed) {
+          console.log('[AuthPage] ⚠️ Popup closed by user');
+          clearInterval(checkPopup);
+          window.removeEventListener('message', handleMessage);
+          setIsLoading(false);
+          setError('Sign-in was cancelled. Please try again.');
+        }
+      }, 500);
+      
+    } catch (err) {
+      console.error('Failed to trigger Google Sign-In:', err);
+      setError('Failed to start authentication. Please try again.');
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
       {/* Animated Gradient Background (from dashboard) */}
@@ -189,6 +458,13 @@ export default function AuthPage() {
             </p>
           </div>
 
+          {/* Session expired message */}
+          {reason === 'expired' && !error && (
+            <div className="mb-6 p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl">
+              <p className="text-sm text-amber-400 text-center">Your session has expired. Please sign in again.</p>
+            </div>
+          )}
+
           {/* Error message */}
           {error && (
             <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
@@ -198,6 +474,7 @@ export default function AuthPage() {
 
           {/* Google Sign-in Button */}
           <button
+            onClick={handleGoogleSignIn}
             disabled={isLoading}
             className={`w-full disabled:cursor-not-allowed disabled:opacity-50 font-semibold py-4 px-6 rounded-xl flex items-center justify-center gap-3 relative overflow-hidden ${styles.googleButton}`}
             style={isLoading ? {} : {
@@ -253,6 +530,15 @@ export default function AuthPage() {
               </>
             )}
           </button>
+
+          {/* Popup blocker help */}
+          {error?.includes('Popup was blocked') && (
+            <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+              <p className="text-xs text-blue-400 text-center leading-relaxed">
+                💡 <strong>Popup blocked?</strong> Check your browser's address bar for a popup blocker icon and allow popups for this site.
+              </p>
+            </div>
+          )}
 
           {/* Footer */}
           <p className="mt-8 text-center text-xs text-gray-500 leading-relaxed">

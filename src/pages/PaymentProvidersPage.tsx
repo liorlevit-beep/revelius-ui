@@ -149,11 +149,22 @@ export function PaymentProvidersPage() {
         console.log('[PaymentProviders] Full Access Key length:', storedAccessKey?.length || 0);
         console.log('[PaymentProviders] Full Secret Key length:', storedSecretKey?.length || 0);
         
-        // Fetch routing table and categories in parallel
-        const [routingResponse, categoriesResponse] = await Promise.all([
-          ProductsAPI.getRoutingTable(),
-          ProductsAPI.getCategories(),
-        ]);
+        let routingResponse;
+        let useFallback = false;
+        
+        // Try to fetch routing table first, with fallback to payment_providers
+        try {
+          console.log('[PaymentProviders] Attempting to fetch routing table...');
+          routingResponse = await ProductsAPI.getRoutingTable();
+        } catch (routingError: any) {
+          console.warn('[PaymentProviders] Routing table fetch failed, falling back to payment_providers endpoint:', routingError);
+          useFallback = true;
+          // Fallback: fetch from /products/payment_providers
+          routingResponse = await ProductsAPI.getPaymentProviders();
+        }
+        
+        // Fetch categories (always needed)
+        const categoriesResponse = await ProductsAPI.getCategories();
         
         // Extract categories
         const categoriesData = categoriesResponse?.data ?? categoriesResponse;
@@ -167,7 +178,7 @@ export function PaymentProvidersPage() {
         console.log('[PaymentProviders] Total categories:', categoriesList.length);
         
         const response = routingResponse;
-        console.log('[PaymentProviders] Raw API response:', response);
+        console.log(`[PaymentProviders] Raw API response (from ${useFallback ? 'payment_providers' : 'routing_table'}):`, response);
         console.log('[PaymentProviders] Raw API response (stringified):', JSON.stringify(response, null, 2));
         
         // Extract data

@@ -15,12 +15,90 @@ export class ApiError extends Error {
   }
 }
 
+// Track if we're currently refreshing to avoid multiple simultaneous refresh attempts
+let isRefreshing = false;
+let refreshPromise: Promise<boolean> | null = null;
+
 interface ApiFetchOptions {
   method?: 'GET' | 'POST';
   body?: unknown;
   sessionId?: string;
   signal?: AbortSignal;
   responseType?: 'json' | 'blob' | 'text';
+  _isRetry?: boolean; // Internal flag to prevent infinite retry loops
+}
+
+/**
+ * Attempt to refresh the authentication token
+ * Returns true if successful, false otherwise
+ */
+async function refreshAuthToken(): Promise<boolean> {
+  // If already refreshing, wait for that to complete
+  if (isRefreshing && refreshPromise) {
+    return refreshPromise;
+  }
+
+  isRefreshing = true;
+  refreshPromise = (async () => {
+    try {
+      console.log('[refreshAuthToken] Attempting to refresh token...');
+      const env = getEnvConfig();
+      const currentToken = localStorage.getItem('revelius_auth_token');
+      
+      if (!currentToken) {
+        console.log('[refreshAuthToken] No token to refresh');
+        return false;
+      }
+
+      const response = await fetch(`${env.baseUrl}/auth/refresh`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${currentToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        console.log('[refreshAuthToken] Refresh failed:', response.status);
+        return false;
+      }
+
+      const data = await response.json();
+      const newToken = data.session_token || data.token || data.data?.session_token || data.data?.token;
+      
+      if (!newToken) {
+        console.log('[refreshAuthToken] No token in refresh response');
+        return false;
+      }
+
+      // Update stored token
+      localStorage.setItem('revelius_auth_token', newToken);
+      const expiresAt = data.expires_at || data.data?.expires_at;
+      if (expiresAt) {
+        localStorage.setItem('revelius_auth_expires_at', expiresAt);
+      }
+
+      console.log('[refreshAuthToken] Token refreshed successfully');
+      return true;
+    } catch (error) {
+      console.error('[refreshAuthToken] Error:', error);
+      return false;
+    } finally {
+      isRefreshing = false;
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
+}
+
+/**
+ * Clear auth and redirect to login page
+ */
+function handleAuthFailure(reason: string = 'expired') {
+  console.log('[handleAuthFailure] Clearing auth and redirecting to /auth');
+  localStorage.removeItem('revelius_auth_token');
+  localStorage.removeItem('revelius_auth_expires_at');
+  window.location.assign(`/auth?reason=${reason}`);
 }
 
 /**
@@ -48,13 +126,22 @@ export async function apiFetch<T>(
   // Note: Browser may send OPTIONS preflight automatically for CORS - that's not from our code
   console.log(`[apiFetch] Making ${method} request to ${path}`);
 
-  // Get signed headers
-  const signedHeaders = getSignedHeaders(env.accessKey, env.secretKey, sessionId);
-
   // Build request headers
-  const headers: Record<string, string> = {
-    ...signedHeaders,
-  };
+  const headers: Record<string, string> = {};
+
+  // Check for session token from OAuth (preferred method)
+  const sessionToken = localStorage.getItem('revelius_auth_token');
+  
+  if (sessionToken) {
+    // Use Bearer token authentication
+    headers['Authorization'] = `Bearer ${sessionToken}`;
+    console.log(`[apiFetch] Using Bearer token authentication`);
+  } else {
+    // Fallback to signature-based authentication
+    const signedHeaders = getSignedHeaders(env.accessKey, env.secretKey, sessionId);
+    Object.assign(headers, signedHeaders);
+    console.log(`[apiFetch] Using signature-based authentication`);
+  }
 
   // Add Content-Type for JSON requests
   if (body && responseType !== 'blob') {
@@ -102,6 +189,25 @@ export async function apiFetch<T>(
           }
         } catch {
           // Use default error message
+        }
+      }
+
+      // Handle 401/403 - attempt token refresh once
+      const sessionToken = localStorage.getItem('revelius_auth_token');
+      if ((response.status === 401 || response.status === 403) && sessionToken && !opts._isRetry) {
+        console.log(`[${method} ${path}] Auth error, attempting token refresh...`);
+        
+        const refreshed = await refreshAuthToken();
+        
+        if (refreshed) {
+          console.log(`[${method} ${path}] Retrying request with new token...`);
+          // Retry the request once with the new token
+          return apiFetch<T>(path, { ...opts, _isRetry: true });
+        } else {
+          console.log(`[${method} ${path}] Refresh failed, redirecting to login`);
+          handleAuthFailure('expired');
+          // This will redirect, but throw anyway for proper error handling
+          throw new ApiError('Session expired. Please sign in again.', 401);
         }
       }
 
