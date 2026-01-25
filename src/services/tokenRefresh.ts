@@ -108,15 +108,7 @@ async function refreshToken(): Promise<boolean> {
       console.error('[TokenRefresh] URL that was called:', response.url);
       console.error('[TokenRefresh] Error response body:', errorText);
       console.error('[TokenRefresh] ========================================');
-      
-      // If refresh fails with 401/403, session is invalid - redirect to login
-      if (response.status === 401 || response.status === 403) {
-        console.log('[TokenRefresh] Session invalid, clearing auth');
-        localStorage.removeItem('revelius_auth_token');
-        localStorage.removeItem('revelius_refresh_token');
-        localStorage.removeItem('revelius_auth_expires_at');
-        window.location.assign('/auth?reason=expired');
-      }
+      console.error('[TokenRefresh] ⚠️  Token refresh failed, but NOT redirecting. User will stay on current page.');
       
       return false;
     }
@@ -239,11 +231,9 @@ function checkTokenExpiry() {
     console.log('[TokenRefresh] Token expires soon, refreshing proactively');
     refreshToken();
   } else if (timeUntilExpiry <= 0) {
-    console.log('[TokenRefresh] Token expired, redirecting to login');
-    localStorage.removeItem('revelius_auth_token');
-    localStorage.removeItem('revelius_refresh_token');
-    localStorage.removeItem('revelius_auth_expires_at');
-    window.location.assign('/auth?reason=expired');
+    console.log('[TokenRefresh] ⚠️  Token has expired, but NOT auto-redirecting');
+    console.log('[TokenRefresh] ProtectedRoute will handle auth check on next navigation');
+    stopTokenRefresh();
   }
 }
 

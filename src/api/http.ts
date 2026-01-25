@@ -269,9 +269,8 @@ export async function apiFetch<T>(
           // Retry the request once with the new token
           return apiFetch<T>(path, { ...opts, _isRetry: true });
         } else {
-          console.log(`[${method} ${path}] Refresh failed, redirecting to login`);
-          handleAuthFailure('expired');
-          // This will redirect, but throw anyway for proper error handling
+          console.log(`[${method} ${path}] ⚠️  Refresh failed, NOT redirecting - throwing error instead`);
+          // Just throw the error, let the calling code handle it
           throw new ApiError('Session expired. Please sign in again.', 401);
         }
       }
