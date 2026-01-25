@@ -228,15 +228,22 @@ export default function AuthPage() {
       
       // Send ID token to backend as Authorization Bearer token
       console.log('Sending ID token to backend as Bearer token...');
+      console.log('Backend URL:', `${env.baseUrl}/auth/login`);
+      
       const backendResponse = await fetch(`${env.baseUrl}/auth/login`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${idToken}`,
         },
+        credentials: 'include',
       });
+
+      console.log('Backend response status:', backendResponse.status);
+      console.log('Backend response headers:', Object.fromEntries(backendResponse.headers.entries()));
 
       if (!backendResponse.ok) {
         const errorData = await backendResponse.json().catch(() => ({}));
+        console.error('Backend error response:', errorData);
         throw new Error(errorData.error || `HTTP ${backendResponse.status}: ${backendResponse.statusText}`);
       }
 
