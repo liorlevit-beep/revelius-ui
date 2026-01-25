@@ -6,6 +6,7 @@
  */
 
 import { getEnvConfig } from '../config/env';
+import { navigateToAuth } from './navigation';
 
 // Refresh token 5 minutes before expiry
 const REFRESH_BUFFER_MS = 5 * 60 * 1000;
@@ -106,39 +107,9 @@ async function refreshToken(): Promise<boolean> {
       localStorage.removeItem('revelius_refresh_token');
       localStorage.removeItem('revelius_auth_expires_at');
       
-      // Redirect to auth page - use multiple methods for maximum compatibility
-      const currentPath = window.location.pathname;
-      const isGitHubPages = window.location.hostname.includes('github.io');
-      
-      let basePath = '/';
-      if (isGitHubPages) {
-        const pathParts = currentPath.split('/').filter(p => p);
-        if (pathParts.length > 0) {
-          basePath = `/${pathParts[0]}/`;
-        }
-      }
-      
-      const authPath = `${basePath}auth`.replace(/\/+/g, '/');
-      const redirectUrl = `${authPath}?reason=expired`;
-      
-      console.error('[TokenRefresh] Current pathname:', currentPath);
-      console.error('[TokenRefresh] Is GitHub Pages:', isGitHubPages);
-      console.error('[TokenRefresh] Detected base path:', basePath);
-      console.error('[TokenRefresh] Redirect URL:', redirectUrl);
-      console.error('[TokenRefresh] Attempting redirect...');
-      
-      // Try multiple redirect methods for compatibility with embedded browsers
-      try {
-        window.location.replace(redirectUrl);
-      } catch (e) {
-        console.error('[TokenRefresh] replace() failed, trying assign:', e);
-        try {
-          window.location.assign(redirectUrl);
-        } catch (e2) {
-          console.error('[TokenRefresh] assign() failed, trying href:', e2);
-          window.location.href = redirectUrl;
-        }
-      }
+      // Redirect to auth page using React Router (works in all browsers including embedded)
+      console.error('[TokenRefresh] Refresh endpoint failed - redirecting to auth');
+      navigateToAuth('expired');
       
       return false;
     }
@@ -197,39 +168,9 @@ async function refreshToken(): Promise<boolean> {
     localStorage.removeItem('revelius_refresh_token');
     localStorage.removeItem('revelius_auth_expires_at');
     
-    // Redirect to auth page - use multiple methods for maximum compatibility
-    const currentPath = window.location.pathname;
-    const isGitHubPages = window.location.hostname.includes('github.io');
-    
-    let basePath = '/';
-    if (isGitHubPages) {
-      const pathParts = currentPath.split('/').filter(p => p);
-      if (pathParts.length > 0) {
-        basePath = `/${pathParts[0]}/`;
-      }
-    }
-    
-    const authPath = `${basePath}auth`.replace(/\/+/g, '/');
-    const redirectUrl = `${authPath}?reason=expired`;
-    
-    console.error('[TokenRefresh] Current pathname:', currentPath);
-    console.error('[TokenRefresh] Is GitHub Pages:', isGitHubPages);
-    console.error('[TokenRefresh] Detected base path:', basePath);
-    console.error('[TokenRefresh] Redirect URL:', redirectUrl);
-    console.error('[TokenRefresh] Attempting redirect...');
-    
-    // Try multiple redirect methods for compatibility with embedded browsers
-    try {
-      window.location.replace(redirectUrl);
-    } catch (e) {
-      console.error('[TokenRefresh] replace() failed, trying assign:', e);
-      try {
-        window.location.assign(redirectUrl);
-      } catch (e2) {
-        console.error('[TokenRefresh] assign() failed, trying href:', e2);
-        window.location.href = redirectUrl;
-      }
-    }
+    // Redirect to auth page using React Router (works in all browsers including embedded)
+    console.error('[TokenRefresh] Exception during refresh - redirecting to auth');
+    navigateToAuth('expired');
     
     return false;
   } finally {

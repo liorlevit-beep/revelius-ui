@@ -1,5 +1,5 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
-import { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { SidebarProvider } from './contexts/SidebarContext';
 import { ModeProvider } from './contexts/ModeContext';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
@@ -36,12 +36,19 @@ import Auth2 from './pages/Auth2';
 import AuthPage from './pages/AuthPage';
 import AuthCallback from './pages/AuthCallback';
 import { useSidebar } from './contexts/SidebarContext';
+import { setNavigate } from './services/navigation';
 
 function AppContent() {
   const { collapsed } = useSidebar();
   const { darkMode, toggleDarkMode } = useTheme();
   const location = useLocation();
+  const navigate = useNavigate();
   const [timeRange, setTimeRange] = useState('7');
+
+  // Set navigate function for the navigation service (used by auth refresh)
+  useEffect(() => {
+    setNavigate(navigate);
+  }, [navigate]);
 
   // Determine page title based on route
   const getPageTitle = () => {
