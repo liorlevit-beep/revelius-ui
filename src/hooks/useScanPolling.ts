@@ -26,9 +26,9 @@ export function useScanPolling({
   onComplete,
   onFailed,
 }: UseScanPollingOptions) {
-  const pollTimerRef = useRef<NodeJS.Timeout>();
+  const pollTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const startTimeRef = useRef<number>(Date.now());
-  const lastStatusRef = useRef<string | undefined>();
+  const lastStatusRef = useRef<string | undefined>(undefined);
   const lastSuccessfulPollRef = useRef<number>(Date.now());
   const isPollingRef = useRef(false);
 

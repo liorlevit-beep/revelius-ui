@@ -18,7 +18,7 @@ export function DarkGradientBackground({
 }: DarkGradientBackgroundProps) {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const interactiveBlobRef = useRef<HTMLDivElement>(null);
-  const animationFrameRef = useRef<number>();
+  const animationFrameRef = useRef<number | undefined>(undefined);
   const targetRef = useRef({ x: 0, y: 0 });
   const currentRef = useRef({ x: 0, y: 0 });
 

@@ -1,4 +1,5 @@
-import { useState, useMemo, useRef, useEffect, ReactNode } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
+import type { ReactNode } from 'react';
 import { ChevronUp, ChevronDown, ChevronsUpDown, Columns3, Loader2, AlertCircle } from 'lucide-react';
 import { saveTableState, getTableState } from '../../utils/tableStorage';
 

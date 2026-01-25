@@ -8,7 +8,7 @@ import styles from './AuthPage.module.css';
 declare global {
   interface Window {
     particlesJS: any;
-    google: {
+    google?: {
       accounts: {
         id: {
           initialize: (config: any) => void;

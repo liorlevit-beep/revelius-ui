@@ -182,11 +182,11 @@ export function PaymentProvidersPage() {
         console.log('[PaymentProviders] Raw API response (stringified):', JSON.stringify(response, null, 2));
         
         // Extract data
-        const data = response?.data ?? response;
+        const data = (response?.data ?? response) as any;
         console.log('[PaymentProviders] Extracted data:', data);
         
-        const defaultPsp = data?.default_psp ?? '';
-        const mapping = data?.mapping ?? {};
+        const defaultPsp = (data?.default_psp ?? '') as string;
+        const mapping = (data?.mapping ?? {}) as Record<string, string[]>;
         
         console.log('[PaymentProviders] Default PSP:', defaultPsp);
         console.log('[PaymentProviders] Mapping object:', mapping);

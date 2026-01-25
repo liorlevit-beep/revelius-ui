@@ -1,4 +1,5 @@
-import { ReactNode, useRef, useState, MouseEvent } from 'react';
+import { useRef, useState } from 'react';
+import type { ReactNode, MouseEvent } from 'react';
 import styles from './tiltCard.module.css';
 
 interface TiltCardProps {
