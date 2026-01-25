@@ -235,7 +235,6 @@ export default function AuthPage() {
         headers: {
           'Authorization': `Bearer ${idToken}`,
         },
-        credentials: 'include',
       });
 
       console.log('Backend response status:', backendResponse.status);
