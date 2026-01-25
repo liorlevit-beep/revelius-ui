@@ -323,7 +323,7 @@ export default function AuthPage() {
     await authenticateWithBackend(idToken);
   };
 
-  // Handle Google Sign-in button click - open popup manually
+  // Handle Google Sign-in button click - use redirect flow (no popups)
   const handleGoogleSignIn = () => {
     setError(null);
     setIsLoading(true);
@@ -337,13 +337,12 @@ export default function AuthPage() {
       }
 
       console.log('========================================');
-      console.log('[AuthPage] Opening Google Sign-In popup');
+      console.log('[AuthPage] Starting Google Sign-In (redirect flow)');
       console.log('========================================');
       
-      // Create OAuth URL for popup - use BASE_URL from Vite config
-      // Router's basename will handle the routing, we just need the full URL
+      // Create OAuth URL for redirect - use BASE_URL from Vite config
       const basePath = import.meta.env.BASE_URL || '/';
-      const redirectUri = `${window.location.origin}${basePath}auth/callback`;
+      const redirectUri = `${window.location.origin}${basePath}auth/callback`.replace(/\/+/g, '/').replace(':/', '://');
       const state = Math.random().toString(36).substring(7);
       const nonce = Math.random().toString(36).substring(7);
       
@@ -365,81 +364,10 @@ export default function AuthPage() {
         `&prompt=select_account`;
 
       console.log('[AuthPage] Auth URL:', authUrl);
-
-      const width = 500;
-      const height = 600;
-      const left = window.screen.width / 2 - width / 2;
-      const top = window.screen.height / 2 - height / 2;
+      console.log('[AuthPage] Redirecting to Google (no popup)...');
       
-      console.log('[AuthPage] Attempting to open popup...');
-      const popup = window.open(
-        authUrl,
-        'Google Sign-In',
-        `width=${width},height=${height},left=${left},top=${top}`
-      );
-
-      console.log('[AuthPage] Popup opened:', !!popup);
-      console.log('[AuthPage] Popup closed?:', popup?.closed);
-
-      if (!popup || popup.closed) {
-        console.error('[AuthPage] Popup was blocked or closed immediately');
-        setError('Popup was blocked. Please allow popups for this site and try again.');
-        setIsLoading(false);
-        return;
-      }
-      
-      console.log('[AuthPage] Popup successfully opened, listening for messages...');
-
-      // Listen for messages from the callback page
-      const handleMessage = async (event: MessageEvent) => {
-        console.log('[AuthPage] Message received:', {
-          origin: event.origin,
-          expectedOrigin: window.location.origin,
-          type: event.data?.type,
-          hasIdToken: !!event.data?.idToken,
-          data: event.data
-        });
-
-        if (event.origin !== window.location.origin) {
-          console.warn('[AuthPage] Message origin mismatch, ignoring');
-          return;
-        }
-
-        if (event.data.type === 'GOOGLE_AUTH_SUCCESS' && event.data.idToken) {
-          console.log('[AuthPage] ✅ Received ID token from popup, authenticating...');
-          window.removeEventListener('message', handleMessage);
-          
-          if (popup) {
-            popup.close();
-          }
-          
-          await authenticateWithBackend(event.data.idToken);
-        } else if (event.data.type === 'GOOGLE_AUTH_ERROR' || event.data.type === 'AUTH_ERROR') {
-          console.error('[AuthPage] ❌ Auth error from popup:', event.data.error);
-          window.removeEventListener('message', handleMessage);
-          
-          if (popup) {
-            popup.close();
-          }
-          
-          setError(event.data.error || 'Authentication failed');
-          setIsLoading(false);
-        }
-      };
-
-      window.addEventListener('message', handleMessage);
-      console.log('[AuthPage] Message listener attached');
-
-      // Monitor popup closure
-      const checkPopup = setInterval(() => {
-        if (popup.closed) {
-          console.log('[AuthPage] ⚠️ Popup closed by user');
-          clearInterval(checkPopup);
-          window.removeEventListener('message', handleMessage);
-          setIsLoading(false);
-          setError('Sign-in was cancelled. Please try again.');
-        }
-      }, 500);
+      // Use window redirect instead of popup - works in all browsers including Cursor
+      window.location.href = authUrl;
       
     } catch (err) {
       console.error('Failed to trigger Google Sign-In:', err);
