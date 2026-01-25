@@ -1,163 +1,119 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useEffect } from 'react';
 
 /**
- * OAuth Callback Page
- * 
- * Flow:
- * 1. Frontend opens popup directly to Google OAuth
- * 2. User authenticates with Google
- * 3. Google redirects popup to backend at /auth/google/callback with authorization code
- * 4. Backend exchanges code with Google for tokens
- * 5. Backend creates session and redirects here with session_token
- * 6. This page verifies state and sends token to parent window (popup opener)
- * 7. Parent window stores token and navigates to dashboard
+ * AuthCallback page - handles OAuth redirect from Google
+ * Extracts ID token from URL hash and sends it back to parent window
  */
 export default function AuthCallback() {
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
-  const [status, setStatus] = useState('Processing...');
-
   useEffect(() => {
-    const handleCallback = () => {
-      console.log('========================================');
-      console.log('[AuthCallback] Starting callback processing');
-      console.log('[AuthCallback] Full URL:', window.location.href);
-      console.log('[AuthCallback] Is popup?', !!window.opener);
-      console.log('========================================');
-      
-      // Check for Google OAuth response in hash fragment (for id_token)
-      const hash = window.location.hash.substring(1);
-      const hashParams = new URLSearchParams(hash);
-      const idToken = hashParams.get('id_token');
-      const hashState = hashParams.get('state');
-      const hashError = hashParams.get('error');
-      
-      console.log('[AuthCallback] Hash fragment:', hash);
-      console.log('[AuthCallback] Hash params:', Object.fromEntries(hashParams.entries()));
-      
-      // Also check query parameters (for session_token from our backend)
-      const token = searchParams.get('token');
-      const sessionToken = searchParams.get('session_token');
-      const queryError = searchParams.get('error');
-      const queryState = searchParams.get('state');
-      
-      console.log('[AuthCallback] Query params:', Object.fromEntries(searchParams.entries()));
-      
-      const error = hashError || queryError;
-      const state = hashState || queryState;
-      
-      console.log('[AuthCallback] ID Token found:', !!idToken, idToken ? `(length: ${idToken.length})` : '');
-      console.log('[AuthCallback] Session Token found:', !!sessionToken);
-      console.log('[AuthCallback] Error:', error);
-      console.log('[AuthCallback] State:', state);
-      
-      // Verify state to prevent CSRF attacks
-      const savedState = sessionStorage.getItem('google_auth_state') || sessionStorage.getItem('oauth_state');
-      if (state && savedState && state !== savedState) {
-        console.error('State mismatch - possible CSRF attack');
-        sendErrorToParent('Invalid state parameter');
-        return;
-      }
-      
-      // Clean up state
-      sessionStorage.removeItem('google_auth_state');
-      sessionStorage.removeItem('oauth_state');
-      sessionStorage.removeItem('frontend_callback');
-
-      if (error) {
-        sendErrorToParent(error);
-        return;
-      }
-
-      // Handle Google ID token (from OAuth popup)
-      if (idToken) {
-        console.log('[AuthCallback] ✅ Processing Google ID token...');
-        setStatus('Processing Google sign-in...');
-        
-        if (window.opener) {
-          console.log('[AuthCallback] Sending ID token to parent window...');
-          window.opener.postMessage({
-            type: 'GOOGLE_AUTH_SUCCESS',
-            idToken: idToken
-          }, window.location.origin);
-          console.log('[AuthCallback] Message sent, closing popup...');
-          setTimeout(() => window.close(), 500);
-        } else {
-          // If not in popup, we can't proceed - need to show error
-          console.error('[AuthCallback] ❌ Not in popup context (no window.opener)');
-          sendErrorToParent('Authentication window error. Please try again.');
-        }
-        return;
-      }
-
-      // Handle session token (from our backend)
-      const authToken = sessionToken || token;
-      if (authToken) {
-        console.log('Processing session token...');
-        setStatus('Authentication successful!');
-        
-        if (window.opener) {
-          window.opener.postMessage({
-            type: 'AUTH_SUCCESS',
-            token: authToken,
-            expiresAt: searchParams.get('expires_at')
-          }, window.location.origin);
-          window.close();
-        } else {
-          // If not in popup, store token and redirect to dashboard
-          localStorage.setItem('revelius_auth_token', authToken);
-          const expiresAt = searchParams.get('expires_at');
-          if (expiresAt) {
-            localStorage.setItem('revelius_auth_expires_at', expiresAt);
-          }
-          navigate('/');
-        }
-        return;
-      }
-
-      // No token found
-      sendErrorToParent('No authentication token received');
-    };
-
-    handleCallback();
-  }, [searchParams, navigate]);
-
-  const sendErrorToParent = (errorMessage: string) => {
-    setStatus(`Error: ${errorMessage}`);
+    console.log('[AuthCallback] Page loaded');
+    console.log('[AuthCallback] Full URL:', window.location.href);
+    console.log('[AuthCallback] Hash:', window.location.hash);
     
-    if (window.opener) {
-      window.opener.postMessage({
-        type: 'AUTH_ERROR',
-        error: errorMessage
-      }, window.location.origin);
+    try {
+      // Parse the URL hash fragment (Google returns id_token in hash after #)
+      const hash = window.location.hash.substring(1); // Remove '#'
+      const params = new URLSearchParams(hash);
       
-      // Close popup after a short delay to show error
-      setTimeout(() => window.close(), 2000);
-    } else {
-      // If not in popup, redirect to auth page with error
-      navigate('/auth?error=' + encodeURIComponent(errorMessage));
+      console.log('[AuthCallback] Hash params:', Object.fromEntries(params.entries()));
+      
+      const idToken = params.get('id_token');
+      const state = params.get('state');
+      const error = params.get('error');
+      const errorDescription = params.get('error_description');
+      
+      if (error) {
+        console.error('[AuthCallback] OAuth error:', error, errorDescription);
+        
+        // Send error back to parent
+        if (window.opener) {
+          window.opener.postMessage({
+            type: 'GOOGLE_AUTH_ERROR',
+            error: errorDescription || error,
+          }, window.location.origin);
+          
+          console.log('[AuthCallback] Error sent to parent, closing popup...');
+          window.close();
+        }
+        return;
+      }
+      
+      if (!idToken) {
+        console.error('[AuthCallback] No ID token in URL');
+        
+        // Send error back to parent
+        if (window.opener) {
+          window.opener.postMessage({
+            type: 'GOOGLE_AUTH_ERROR',
+            error: 'No authentication token received',
+          }, window.location.origin);
+          
+          console.log('[AuthCallback] Error sent to parent, closing popup...');
+          window.close();
+        }
+        return;
+      }
+      
+      // Verify state matches (CSRF protection)
+      const savedState = sessionStorage.getItem('google_auth_state');
+      console.log('[AuthCallback] State from URL:', state);
+      console.log('[AuthCallback] State from sessionStorage:', savedState);
+      
+      if (state !== savedState) {
+        console.error('[AuthCallback] State mismatch! Possible CSRF attack');
+        
+        if (window.opener) {
+          window.opener.postMessage({
+            type: 'GOOGLE_AUTH_ERROR',
+            error: 'Security validation failed. Please try again.',
+          }, window.location.origin);
+          
+          window.close();
+        }
+        return;
+      }
+      
+      console.log('[AuthCallback] ✅ ID token received, length:', idToken.length);
+      
+      // Send token back to parent window
+      if (window.opener) {
+        console.log('[AuthCallback] Sending ID token to parent window...');
+        window.opener.postMessage({
+          type: 'GOOGLE_AUTH_SUCCESS',
+          idToken: idToken,
+        }, window.location.origin);
+        
+        console.log('[AuthCallback] Message sent, popup will close');
+        
+        // Parent window will close the popup
+      } else {
+        console.error('[AuthCallback] No opener window found!');
+      }
+      
+    } catch (err) {
+      console.error('[AuthCallback] Error processing callback:', err);
+      
+      if (window.opener) {
+        window.opener.postMessage({
+          type: 'GOOGLE_AUTH_ERROR',
+          error: 'Failed to process authentication response',
+        }, window.location.origin);
+        
+        window.close();
+      }
     }
-  };
-
+  }, []);
+  
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900">
+    <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
       <div className="text-center">
-        {status.startsWith('Error:') ? (
-          <>
-            <div className="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </div>
-            <p className="text-red-400">{status}</p>
-          </>
-        ) : (
-          <>
-            <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-gray-400">{status}</p>
-          </>
-        )}
+        <div className="mb-4">
+          <svg className="animate-spin h-12 w-12 mx-auto text-purple-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+        </div>
+        <p className="text-lg">Completing sign-in...</p>
       </div>
     </div>
   );
