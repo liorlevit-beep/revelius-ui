@@ -63,28 +63,51 @@ async function refreshToken(): Promise<boolean> {
     // Check if we have a refresh token
     const refreshToken = localStorage.getItem('revelius_refresh_token');
     
-    console.log('[TokenRefresh] Calling:', `${env.baseUrl}/auth/refresh`);
-    console.log('[TokenRefresh] Has refresh token:', !!refreshToken);
-    console.log('[TokenRefresh] Using token:', (refreshToken || currentToken).substring(0, 20) + '...');
+    const requestUrl = `${env.baseUrl}/auth/refresh`;
+    const requestHeaders = {
+      'Authorization': `Bearer ${refreshToken || currentToken}`,
+      'Content-Type': 'application/json',
+    };
+    const requestBody = {
+      refresh_token: refreshToken || currentToken,
+    };
     
-    const response = await fetch(`${env.baseUrl}/auth/refresh`, {
+    console.log('[TokenRefresh] ========================================');
+    console.log('[TokenRefresh] 📤 SENDING REFRESH REQUEST');
+    console.log('[TokenRefresh] URL:', requestUrl);
+    console.log('[TokenRefresh] Method: POST');
+    console.log('[TokenRefresh] Has refresh_token in localStorage:', !!refreshToken);
+    console.log('[TokenRefresh] Using token (first 20 chars):', (refreshToken || currentToken).substring(0, 20) + '...');
+    console.log('[TokenRefresh] Headers:', {
+      'Authorization': 'Bearer ' + (refreshToken || currentToken).substring(0, 20) + '...',
+      'Content-Type': 'application/json',
+    });
+    console.log('[TokenRefresh] Body:', {
+      refresh_token: (refreshToken || currentToken).substring(0, 20) + '...'
+    });
+    console.log('[TokenRefresh] ========================================');
+    
+    const response = await fetch(requestUrl, {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${refreshToken || currentToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        refresh_token: refreshToken || currentToken,
-      }),
+      headers: requestHeaders,
+      body: JSON.stringify(requestBody),
     });
     
+    console.log('[TokenRefresh] ========================================');
     console.log('[TokenRefresh] Response status:', response.status);
+    console.log('[TokenRefresh] Response statusText:', response.statusText);
+    console.log('[TokenRefresh] Response URL:', response.url);
     console.log('[TokenRefresh] Response headers:', Object.fromEntries(response.headers.entries()));
+    console.log('[TokenRefresh] ========================================');
     
     if (!response.ok) {
       const errorText = await response.text().catch(() => '');
-      console.error('[TokenRefresh] ❌ Refresh failed with status:', response.status);
-      console.error('[TokenRefresh] Error response:', errorText);
+      console.error('[TokenRefresh] ========================================');
+      console.error('[TokenRefresh] ❌ REFRESH FAILED');
+      console.error('[TokenRefresh] Status:', response.status, response.statusText);
+      console.error('[TokenRefresh] URL that was called:', response.url);
+      console.error('[TokenRefresh] Error response body:', errorText);
+      console.error('[TokenRefresh] ========================================');
       
       // If refresh fails with 401/403, session is invalid - redirect to login
       if (response.status === 401 || response.status === 403) {
@@ -98,8 +121,15 @@ async function refreshToken(): Promise<boolean> {
       return false;
     }
     
-    const data = await response.json();
-    console.log('[TokenRefresh] Success response:', data);
+    const rawText = await response.text();
+    console.log('[TokenRefresh] ========================================');
+    console.log('[TokenRefresh] ✅ REFRESH SUCCESS');
+    console.log('[TokenRefresh] Raw response body:', rawText);
+    console.log('[TokenRefresh] Response length:', rawText.length, 'bytes');
+    console.log('[TokenRefresh] ========================================');
+    
+    const data = JSON.parse(rawText);
+    console.log('[TokenRefresh] Parsed response:', data);
     const newToken = data.session_token || data.token || data.data?.session_token || data.data?.token;
     const newRefreshToken = data.refresh_token || data.data?.refresh_token;
     
