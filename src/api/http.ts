@@ -144,6 +144,12 @@ export async function apiFetch<T>(
     console.log(`[apiFetch] Using signature-based authentication`);
   }
 
+  // Add session ID header if provided (for scanner endpoints)
+  if (sessionId) {
+    headers['X-Session-Id'] = sessionId;
+    console.log(`[apiFetch] Adding session ID header: ${sessionId}`);
+  }
+
   // Add Content-Type for JSON requests
   if (body && responseType !== 'blob') {
     headers['Content-Type'] = 'application/json';
