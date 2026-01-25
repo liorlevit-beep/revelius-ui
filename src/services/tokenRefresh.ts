@@ -106,8 +106,11 @@ async function refreshToken(): Promise<boolean> {
       localStorage.removeItem('revelius_refresh_token');
       localStorage.removeItem('revelius_auth_expires_at');
       
-      // Redirect to auth page
-      window.location.assign('/auth?reason=expired');
+      // Redirect to auth page (including base path for GitHub Pages)
+      const basePath = import.meta.env.BASE_URL || '/';
+      const authUrl = `${window.location.origin}${basePath}auth?reason=expired`;
+      console.error('[TokenRefresh] Redirecting to:', authUrl);
+      window.location.href = authUrl;
       
       return false;
     }
@@ -166,8 +169,11 @@ async function refreshToken(): Promise<boolean> {
     localStorage.removeItem('revelius_refresh_token');
     localStorage.removeItem('revelius_auth_expires_at');
     
-    // Redirect to auth page
-    window.location.assign('/auth?reason=expired');
+    // Redirect to auth page (including base path for GitHub Pages)
+    const basePath = import.meta.env.BASE_URL || '/';
+    const authUrl = `${window.location.origin}${basePath}auth?reason=expired`;
+    console.error('[TokenRefresh] Redirecting to:', authUrl);
+    window.location.href = authUrl;
     
     return false;
   } finally {
