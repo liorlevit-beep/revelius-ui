@@ -146,8 +146,8 @@ export async function apiFetch<T>(
 
   // Add session ID header if provided (for scanner endpoints)
   if (sessionId) {
-    headers['X-Session-Id'] = sessionId;
-    console.log(`[apiFetch] Adding session ID header: ${sessionId}`);
+    headers['Session-Id'] = sessionId;
+    console.log(`[apiFetch] Adding Session-Id header: ${sessionId}`);
   }
 
   // Add Content-Type for JSON requests
