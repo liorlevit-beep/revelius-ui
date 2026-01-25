@@ -70,7 +70,7 @@ try {
   // If keys are missing, set a placeholder config
   // The API will fail gracefully and the modal will prompt for keys
   env = {
-    baseUrl: import.meta.env.VITE_REVELIUS_API_BASE_URL || 'http://api.revelius.com',
+    baseUrl: import.meta.env.VITE_REVELIUS_API_BASE_URL || 'https://api.revelius.com',
     accessKey: '',
     secretKey: '',
     mock: (import.meta.env.VITE_REVELIUS_MOCK || "0") === "1",
