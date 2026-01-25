@@ -80,6 +80,73 @@ const PROVIDER_DOMAINS: Record<string, string> = {
   'dlocal': 'dlocal-sbox.com',
 };
 
+// Provider brand colors (official brand colors for each payment provider)
+const PROVIDER_BRAND_COLORS: Record<string, string> = {
+  '2c2p': '#00A4E0',
+  'adyen': '#0ABF53',
+  'adyen_eu': '#0ABF53',
+  'airwallex': '#6366F1',
+  'alipay': '#1677FF',
+  'authorizenet': '#0085CA',
+  'bluesnap': '#00A0DF',
+  'braintree': '#00AA6C',
+  'chasepaymentech': '#117ACA',
+  'checkoutcom': '#6C5CE7',
+  'checkoutcom_uk': '#6C5CE7',
+  'cielo': '#00AEEF',
+  'dlocal': '#FF6B00',
+  'ebanx': '#FF6900',
+  'elavon': '#00A3E0',
+  'fis': '#FF6600',
+  'fiserv': '#FF6600',
+  'flutterwave': '#F5A623',
+  'globalpayments': '#00A3E0',
+  'gocardless': '#27AE60',
+  'hyp': '#8E44AD',
+  'hyperpay': '#8E44AD',
+  'isracard': '#0066CC',
+  'klarna': '#FFB3C7',
+  'mercadopago': '#00B1EA',
+  'mollie': '#0A7EE8',
+  'mpesa': '#00A65E',
+  'networkinternational': '#003DA5',
+  'nexi': '#EA1C2C',
+  'nuvei': '#0070C0',
+  'pagseguro': '#FF8A00',
+  'paymob': '#2ECC71',
+  'paypal': '#003087',
+  'paypal_us': '#003087',
+  'payplus': '#6C5CE7',
+  'paystack': '#00C3F7',
+  'paytm': '#00BAF2',
+  'payu': '#95C11F',
+  'payu_latam': '#95C11F',
+  'payu_uk': '#95C11F',
+  'rapyd': '#00C48C',
+  'razorpay': '#3395FF',
+  'square': '#000000',
+  'stripe': '#635BFF',
+  'stripe_uk': '#635BFF',
+  'stripe_us': '#635BFF',
+  'tranzila': '#0066CC',
+  'truelayer': '#00D4FF',
+  'trustly': '#1ED760',
+  'vivawallet': '#E94B3C',
+  'wechatpay': '#09BB07',
+  'worldline': '#00A3E0',
+  'worldpay': '#D62828',
+  'worldpay_uk': '#D62828',
+  'xendit': '#01D5B6',
+  'zcredit': '#6C5CE7',
+};
+
+// Fallback color palette for providers not in the brand colors map
+const FALLBACK_COLORS = [
+  '#635BFF', '#0ABF53', '#FF6600', '#6C5CE7', '#D62828',
+  '#00C48C', '#00AA6C', '#000000', '#003087', '#0085CA',
+  '#8B5CF6', '#EC4899', '#F59E0B', '#10B981', '#3B82F6',
+];
+
 // Providers that should skip logo.dev and use local assets directly
 const LOCAL_ONLY_PROVIDERS = new Set<string>([
   'isracard',
@@ -183,6 +250,23 @@ export function markProviderLogoFailed(providerKey: string): void {
   if (import.meta.env.DEV) {
     console.warn(`[ProviderLogo] ❌ Marked "${providerKey}" as failed, will use local fallback`);
   }
+}
+
+/**
+ * Get the brand color for a payment provider
+ * Returns the official brand color or a fallback color based on provider index
+ */
+export function getProviderBrandColor(providerKey: string, fallbackIndex: number = 0): string {
+  const lowerKey = providerKey.toLowerCase();
+  
+  // Check if we have a brand color for this provider
+  if (PROVIDER_BRAND_COLORS[lowerKey]) {
+    return PROVIDER_BRAND_COLORS[lowerKey];
+  }
+  
+  // Use fallback color palette
+  const colorIndex = fallbackIndex % FALLBACK_COLORS.length;
+  return FALLBACK_COLORS[colorIndex];
 }
 
 /**

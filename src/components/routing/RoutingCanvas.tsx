@@ -6,6 +6,7 @@ import { getProviderDisplayName } from '../../data/providerRegions';
 import { ProviderRouteModal } from './ProviderRouteModal';
 import { computeCartEligibility } from '../../utils/routingEligibility';
 import { PaymentProviderLogo } from '../paymentProviders/PaymentProviderLogo';
+import { getProviderBrandColor } from '../../utils/providerLogoResolver';
 import type { SKU, LineItem } from '../../demo/transactions';
 
 // Types
@@ -62,40 +63,7 @@ interface RoutingCanvasProps {
   glassTheme?: boolean;
 }
 
-// Provider configuration - Default/fallback config
-const DEFAULT_PSP_CONFIG: Record<string, { color: string; logo: string }> = {
-  stripe: { color: '#635BFF', logo: 'https://cdn.brandfetch.io/stripe.com/w/400/h/400/theme/dark/icon.jpeg' },
-  adyen: { color: '#0ABF53', logo: 'https://cdn.brandfetch.io/adyen.com/w/400/h/400/theme/dark/icon.jpeg' },
-  fiserv: { color: '#FF6600', logo: 'https://cdn.brandfetch.io/fiserv.com/w/400/h/400/theme/dark/icon.jpeg' },
-  checkout: { color: '#6C5CE7', logo: 'https://cdn.brandfetch.io/checkout.com/w/400/h/400/theme/dark/icon.jpeg' },
-  worldpay: { color: '#D62828', logo: 'https://logo.clearbit.com/worldpay.com' },
-  rapyd: { color: '#00C48C', logo: 'https://logo.clearbit.com/rapyd.net' },
-  braintree: { color: '#00AA6C', logo: 'https://logo.clearbit.com/braintreepayments.com' },
-  square: { color: '#000000', logo: 'https://logo.clearbit.com/squareup.com' },
-  paypal: { color: '#003087', logo: 'https://logo.clearbit.com/paypal.com' },
-  authorize: { color: '#0085CA', logo: 'https://logo.clearbit.com/authorize.net' },
-};
-
-// Stable color palette for providers not in default config
-const PROVIDER_COLORS = [
-  '#635BFF', '#0ABF53', '#FF6600', '#6C5CE7', '#D62828',
-  '#00C48C', '#00AA6C', '#000000', '#003087', '#0085CA',
-  '#8B5CF6', '#EC4899', '#F59E0B', '#10B981', '#3B82F6',
-];
-
-function getProviderConfig(providerKey: string, index: number): { color: string; logo: string } {
-  const lowerKey = providerKey.toLowerCase();
-  
-  if (DEFAULT_PSP_CONFIG[lowerKey]) {
-    return DEFAULT_PSP_CONFIG[lowerKey];
-  }
-  
-  const colorIndex = index % PROVIDER_COLORS.length;
-  return {
-    color: PROVIDER_COLORS[colorIndex],
-    logo: `https://logo.clearbit.com/${lowerKey}.com`
-  };
-}
+// Note: Provider logos and brand colors are now managed in providerLogoResolver.ts
 
 // Cubic bezier point calculation
 function cubicBezierPoint(t: number, p0: Point, p1: Point, p2: Point, p3: Point): Point {
@@ -243,11 +211,13 @@ export function RoutingCanvas({
   const pspConfig = useMemo(() => {
     const providers = (availableProviders && availableProviders.length > 0)
       ? availableProviders 
-      : ['stripe', 'adyen', 'checkout', 'braintree', 'rapyd'];
+      : ['stripe', 'adyen', 'checkoutcom', 'braintree', 'rapyd'];
     
-    const config: Record<string, { color: string; logo: string }> = {};
+    const config: Record<string, { color: string }> = {};
     providers.forEach((provider, index) => {
-      config[provider] = getProviderConfig(provider, index);
+      config[provider] = {
+        color: getProviderBrandColor(provider, index)
+      };
     });
     
     return config;
