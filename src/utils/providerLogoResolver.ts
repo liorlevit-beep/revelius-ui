@@ -1,19 +1,82 @@
 /**
- * Robust provider logo resolver
- * 1. Checks for local SVG in /public/provider-logos/{key}.svg
- * 2. Falls back to initials avatar if not found
- * 3. Logs warnings in dev mode when logos are missing
+ * Provider logo resolver using logo.dev API
+ * 1. Tries logo.dev/name/{companyName} first (using pk_McRnKQqUS2C-RKXK44iXwQ)
+ * 2. Falls back to local SVG in /public/provider-logos/{key}.svg
+ * 3. Falls back to initials avatar if all else fails
  */
 
 interface LogoResult {
-  type: 'svg' | 'initials';
+  type: 'logo-dev' | 'local' | 'initials';
   src?: string;
   initials?: string;
   fallbackReason?: string;
 }
 
-// Cache to avoid repeated 404 checks
-const logoCache = new Map<string, LogoResult>();
+// Logo.dev publishable key (provided by user)
+const LOGO_DEV_TOKEN = 'pk_McRnKQqUS2C-RKXK44iXwQ';
+
+// Map provider keys to their brand names for logo.dev
+const PROVIDER_BRAND_NAMES: Record<string, string> = {
+  '2c2p': '2C2P',
+  'adyen': 'Adyen',
+  'adyen_eu': 'Adyen',
+  'airwallex': 'Airwallex',
+  'alipay': 'Alipay',
+  'authorizenet': 'Authorize.Net',
+  'bluesnap': 'BlueSnap',
+  'braintree': 'Braintree',
+  'chasepaymentech': 'Chase',
+  'checkoutcom': 'Checkout.com',
+  'checkoutcom_uk': 'Checkout.com',
+  'cielo': 'Cielo',
+  'dlocal': 'dLocal',
+  'ebanx': 'EBANX',
+  'elavon': 'Elavon',
+  'fis': 'FIS',
+  'fiserv': 'Fiserv',
+  'flutterwave': 'Flutterwave',
+  'globalpayments': 'Global Payments',
+  'gocardless': 'GoCardless',
+  'hyp': 'HyperPay',
+  'hyperpay': 'HyperPay',
+  'isracard': 'Isracard',
+  'klarna': 'Klarna',
+  'mercadopago': 'Mercado Pago',
+  'mollie': 'Mollie',
+  'mpesa': 'M-Pesa',
+  'networkinternational': 'Network International',
+  'nexi': 'Nexi',
+  'nuvei': 'Nuvei',
+  'pagseguro': 'PagSeguro',
+  'paymob': 'Paymob',
+  'paypal': 'PayPal',
+  'paypal_us': 'PayPal',
+  'payplus': 'PayPlus',
+  'paystack': 'Paystack',
+  'paytm': 'Paytm',
+  'payu': 'PayU',
+  'payu_latam': 'PayU',
+  'payu_uk': 'PayU',
+  'rapyd': 'Rapyd',
+  'razorpay': 'Razorpay',
+  'square': 'Square',
+  'stripe': 'Stripe',
+  'stripe_uk': 'Stripe',
+  'stripe_us': 'Stripe',
+  'tranzila': 'Tranzila',
+  'truelayer': 'TrueLayer',
+  'trustly': 'Trustly',
+  'vivawallet': 'Viva Wallet',
+  'wechatpay': 'WeChat Pay',
+  'worldline': 'Worldline',
+  'worldpay': 'Worldpay',
+  'worldpay_uk': 'Worldpay',
+  'xendit': 'Xendit',
+  'zcredit': 'ZCredit',
+};
+
+// Cache of failed providers (don't retry logo.dev for these)
+const failedProviders = new Set<string>();
 
 /**
  * Generate initials from provider name
@@ -27,36 +90,66 @@ export function generateInitials(name: string): string {
 }
 
 /**
- * Check if logo exists and resolve to local path or initials
- * Now returns optimistic result - let the component handle onError
+ * Get logo URL from logo.dev
+ */
+function getLogoDevUrl(providerKey: string): string | null {
+  const brandName = PROVIDER_BRAND_NAMES[providerKey];
+  if (!brandName) return null;
+  
+  return `https://img.logo.dev/name/${encodeURIComponent(brandName)}?token=${LOGO_DEV_TOKEN}`;
+}
+
+/**
+ * Get local fallback path
+ */
+function getLocalPath(providerKey: string): string {
+  const basePath = import.meta.env.BASE_URL || '/';
+  return `${basePath}provider-logos/${providerKey}.svg`.replace(/\/+/g, '/').replace(':/', '://');
+}
+
+/**
+ * Resolve provider logo URL (returns optimistic result, component handles onError)
  */
 export async function resolveProviderLogo(
   providerKey: string,
   providerName: string
 ): Promise<LogoResult> {
-  // Check cache first
-  if (logoCache.has(providerKey)) {
-    return logoCache.get(providerKey)!;
+  // If already failed, go straight to local fallback
+  if (failedProviders.has(providerKey)) {
+    return {
+      type: 'local',
+      src: getLocalPath(providerKey),
+      fallbackReason: 'logo.dev previously failed',
+    };
   }
 
-  // Construct local SVG path (include base path for GitHub Pages)
-  const basePath = import.meta.env.BASE_URL || '/';
-  const svgPath = `${basePath}provider-logos/${providerKey}.svg`.replace(/\/+/g, '/').replace(':/', '://');
+  // Try logo.dev first
+  const logoDevUrl = getLogoDevUrl(providerKey);
+  if (logoDevUrl) {
+    if (import.meta.env.DEV) {
+      console.log(`[ProviderLogo] 🌐 Trying logo.dev for "${providerKey}": ${logoDevUrl}`);
+    }
+    return {
+      type: 'logo-dev',
+      src: logoDevUrl,
+    };
+  }
 
-  // Return optimistic result - let img onError handle fallback
-  // This avoids double-fetching (HEAD + GET) and respects cache headers
-  const result: LogoResult = {
-    type: 'svg',
-    src: svgPath,
+  // Fallback to local
+  return {
+    type: 'local',
+    src: getLocalPath(providerKey),
   };
-  
-  logoCache.set(providerKey, result);
-  
+}
+
+/**
+ * Mark provider as failed (don't retry logo.dev for this provider)
+ */
+export function markProviderLogoFailed(providerKey: string): void {
+  failedProviders.add(providerKey);
   if (import.meta.env.DEV) {
-    console.log(`[ProviderLogo] 📍 Resolved path for "${providerKey}": ${svgPath}`);
+    console.warn(`[ProviderLogo] ❌ Marked "${providerKey}" as failed, will use local fallback`);
   }
-  
-  return result;
 }
 
 /**
