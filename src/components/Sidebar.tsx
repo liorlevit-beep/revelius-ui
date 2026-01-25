@@ -49,7 +49,6 @@ export function Sidebar() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
-  const prevLocationRef = useRef(location.pathname);
 
   // Handle collapse animation
   useEffect(() => {

@@ -45,6 +45,24 @@ export function RoutingDecisionBlock({ lineItems }: RoutingDecisionBlockProps) {
     const categoryIds = Array.from(new Set(lineItems.map(item => item.categoryId)));
 
     // For each category, find which providers support it
+    // Guard against undefined mapping
+    if (!mapping) {
+      return {
+        selectedPsp: default_psp,
+        totalCategories: categoryIds.length,
+        supportedCategories: 0,
+        missingCategories: categoryIds,
+        explanation: `Selected ${getProviderDisplayName(default_psp)} (default PSP) - no routing data available.`,
+        skuAnalysis: lineItems.map(item => ({
+          sku: item.sku,
+          name: item.name,
+          categoryId: item.categoryId,
+          supportedProviders: [],
+          routedProvider: null,
+        })),
+      };
+    }
+
     const categoryProviderMap = new Map<string, string[]>();
     categoryIds.forEach(categoryId => {
       const providers: string[] = [];

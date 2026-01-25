@@ -1,4 +1,4 @@
-import { forwardRef, useRef, useState, useEffect } from 'react';
+import { forwardRef, useRef } from 'react';
 
 interface IridescentButtonProps {
   active?: boolean;
@@ -40,7 +40,6 @@ export const IridescentButton = forwardRef<
         }}
         href={href}
         className={baseClass}
-        style={active ? tiltStyle : undefined}
         onClick={onClick}
         aria-current={active ? 'page' : undefined}
       >

@@ -33,12 +33,12 @@ export function ProviderRouteModal({
 
   // Categorize items as supported or unsupported
   const supportedItems = items.filter(item => {
-    const categoryId = 'category_id' in item ? item.category_id : item.categoryId;
+    const categoryId = 'category_id' in item ? item.category_id : (item as any).categoryId;
     return categoryId && coverage?.coveredCategories.includes(categoryId);
   });
 
   const unsupportedItems = items.filter(item => {
-    const categoryId = 'category_id' in item ? item.category_id : item.categoryId;
+    const categoryId = 'category_id' in item ? item.category_id : (item as any).categoryId;
     return categoryId && !coverage?.coveredCategories.includes(categoryId);
   });
 
@@ -162,7 +162,7 @@ export function ProviderRouteModal({
                 {supportedItems.map((item, idx) => {
                   const title = 'title' in item ? item.title : item.name;
                   const sku = 'sku_id' in item ? item.sku_id : item.sku;
-                  const categoryId = 'category_id' in item ? item.category_id : item.categoryId;
+                  const categoryId = 'category_id' in item ? item.category_id : (item as any).categoryId;
                   
                   return (
                     <div
@@ -204,7 +204,7 @@ export function ProviderRouteModal({
                 {unsupportedItems.map((item, idx) => {
                   const title = 'title' in item ? item.title : item.name;
                   const sku = 'sku_id' in item ? item.sku_id : item.sku;
-                  const categoryId = 'category_id' in item ? item.category_id : item.categoryId;
+                  const categoryId = 'category_id' in item ? item.category_id : (item as any).categoryId;
                   
                   return (
                     <div

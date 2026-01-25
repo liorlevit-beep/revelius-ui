@@ -170,7 +170,7 @@ export function OverviewTab({ merchantId, merchantName, merchantCountry, overvie
                   borderRadius: '8px',
                   fontSize: '12px',
                 }}
-                formatter={(value: number) => [value.toFixed(0), 'Risk Score']}
+                formatter={(value?: number) => value ? [value.toFixed(0), 'Risk Score'] : ['0', 'Risk Score']}
                 labelFormatter={(date) => new Date(date).toLocaleDateString()}
               />
               <Line type="monotone" dataKey="riskScore" stroke="#f59e0b" strokeWidth={2} dot={false} />
@@ -179,7 +179,7 @@ export function OverviewTab({ merchantId, merchantName, merchantCountry, overvie
               {overview.riskTrendSeries.filter(d => d.event).map((d, i) => (
                 <ReferenceDot
                   key={i}
-                  x={d.date}
+                  x={d.date.getTime()}
                   y={d.riskScore}
                   r={6}
                   fill="#10b981"
