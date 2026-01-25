@@ -310,13 +310,14 @@ export function PolicyPackDetail() {
                     </Card>
                   ) : (
                     pack.rules.map((rule) => (
-                      <Card
+                      <div
                         key={rule.id}
-                        className={`cursor-pointer transition-all ${
-                          selectedRule?.id === rule.id ? 'ring-2 ring-emerald-500' : 'hover:shadow-md'
-                        }`}
+                        className="cursor-pointer"
                         onClick={() => setSelectedRule(rule)}
                       >
+                        <Card className={`transition-all ${
+                          selectedRule?.id === rule.id ? 'ring-2 ring-emerald-500' : 'hover:shadow-md'
+                        }`}>
                         <div className="p-4">
                           <div className="flex items-start justify-between mb-2">
                             <div className="flex-1">
@@ -369,7 +370,8 @@ export function PolicyPackDetail() {
                             </div>
                           </div>
                         </div>
-                      </Card>
+                        </Card>
+                      </div>
                     ))
                   )}
                 </div>

@@ -51,8 +51,8 @@ export function computeCartEligibility(
   
   allProviders.forEach(provider => {
     const supportedCategories = mapping[provider] || [];
-    const coveredCategories = categories.filter(cat => supportedCategories.includes(cat!));
-    const missedCategories = categories.filter(cat => !supportedCategories.includes(cat!));
+    const coveredCategories = categories.filter((cat): cat is string => cat !== undefined && supportedCategories.includes(cat));
+    const missedCategories = categories.filter((cat): cat is string => cat !== undefined && !supportedCategories.includes(cat));
     const coverageCount = cart.filter(sku => sku.category_id && supportedCategories.includes(sku.category_id)).length;
     const coveragePercentage = totalItems > 0 ? Math.round((coverageCount / totalItems) * 100) : 0;
     
@@ -117,6 +117,16 @@ export function computeLineItemsEligibility(
   // Get unique categories from line items
   const categories = Array.from(new Set(lineItems.map(item => item.categoryId)));
   const totalItems = lineItems.length;
+  
+  // Guard against undefined mapping
+  if (!mapping) {
+    return {
+      eligibleProviders: [],
+      defaultProvider: null,
+      bestCoverageProviders: [],
+      totalItems: 0,
+    };
+  }
   
   // Compute coverage for each provider
   const providerCoverages: ProviderCoverage[] = [];

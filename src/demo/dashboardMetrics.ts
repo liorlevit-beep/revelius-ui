@@ -3,6 +3,8 @@ export interface KPI {
   value: string;
   delta?: string;
   deltaType?: 'positive' | 'negative' | 'neutral';
+  change?: string;
+  subtitle?: string;
 }
 
 export interface TimeSeriesDataPoint {

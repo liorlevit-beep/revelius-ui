@@ -111,7 +111,7 @@ export function ScanReport() {
       try {
         setLoadingStatus(true);
         setStatusError(null);
-        const response = await ScannerAPI.getSessionStatus(sessionId);
+        const response = await ScannerAPI.getSessionStatus(sessionId!);
         console.log('[fetchStatus] Raw API response:', response);
         console.log('[fetchStatus] Response data field:', response?.data);
         setStatusData(response);

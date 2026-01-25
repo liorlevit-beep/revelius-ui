@@ -332,6 +332,21 @@ export function Transactions() {
           whySuggested: ['Generated from scan session'],
           complianceNotes: [`Evidence from scan session ${sessionId}`, `${transactionData.evidence_summary?.total_scanned_items || 0} items scanned`],
         },
+        routing: {
+          baselineRoute: selectedPsp,
+          suggestedRoute: selectedPsp,
+          candidates: [{
+            routeId: selectedPsp,
+            displayName: selectedPsp,
+            logoText: selectedPsp.substring(0, 3).toUpperCase(),
+            eligibility: 'eligible' as const,
+            approvalProb: 0.85,
+            costBps: 150,
+            complianceFit: 'good' as const,
+            decision: 'selected' as const,
+            reasons: ['Generated from scan session'],
+          }],
+        },
       };
 
       // Save to persistent store
@@ -734,7 +749,9 @@ export function Transactions() {
                             <div className="flex items-center gap-2 whitespace-nowrap overflow-hidden">
                               <span className="text-sm font-mono text-gray-900 dark:text-white truncate">{txn.id}</span>
                               {hasOptimization && (
-                                <TrendingUp className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" title="Optimization opportunity" />
+                                <span title="Optimization opportunity">
+                                  <TrendingUp className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+                                </span>
                               )}
                               {txn.evidence_session_id && (
                                 <span 

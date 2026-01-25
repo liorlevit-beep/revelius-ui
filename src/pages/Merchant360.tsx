@@ -287,7 +287,9 @@ export function Merchant360() {
                                   <div className="flex items-center gap-2">
                                     <span className="text-sm font-mono text-gray-900">{txn.id}</span>
                                     {hasOptimization && (
-                                      <TrendingUp className="w-3.5 h-3.5 text-emerald-600" title="Optimization opportunity" />
+                                      <span title="Optimization opportunity">
+                                        <TrendingUp className="w-3.5 h-3.5 text-emerald-600" />
+                                      </span>
                                     )}
                                   </div>
                                 </td>

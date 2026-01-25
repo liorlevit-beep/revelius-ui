@@ -5,8 +5,8 @@ import { ScanActivityIndicator } from './scans/ScanActivityIndicator';
 
 interface HeaderProps {
   title: string;
-  timeRange: string;
-  onTimeRangeChange: (range: string) => void;
+  timeRange?: string;
+  onTimeRangeChange?: (range: string) => void;
   glassTheme?: boolean;
   onThemeToggle?: () => void;
 }

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ReveliusClient } from '../lib/revelius-sdk';
 import { Card } from '../components/Card';
-import { StatusBadge } from '../components/Badges';
+import { Badge } from '../components/Badge';
 import { ApiKeysModal } from '../components/ApiKeysModal';
 
 const API_KEYS_STORAGE = 'revelius_api_keys';

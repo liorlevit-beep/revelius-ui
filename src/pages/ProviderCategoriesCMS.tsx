@@ -70,16 +70,17 @@ export function ProviderCategoriesCMS() {
 
         // Parse canonical categories
         let parsedCategories: CanonicalCategory[] = [];
-        if (categoriesRes.success && categoriesRes.data) {
-          if (Array.isArray(categoriesRes.data)) {
-            parsedCategories = categoriesRes.data.map((cat: any) => ({
+        const categoriesData = categoriesRes as any;
+        if (categoriesData.success && categoriesData.data) {
+          if (Array.isArray(categoriesData.data)) {
+            parsedCategories = categoriesData.data.map((cat: any) => ({
               id: cat.id,
               title: cat.title || cat.category || cat.name,
               category: cat.category || cat.title,
               mcc_code: cat.mcc_code,
             }));
-          } else if (categoriesRes.data.categories && Array.isArray(categoriesRes.data.categories)) {
-            parsedCategories = categoriesRes.data.categories.map((cat: any) => ({
+          } else if (categoriesData.data.categories && Array.isArray(categoriesData.data.categories)) {
+            parsedCategories = categoriesData.data.categories.map((cat: any) => ({
               id: cat.id,
               title: cat.title || cat.category || cat.name,
               category: cat.category || cat.title,
@@ -96,15 +97,15 @@ export function ProviderCategoriesCMS() {
         const storedData = loadFromLocalStorage();
         if (storedData) {
           initialData = normalizeAllProviders(storedData, parsedCategories);
-        } else if (routingTableRes.success && routingTableRes.data) {
+        } else if ((routingTableRes as any).success && (routingTableRes as any).data) {
           // Parse from API
-          const apiData = routingTableRes.data;
+          const apiData = (routingTableRes as any).data;
           let providersData: any[] = [];
           
           if (Array.isArray(apiData)) {
             providersData = apiData;
-          } else if (apiData.data && Array.isArray(apiData.data)) {
-            providersData = apiData.data;
+          } else if ((apiData as any).data && Array.isArray((apiData as any).data)) {
+            providersData = (apiData as any).data;
           } else if (apiData.mapping && typeof apiData.mapping === 'object') {
             // Convert mapping object to array
             const mapping = apiData.mapping;

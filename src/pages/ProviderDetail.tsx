@@ -353,7 +353,7 @@ export function ProviderDetail() {
                           borderRadius: '8px',
                           fontSize: '12px',
                         }}
-                        formatter={(value: number) => [`${value.toFixed(1)}%`, 'Approval Rate']}
+                        formatter={(value?: number) => value ? [`${value.toFixed(1)}%`, 'Approval Rate'] : ['0%', 'Approval Rate']}
                         labelFormatter={(date) => new Date(date).toLocaleDateString()}
                       />
                       <Line type="monotone" dataKey="approvalRatePct" stroke="#10b981" strokeWidth={2} dot={false} />

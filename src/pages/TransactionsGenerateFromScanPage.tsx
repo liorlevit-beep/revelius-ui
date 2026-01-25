@@ -122,12 +122,13 @@ export function TransactionsGenerateFromScanPage() {
   // Convert selected products to SKU format for RoutingCanvas
   const cartItems: SKU[] = useMemo(() => {
     return selectedProducts.map(product => ({
-      id: product.id,
-      name: getProductTitle(product),
-      category: getProductCategory(product) || 'Uncategorized',
+      sku_id: product.id,
+      title: getProductTitle(product),
+      category_id: getProductCategory(product) || 'Uncategorized',
       price: product.price || 0,
       quantity: 1,
-      risk: getRiskLevel(product) as 'high' | 'medium' | 'low' | undefined,
+      product_url: `https://example.com/product/${product.id}`,
+      evidence_items: [],
     }));
   }, [selectedProducts]);
 
