@@ -63,13 +63,11 @@ export function PaymentProviderLogo({ provider, size = 56, className = '' }: Pay
     const index = provider.name.charCodeAt(0) % textColors.length;
     const textColor = textColors[index];
     
+    // Just return the text - let parent container handle background/circle
     return (
-      <div 
-        className={`w-full h-full rounded-full bg-white dark:bg-gray-800 flex items-center justify-center ${textColor} font-bold text-lg ${className}`}
-        style={{ width: size, height: size }}
-      >
+      <span className={`${textColor} font-bold text-lg ${className}`}>
         {initials}
-      </div>
+      </span>
     );
   }
 
