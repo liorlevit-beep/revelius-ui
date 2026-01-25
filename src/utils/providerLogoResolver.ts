@@ -29,7 +29,7 @@ const PROVIDER_BRAND_NAMES: Record<string, string> = {
   'checkoutcom': 'Checkout.com',
   'checkoutcom_uk': 'Checkout.com',
   'cielo': 'Cielo',
-  'dlocal': 'dLocal',
+  'dlocal': 'DLocal',
   'ebanx': 'EBANX',
   'elavon': 'Elavon',
   'fis': 'FIS',
@@ -75,6 +75,19 @@ const PROVIDER_BRAND_NAMES: Record<string, string> = {
   'zcredit': 'ZCredit',
 };
 
+// Providers that use domain-based logo.dev endpoint instead of name-based
+const PROVIDER_DOMAINS: Record<string, string> = {
+  'dlocal': 'dlocal-sbox.com',
+};
+
+// Providers that should skip logo.dev and use local assets directly
+const LOCAL_ONLY_PROVIDERS = new Set<string>([
+  'isracard',
+  'tranzila',
+  'zcredit',
+  'payplus',
+]);
+
 // Cache of failed providers (don't retry logo.dev for these)
 const failedProviders = new Set<string>();
 
@@ -91,8 +104,16 @@ export function generateInitials(name: string): string {
 
 /**
  * Get logo URL from logo.dev
+ * Uses domain endpoint if available, otherwise uses name endpoint
  */
 function getLogoDevUrl(providerKey: string): string | null {
+  // Check if provider has a specific domain mapping
+  const domain = PROVIDER_DOMAINS[providerKey];
+  if (domain) {
+    return `https://img.logo.dev/${domain}?token=${LOGO_DEV_TOKEN}`;
+  }
+  
+  // Fall back to name-based endpoint
   const brandName = PROVIDER_BRAND_NAMES[providerKey];
   if (!brandName) return null;
   
@@ -114,6 +135,18 @@ export async function resolveProviderLogo(
   providerKey: string,
   providerName: string
 ): Promise<LogoResult> {
+  // If provider is in local-only list, skip logo.dev entirely
+  if (LOCAL_ONLY_PROVIDERS.has(providerKey)) {
+    if (import.meta.env.DEV) {
+      console.log(`[ProviderLogo] 📁 Using local asset for "${providerKey}" (local-only)`);
+    }
+    return {
+      type: 'local',
+      src: getLocalPath(providerKey),
+      fallbackReason: 'local-only provider',
+    };
+  }
+
   // If already failed, go straight to local fallback
   if (failedProviders.has(providerKey)) {
     return {
