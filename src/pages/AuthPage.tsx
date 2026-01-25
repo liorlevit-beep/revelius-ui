@@ -302,13 +302,17 @@ export default function AuthPage() {
       console.log('[AuthPage] Opening Google Sign-In popup');
       console.log('========================================');
       
-      // Create OAuth URL for popup - include base path for GitHub Pages
-      const basePath = import.meta.env.BASE_URL || '/';
+      // Create OAuth URL for popup - detect base path from current URL
+      // For GitHub Pages: https://user.github.io/repo-name/ -> base is /repo-name/
+      // For localhost: http://localhost:5174/ -> base is /
+      const currentPath = window.location.pathname;
+      const basePath = currentPath.startsWith('/revelius-ui/') ? '/revelius-ui/' : '/';
       const redirectUri = `${window.location.origin}${basePath}auth/callback`;
       const state = Math.random().toString(36).substring(7);
       const nonce = Math.random().toString(36).substring(7);
       
-      console.log('[AuthPage] Base path:', basePath);
+      console.log('[AuthPage] Current path:', currentPath);
+      console.log('[AuthPage] Detected base path:', basePath);
       console.log('[AuthPage] Redirect URI:', redirectUri);
       console.log('[AuthPage] State:', state);
       console.log('[AuthPage] Client ID:', googleClientId);
