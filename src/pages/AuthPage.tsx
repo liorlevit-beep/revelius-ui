@@ -302,11 +302,13 @@ export default function AuthPage() {
       console.log('[AuthPage] Opening Google Sign-In popup');
       console.log('========================================');
       
-      // Create OAuth URL for popup
-      const redirectUri = `${window.location.origin}/auth/callback`;
+      // Create OAuth URL for popup - include base path for GitHub Pages
+      const basePath = import.meta.env.BASE_URL || '/';
+      const redirectUri = `${window.location.origin}${basePath}auth/callback`;
       const state = Math.random().toString(36).substring(7);
       const nonce = Math.random().toString(36).substring(7);
       
+      console.log('[AuthPage] Base path:', basePath);
       console.log('[AuthPage] Redirect URI:', redirectUri);
       console.log('[AuthPage] State:', state);
       console.log('[AuthPage] Client ID:', googleClientId);
