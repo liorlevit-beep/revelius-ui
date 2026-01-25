@@ -36,8 +36,28 @@ export function navigateTo(path: string) {
 
 /**
  * Navigate to auth page with reason
+ * Saves the current location so we can redirect back after login
  */
 export function navigateToAuth(reason: string = 'expired') {
+  // Save current location for redirect after login
+  const currentPath = window.location.pathname + window.location.search + window.location.hash;
+  if (currentPath !== '/auth' && currentPath !== '/auth/callback') {
+    sessionStorage.setItem('revelius_redirect_after_login', currentPath);
+    console.log('[Navigation] Saved redirect path:', currentPath);
+  }
+  
   const path = `/auth?reason=${reason}`;
   navigateTo(path);
+}
+
+/**
+ * Get the saved redirect path and clear it
+ */
+export function getAndClearRedirectPath(): string | null {
+  const path = sessionStorage.getItem('revelius_redirect_after_login');
+  if (path) {
+    sessionStorage.removeItem('revelius_redirect_after_login');
+    console.log('[Navigation] Retrieved redirect path:', path);
+  }
+  return path;
 }

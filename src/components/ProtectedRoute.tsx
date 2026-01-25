@@ -134,9 +134,16 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     );
   }
 
-  // Not authenticated? Redirect to auth with current location
+  // Not authenticated? Save current location and redirect to auth
   if (!isAuthenticated) {
-    return <Navigate to="/auth?reason=expired" state={{ from: location }} replace />;
+    // Save current location for redirect after login
+    const currentPath = location.pathname + location.search + location.hash;
+    if (currentPath !== '/auth' && currentPath !== '/auth/callback') {
+      sessionStorage.setItem('revelius_redirect_after_login', currentPath);
+      console.log('[ProtectedRoute] Saved redirect path:', currentPath);
+    }
+    
+    return <Navigate to="/auth?reason=expired" replace />;
   }
 
   // Authenticated - render protected content

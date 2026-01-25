@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { DarkGradientBackground } from '../components/ui/DarkGradientBackground';
 import { env } from '../config/env';
 import { startTokenRefresh } from '../services/tokenRefresh';
+import { getAndClearRedirectPath } from '../services/navigation';
 import styles from './AuthPage.module.css';
 
 // Declare particlesJS and Google Identity Services on window
@@ -284,7 +285,12 @@ export default function AuthPage() {
       console.log('========================================');
       console.log('Session token stored:', sessionToken.substring(0, 20) + '...');
       console.log('Expires at:', expiresAt || expiresIn ? `${expiresIn}s from now` : 'not provided');
-      console.log('Navigating to dashboard at: /');
+      
+      // Check if we have a saved redirect path (where user was before auth)
+      const redirectPath = getAndClearRedirectPath();
+      const finalPath = redirectPath || '/';
+      
+      console.log('Navigating to:', finalPath);
       console.log('========================================');
       
       // Start automatic token refresh
@@ -292,8 +298,8 @@ export default function AuthPage() {
       
       setIsLoading(false);
       
-      // Navigate to dashboard (route is at '/')
-      navigate('/', { replace: true });
+      // Navigate to original location or dashboard
+      navigate(finalPath, { replace: true });
     } catch (err) {
       console.error('Failed to authenticate with backend:', err);
       setError(err instanceof Error ? err.message : 'Authentication failed. Please try again.');
