@@ -5,6 +5,7 @@ import { useRoutingTable } from '../../hooks/useRoutingTable';
 import { getProviderDisplayName } from '../../data/providerRegions';
 import { ProviderRouteModal } from './ProviderRouteModal';
 import { computeCartEligibility } from '../../utils/routingEligibility';
+import { PaymentProviderLogo } from '../paymentProviders/PaymentProviderLogo';
 import type { SKU, LineItem } from '../../demo/transactions';
 
 // Types
@@ -1034,18 +1035,12 @@ export function RoutingCanvas({
                     />
                     
                     <div
-                      className="w-8 h-8 rounded-lg flex-shrink-0 flex items-center justify-center"
-                      style={{ 
-                        backgroundColor: glassTheme 
-                          ? `${config?.color}40` 
-                          : `${config?.color}20`
-                      }}
+                      className="w-8 h-8 rounded-full bg-white dark:bg-gray-800 flex-shrink-0 flex items-center justify-center shadow-sm"
                     >
-                      <div
-                        className="w-5 h-5 rounded"
-                        style={{ 
-                          backgroundColor: config?.color || '#9CA3AF'
-                        }}
+                      <PaymentProviderLogo
+                        provider={{ key: pspName, name: getProviderDisplayName(pspName) }}
+                        size={28}
+                        className="object-contain"
                       />
                     </div>
                     
