@@ -263,11 +263,18 @@ export default function AuthPage() {
         localStorage.setItem('revelius_auth_expires_at', expiresAt);
       }
 
-      console.log('Authentication successful, navigating to dashboard');
+      console.log('========================================');
+      console.log('✅ AUTHENTICATION SUCCESSFUL');
+      console.log('========================================');
+      console.log('Session token stored:', sessionToken.substring(0, 20) + '...');
+      console.log('Expires at:', expiresAt || 'not provided');
+      console.log('Navigating to dashboard at: /');
+      console.log('========================================');
+      
       setIsLoading(false);
       
       // Navigate to dashboard (route is at '/')
-      navigate('/');
+      navigate('/', { replace: true });
     } catch (err) {
       console.error('Failed to authenticate with backend:', err);
       setError(err instanceof Error ? err.message : 'Authentication failed. Please try again.');

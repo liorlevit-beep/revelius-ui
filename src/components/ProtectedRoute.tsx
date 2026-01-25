@@ -35,6 +35,8 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
         // Validate token with backend
         const env = getEnvConfig();
         console.log('[ProtectedRoute] Validating session token...');
+        console.log('[ProtectedRoute] Token:', token.substring(0, 20) + '...');
+        console.log('[ProtectedRoute] Calling:', `${env.baseUrl}/auth/status`);
         
         const response = await fetch(`${env.baseUrl}/auth/status`, {
           method: 'GET',
@@ -43,15 +45,22 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
           },
         });
 
+        console.log('[ProtectedRoute] Response status:', response.status);
+
         if (response.ok) {
-          console.log('[ProtectedRoute] Session valid');
+          console.log('[ProtectedRoute] ✅ Session valid');
           setIsAuthenticated(true);
           setIsValidating(false);
           return;
         }
 
         // Token invalid - try to refresh
-        console.log('[ProtectedRoute] Session invalid, attempting refresh...');
+        console.log('[ProtectedRoute] ❌ Session invalid (status:', response.status, '), attempting refresh...');
+        
+        const errorText = await response.text().catch(() => '');
+        console.log('[ProtectedRoute] /auth/status error:', errorText);
+        
+        console.log('[ProtectedRoute] Calling refresh endpoint:', `${env.baseUrl}/auth/refresh`);
         
         const refreshResponse = await fetch(`${env.baseUrl}/auth/refresh`, {
           method: 'GET',
@@ -60,12 +69,14 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
           },
         });
 
+        console.log('[ProtectedRoute] Refresh response status:', refreshResponse.status);
+
         if (refreshResponse.ok) {
           const data = await refreshResponse.json();
           const newToken = data.session_token || data.token || data.data?.session_token || data.data?.token;
           
           if (newToken) {
-            console.log('[ProtectedRoute] Token refreshed successfully');
+            console.log('[ProtectedRoute] ✅ Token refreshed successfully');
             localStorage.setItem('revelius_auth_token', newToken);
             const expiresAt = data.expires_at || data.data?.expires_at;
             if (expiresAt) {
@@ -78,7 +89,9 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
         }
 
         // Refresh failed - clear token and redirect
-        console.log('[ProtectedRoute] Refresh failed, clearing session');
+        const refreshError = await refreshResponse.text().catch(() => '');
+        console.log('[ProtectedRoute] ❌ Refresh failed:', refreshError);
+        console.log('[ProtectedRoute] Clearing session and redirecting to /auth');
         localStorage.removeItem('revelius_auth_token');
         localStorage.removeItem('revelius_auth_expires_at');
         setIsAuthenticated(false);
