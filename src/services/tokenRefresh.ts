@@ -60,6 +60,9 @@ async function refreshToken(): Promise<boolean> {
       return false;
     }
     
+    console.log('[TokenRefresh] Calling:', `${env.baseUrl}/auth/refresh`);
+    console.log('[TokenRefresh] Using token:', currentToken.substring(0, 20) + '...');
+    
     const response = await fetch(`${env.baseUrl}/auth/refresh`, {
       method: 'GET',
       headers: {
@@ -67,8 +70,13 @@ async function refreshToken(): Promise<boolean> {
       },
     });
     
+    console.log('[TokenRefresh] Response status:', response.status);
+    console.log('[TokenRefresh] Response headers:', Object.fromEntries(response.headers.entries()));
+    
     if (!response.ok) {
-      console.log('[TokenRefresh] ❌ Refresh failed:', response.status);
+      const errorText = await response.text().catch(() => '');
+      console.error('[TokenRefresh] ❌ Refresh failed with status:', response.status);
+      console.error('[TokenRefresh] Error response:', errorText);
       
       // If refresh fails with 401/403, session is invalid - redirect to login
       if (response.status === 401 || response.status === 403) {
@@ -82,6 +90,7 @@ async function refreshToken(): Promise<boolean> {
     }
     
     const data = await response.json();
+    console.log('[TokenRefresh] Success response:', data);
     const newToken = data.session_token || data.token || data.data?.session_token || data.data?.token;
     
     if (!newToken) {

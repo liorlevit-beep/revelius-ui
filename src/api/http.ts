@@ -58,12 +58,18 @@ async function refreshAuthToken(): Promise<boolean> {
         },
       });
 
+      console.log('[refreshAuthToken] Response status:', response.status);
+      console.log('[refreshAuthToken] Response headers:', Object.fromEntries(response.headers.entries()));
+
       if (!response.ok) {
-        console.log('[refreshAuthToken] Refresh failed:', response.status);
+        const errorText = await response.text().catch(() => '');
+        console.error('[refreshAuthToken] Refresh failed with status:', response.status);
+        console.error('[refreshAuthToken] Error response:', errorText);
         return false;
       }
 
       const data = await response.json();
+      console.log('[refreshAuthToken] Success response:', data);
       const newToken = data.session_token || data.token || data.data?.session_token || data.data?.token;
       
       if (!newToken) {
