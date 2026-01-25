@@ -152,8 +152,13 @@ function AppContent() {
 }
 
 function App() {
+  // Detect base path for GitHub Pages deployment
+  // For GitHub Pages: /revelius-ui/
+  // For localhost: /
+  const basename = import.meta.env.BASE_URL || '/';
+  
   return (
-    <Router>
+    <Router basename={basename}>
       <ThemeProvider>
         <ModeProvider>
           <SidebarProvider>

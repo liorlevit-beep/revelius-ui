@@ -302,17 +302,14 @@ export default function AuthPage() {
       console.log('[AuthPage] Opening Google Sign-In popup');
       console.log('========================================');
       
-      // Create OAuth URL for popup - detect base path from current URL
-      // For GitHub Pages: https://user.github.io/repo-name/ -> base is /repo-name/
-      // For localhost: http://localhost:5174/ -> base is /
-      const currentPath = window.location.pathname;
-      const basePath = currentPath.startsWith('/revelius-ui/') ? '/revelius-ui/' : '/';
+      // Create OAuth URL for popup - use BASE_URL from Vite config
+      // Router's basename will handle the routing, we just need the full URL
+      const basePath = import.meta.env.BASE_URL || '/';
       const redirectUri = `${window.location.origin}${basePath}auth/callback`;
       const state = Math.random().toString(36).substring(7);
       const nonce = Math.random().toString(36).substring(7);
       
-      console.log('[AuthPage] Current path:', currentPath);
-      console.log('[AuthPage] Detected base path:', basePath);
+      console.log('[AuthPage] Base path (from Vite):', basePath);
       console.log('[AuthPage] Redirect URI:', redirectUri);
       console.log('[AuthPage] State:', state);
       console.log('[AuthPage] Client ID:', googleClientId);
