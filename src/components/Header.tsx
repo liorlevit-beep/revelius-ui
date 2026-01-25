@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Moon, Sun, User, LogOut } from 'lucide-react';
 import { ScanActivityIndicator } from './scans/ScanActivityIndicator';
+import { stopTokenRefresh } from '../services/tokenRefresh';
 
 interface HeaderProps {
   title: string;
@@ -29,8 +30,15 @@ export function Header({ title, timeRange, onTimeRangeChange, glassTheme = false
 
   const handleSignOut = () => {
     console.log('[Header] Signing out...');
+    
+    // Stop automatic token refresh
+    stopTokenRefresh();
+    
+    // Clear auth data
     localStorage.removeItem('revelius_auth_token');
     localStorage.removeItem('revelius_auth_expires_at');
+    
+    // Redirect to login
     navigate('/auth');
   };
 

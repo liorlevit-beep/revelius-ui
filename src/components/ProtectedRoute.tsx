@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { getEnvConfig } from '../config/env';
+import { startTokenRefresh, stopTokenRefresh } from '../services/tokenRefresh';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -51,6 +52,9 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
           console.log('[ProtectedRoute] ✅ Session valid');
           setIsAuthenticated(true);
           setIsValidating(false);
+          
+          // Start automatic token refresh
+          startTokenRefresh();
           return;
         }
 
@@ -92,12 +96,20 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
         const refreshError = await refreshResponse.text().catch(() => '');
         console.log('[ProtectedRoute] ❌ Refresh failed:', refreshError);
         console.log('[ProtectedRoute] Clearing session and redirecting to /auth');
+        
+        // Stop token refresh service
+        stopTokenRefresh();
+        
         localStorage.removeItem('revelius_auth_token');
         localStorage.removeItem('revelius_auth_expires_at');
         setIsAuthenticated(false);
         setIsValidating(false);
       } catch (error) {
         console.error('[ProtectedRoute] Error validating session:', error);
+        
+        // Stop token refresh service
+        stopTokenRefresh();
+        
         localStorage.removeItem('revelius_auth_token');
         localStorage.removeItem('revelius_auth_expires_at');
         setIsAuthenticated(false);

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { DarkGradientBackground } from '../components/ui/DarkGradientBackground';
 import { env } from '../config/env';
+import { startTokenRefresh } from '../services/tokenRefresh';
 import styles from './AuthPage.module.css';
 
 // Declare particlesJS and Google Identity Services on window
@@ -258,18 +259,29 @@ export default function AuthPage() {
 
       // Store the session token
       localStorage.setItem('revelius_auth_token', sessionToken);
+      
+      // Store expiry time
       const expiresAt = data.expires_at || data.data?.expires_at;
+      const expiresIn = data.expires_in || data.data?.expires_in;
+      
       if (expiresAt) {
         localStorage.setItem('revelius_auth_expires_at', expiresAt);
+      } else if (expiresIn) {
+        // Calculate expiry from expires_in (seconds)
+        const expiryTime = Date.now() + (expiresIn * 1000);
+        localStorage.setItem('revelius_auth_expires_at', expiryTime.toString());
       }
 
       console.log('========================================');
       console.log('✅ AUTHENTICATION SUCCESSFUL');
       console.log('========================================');
       console.log('Session token stored:', sessionToken.substring(0, 20) + '...');
-      console.log('Expires at:', expiresAt || 'not provided');
+      console.log('Expires at:', expiresAt || expiresIn ? `${expiresIn}s from now` : 'not provided');
       console.log('Navigating to dashboard at: /');
       console.log('========================================');
+      
+      // Start automatic token refresh
+      startTokenRefresh();
       
       setIsLoading(false);
       
