@@ -47,6 +47,6 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./outbound-website/dist
           destination_dir: .
-          force_orphan: false
           keep_files: true
-          cname: false
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
