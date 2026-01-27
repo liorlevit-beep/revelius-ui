@@ -1,34 +1,119 @@
-import { Link } from 'react-router-dom';
+import { Link } from "react-router-dom";
 
 export default function Footer() {
   return (
-    <footer className="border-t mt-auto">
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        <div className="grid grid-cols-4 gap-8">
+    <footer className="border-t mt-auto bg-white">
+      <div className="max-w-7xl mx-auto px-6 py-12">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
+          {/* Product Column */}
           <div>
-            <h3 className="font-bold mb-3">Product</h3>
-            <Link to="/product" className="block mb-2">Overview</Link>
+            <h3 className="font-bold mb-4 text-gray-900">Product</h3>
+            <div className="space-y-3">
+              <Link
+                to="/product"
+                className="block text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                Product
+              </Link>
+              <Link
+                to="/solutions"
+                className="block text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                Solutions
+              </Link>
+              <Link
+                to="/network"
+                className="block text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                Network
+              </Link>
+            </div>
           </div>
-          
+
+          {/* Solutions Column */}
           <div>
-            <h3 className="font-bold mb-3">Solutions</h3>
-            <Link to="/solutions/fintechs" className="block mb-2">Fintechs</Link>
-            <Link to="/solutions/merchants" className="block mb-2">Merchants</Link>
+            <h3 className="font-bold mb-4 text-gray-900">Solutions</h3>
+            <div className="space-y-3">
+              <Link
+                to="/solutions#psps"
+                className="block text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                PSPs & PayFacs
+              </Link>
+              <Link
+                to="/solutions#platforms"
+                className="block text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                Marketplaces & Platforms
+              </Link>
+              <Link
+                to="/solutions#neobanks"
+                className="block text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                Neobanks & Embedded Finance
+              </Link>
+            </div>
           </div>
-          
+
+          {/* Company Column */}
           <div>
-            <h3 className="font-bold mb-3">Company</h3>
-            <Link to="/company" className="block mb-2">About</Link>
+            <h3 className="font-bold mb-4 text-gray-900">Company</h3>
+            <div className="space-y-3">
+              <Link
+                to="/company"
+                className="block text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                Company
+              </Link>
+              <Link
+                to="/security"
+                className="block text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                Security
+              </Link>
+              <Link
+                to="/contact"
+                className="block text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                Contact
+              </Link>
+            </div>
           </div>
-          
+
+          {/* Resources Column */}
           <div>
-            <h3 className="font-bold mb-3">Legal</h3>
-            <Link to="/privacy" className="block mb-2">Privacy</Link>
-            <Link to="/terms" className="block mb-2">Terms</Link>
+            <h3 className="font-bold mb-4 text-gray-900">Resources</h3>
+            <div className="space-y-3">
+              <Link
+                to="/docs"
+                className="block text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                Documentation
+              </Link>
+            </div>
+          </div>
+
+          {/* Legal Column */}
+          <div>
+            <h3 className="font-bold mb-4 text-gray-900">Legal</h3>
+            <div className="space-y-3">
+              <Link
+                to="/privacy"
+                className="block text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                Privacy Policy
+              </Link>
+              <Link
+                to="/terms"
+                className="block text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                Terms of Service
+              </Link>
+            </div>
           </div>
         </div>
-        
-        <div className="mt-8 pt-8 border-t text-sm text-gray-600">
+
+        <div className="mt-12 pt-8 border-t border-gray-200 text-sm text-gray-600">
           © 2026 Revelius. All rights reserved.
         </div>
       </div>
