@@ -3,8 +3,9 @@ import { Link } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import GlossyButton from './GlossyButton';
 
-// Dashboard URL - update this with your production dashboard URL
-const DASHBOARD_URL = import.meta.env.VITE_DASHBOARD_URL || 'https://app.revelius.com';
+// Dashboard URL - GitHub Pages or production
+const DASHBOARD_URL = import.meta.env.VITE_DASHBOARD_URL || 
+  (import.meta.env.PROD ? 'https://liorlevit-beep.github.io/revelius-ui/app' : 'http://localhost:5174');
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);

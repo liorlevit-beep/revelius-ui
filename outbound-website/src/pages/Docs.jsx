@@ -3,6 +3,10 @@ import { Link } from 'react-router-dom';
 import { Search, Menu, X, Copy, Check, ChevronRight, ChevronDown, Book, Terminal, Shield, Code2, Zap, FileText, ArrowLeft, ArrowRight, ExternalLink } from 'lucide-react';
 import GlossyButton from '../components/GlossyButton';
 
+// Dashboard URL - GitHub Pages or production
+const DASHBOARD_URL = import.meta.env.VITE_DASHBOARD_URL || 
+  (import.meta.env.PROD ? 'https://liorlevit-beep.github.io/revelius-ui/app' : 'http://localhost:5174');
+
 // Code block with copy functionality
 function CodeBlock({ children, language = 'json' }) {
   const [copied, setCopied] = useState(false);
