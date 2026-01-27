@@ -102,7 +102,23 @@ export default function AuthCallback() {
         
         // Navigate to saved location or dashboard
         const redirectPath = getAndClearRedirectPath();
-        navigate(redirectPath || '/', { replace: true });
+        const targetPath = redirectPath || '/';
+        
+        console.log('[AuthCallback] Redirect path from storage:', redirectPath);
+        console.log('[AuthCallback] Navigating to:', targetPath);
+        console.log('[AuthCallback] Current location:', window.location.href);
+        console.log('[AuthCallback] Basename:', import.meta.env.BASE_URL);
+        
+        // Use window.location for more reliable redirect after OAuth
+        if (!redirectPath) {
+          // No saved redirect, go to dashboard home
+          const dashboardHome = import.meta.env.BASE_URL || '/';
+          console.log('[AuthCallback] Using window.location to navigate to dashboard home:', dashboardHome);
+          window.location.href = dashboardHome;
+        } else {
+          // Use React Router navigate for internal navigation
+          navigate(targetPath, { replace: true });
+        }
         
       } catch (err) {
         console.error('[AuthCallback] Error processing callback:', err);
