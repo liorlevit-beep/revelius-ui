@@ -39,11 +39,20 @@ export function navigateTo(path: string) {
  * Saves the current location so we can redirect back after login
  */
 export function navigateToAuth(reason: string = 'expired') {
-  // Save current location for redirect after login
-  const currentPath = window.location.pathname + window.location.search + window.location.hash;
-  if (currentPath !== '/auth' && currentPath !== '/auth/callback') {
+  // Get the base URL (e.g., /revelius-ui/app/)
+  const baseUrl = import.meta.env.BASE_URL || '/';
+  
+  // Get current path relative to base
+  let currentPath = window.location.pathname;
+  if (currentPath.startsWith(baseUrl)) {
+    currentPath = currentPath.slice(baseUrl.length) || '/';
+  }
+  currentPath += window.location.search + window.location.hash;
+  
+  // Don't save auth pages as redirect paths
+  if (!currentPath.startsWith('/auth')) {
     sessionStorage.setItem('revelius_redirect_after_login', currentPath);
-    console.log('[Navigation] Saved redirect path:', currentPath);
+    console.log('[Navigation] Saved redirect path (relative to base):', currentPath);
   }
   
   const path = `/auth?reason=${reason}`;

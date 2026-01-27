@@ -138,7 +138,8 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   if (!isAuthenticated) {
     // Save current location for redirect after login
     const currentPath = location.pathname + location.search + location.hash;
-    if (currentPath !== '/auth' && currentPath !== '/auth/callback') {
+    // Don't save auth pages as redirect paths
+    if (!currentPath.startsWith('/auth')) {
       sessionStorage.setItem('revelius_redirect_after_login', currentPath);
       console.log('[ProtectedRoute] Saved redirect path:', currentPath);
     }
