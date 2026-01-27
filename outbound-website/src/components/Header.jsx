@@ -58,7 +58,7 @@ export default function Header() {
 
           {/* Desktop Buttons */}
           <div className="hidden md:flex gap-3 items-center">
-            <GlossyButton to="/signin" variant="outline-dark">
+            <GlossyButton to="/auth" variant="outline-dark">
               Sign in
             </GlossyButton>
             <GlossyButton to="/contact" variant="dark">
@@ -93,7 +93,7 @@ export default function Header() {
             ))}
             
             <div className="pt-6 space-y-3">
-              <Link to="/signin" onClick={() => setMobileMenuOpen(false)}>
+              <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
                 <GlossyButton variant="outline-dark" className="w-full">
                   Sign in
                 </GlossyButton>

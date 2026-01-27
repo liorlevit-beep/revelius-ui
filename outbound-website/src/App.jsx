@@ -12,7 +12,6 @@ import Docs from "./pages/Docs";
 import Company from "./pages/Company";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
-import SignIn from "./pages/SignIn";
 import RequestAccess from "./pages/RequestAccess";
 import Contact from "./pages/Contact";
 
@@ -37,7 +36,6 @@ function App() {
             <Route path="/company" element={<Company />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
-            <Route path="/signin" element={<SignIn />} />
             <Route path="/request-access" element={<RequestAccess />} />
             <Route path="/contact" element={<Contact />} />
           </Routes>

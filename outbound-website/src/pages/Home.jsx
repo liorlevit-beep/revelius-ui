@@ -293,7 +293,7 @@ export default function Home() {
 
           {/* Inline CTA Row */}
           <div className="flex gap-4 justify-center flex-wrap pt-8 border-t border-gray-200 animate-fade-in" style={{ animationDelay: '0.4s' }}>
-            <GlossyButton to="/signin" variant="outline-dark">
+            <GlossyButton to="/auth" variant="outline-dark">
               Sign in
             </GlossyButton>
             <GlossyButton to="/contact" variant="dark">
