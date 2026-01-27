@@ -7,7 +7,6 @@ import { ProvidersProvider } from './state/providersStore';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { ApiKeysModal } from './components/ApiKeysModal';
-import { FloatingScansIndicator } from './components/scans/FloatingScansIndicator';
 import { DarkGradientBackground } from './components/ui/DarkGradientBackground';
 import { DashboardLiquidGlassTheme } from './theme/DashboardLiquidGlassTheme';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -138,9 +137,6 @@ function AppContent() {
               <Route path="/auth2" element={<Auth2 />} />
             </Routes>
           </main>
-          
-        {/* Global Floating Scan Indicator */}
-        <FloatingScansIndicator />
       </ProtectedRoute>
     );
   };

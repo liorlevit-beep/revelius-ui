@@ -1,11 +1,9 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Plus, Loader2, Copy, Check, AlertCircle, Columns3, ChevronUp, ChevronDown, RefreshCw, CheckCircle, X } from 'lucide-react';
+import { Search, Plus, Loader2, Copy, Check, AlertCircle, Columns3, ChevronUp, ChevronDown, RefreshCw } from 'lucide-react';
+import { Header } from '../components/Header';
 import { ScannerAPI } from '../api';
 import { EllipsisCell, SessionIdCell, UrlCell } from '../components/table/EllipsisCell';
-import { CountryFlag } from '../components/CountryFlag';
-import { NewScanModal } from '../components/scans/NewScanModal';
-import { LiveScansStrip } from '../components/scans/LiveScansStrip';
 import {
   unwrapList,
   pickSessionId,
@@ -56,8 +54,6 @@ export function Scans() {
   const [sortColumn, setSortColumn] = useState<SortColumn>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
   const [showColumnsMenu, setShowColumnsMenu] = useState(false);
-  const [isNewScanModalOpen, setIsNewScanModalOpen] = useState(false);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [pageSize, setPageSize] = useState<number>(() => {
     try {
       const stored = localStorage.getItem(PAGE_SIZE_STORAGE_KEY);
@@ -275,72 +271,58 @@ export function Scans() {
       });
   };
 
-  const handleScanSuccess = (sessionId: string) => {
-    // Show success message
-    setSuccessMessage(`Scan started successfully! Session: ${sessionId}`);
-    setTimeout(() => setSuccessMessage(null), 5000);
-
-    // Refresh the sessions list
-    handleRefresh();
-
-    // Navigate to the new scan detail page after a short delay
-    setTimeout(() => {
-      navigate(`/scans/${sessionId}`);
-    }, 1500);
-  };
-
   // Loading skeleton
   const renderLoadingSkeleton = () => (
-    <div className="bg-white dark:bg-white/5 dark:backdrop-blur-xl rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm overflow-hidden">
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
       <div className="overflow-x-auto" style={{ maxHeight: 'calc(100vh - 320px)' }}>
         <table className="w-full">
-          <thead className="bg-gray-50/70 dark:bg-gray-900/70 backdrop-blur-xl border-b border-gray-100 dark:border-white/10 sticky top-0 z-10">
+          <thead className="bg-gray-50 border-b border-gray-100 sticky top-0 z-10">
             <tr>
-              {columnVisibility.sessionId && <th className="text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider py-3 px-6 whitespace-nowrap w-[15%]">Session ID</th>}
-              {columnVisibility.url && <th className="text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider py-3 px-4 whitespace-nowrap w-[25%]">Target URL</th>}
-              {columnVisibility.status && <th className="text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider py-3 px-4 whitespace-nowrap w-[12%]">Status</th>}
-              {columnVisibility.region && <th className="text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider py-3 px-4 whitespace-nowrap w-[10%]">Region</th>}
-              {columnVisibility.created && <th className="text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider py-3 px-4 whitespace-nowrap w-[14%]">Created</th>}
-              {columnVisibility.updated && <th className="text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider py-3 px-4 whitespace-nowrap w-[14%]">Updated</th>}
-              {columnVisibility.actions && <th className="text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider py-3 px-6 whitespace-nowrap w-[10%]">Actions</th>}
+              {columnVisibility.sessionId && <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider py-3 px-6 whitespace-nowrap w-[15%]">Session ID</th>}
+              {columnVisibility.url && <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider py-3 px-4 whitespace-nowrap w-[25%]">Target URL</th>}
+              {columnVisibility.status && <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider py-3 px-4 whitespace-nowrap w-[12%]">Status</th>}
+              {columnVisibility.region && <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider py-3 px-4 whitespace-nowrap w-[10%]">Region</th>}
+              {columnVisibility.created && <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider py-3 px-4 whitespace-nowrap w-[14%]">Created</th>}
+              {columnVisibility.updated && <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider py-3 px-4 whitespace-nowrap w-[14%]">Updated</th>}
+              {columnVisibility.actions && <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider py-3 px-6 whitespace-nowrap w-[10%]">Actions</th>}
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-50 dark:divide-white/5">
+          <tbody className="divide-y divide-gray-50">
             {[...Array(10)].map((_, idx) => (
               <tr key={idx} className="animate-pulse">
                 {columnVisibility.sessionId && (
                   <td className="py-4 px-6 whitespace-nowrap w-[15%]">
-                    <div className="h-4 bg-gray-200 dark:bg-white/10 rounded w-32"></div>
+                    <div className="h-4 bg-gray-200 rounded w-32"></div>
                   </td>
                 )}
                 {columnVisibility.url && (
                   <td className="py-4 px-4 whitespace-nowrap w-[25%]">
-                    <div className="h-4 bg-gray-200 dark:bg-white/10 rounded w-48"></div>
+                    <div className="h-4 bg-gray-200 rounded w-48"></div>
                   </td>
                 )}
                 {columnVisibility.status && (
                   <td className="py-4 px-4 whitespace-nowrap w-[12%]">
-                    <div className="h-6 bg-gray-200 dark:bg-white/10 rounded-full w-24"></div>
+                    <div className="h-6 bg-gray-200 rounded-full w-24"></div>
                   </td>
                 )}
                 {columnVisibility.region && (
                   <td className="py-4 px-4 whitespace-nowrap w-[10%]">
-                    <div className="h-6 w-6 bg-gray-200 dark:bg-white/10 rounded-full mx-auto"></div>
+                    <div className="h-4 bg-gray-200 rounded w-20"></div>
                   </td>
                 )}
                 {columnVisibility.created && (
                   <td className="py-4 px-4 whitespace-nowrap w-[14%]">
-                    <div className="h-4 bg-gray-200 dark:bg-white/10 rounded w-32"></div>
+                    <div className="h-4 bg-gray-200 rounded w-32"></div>
                   </td>
                 )}
                 {columnVisibility.updated && (
                   <td className="py-4 px-4 whitespace-nowrap w-[14%]">
-                    <div className="h-4 bg-gray-200 dark:bg-white/10 rounded w-32"></div>
+                    <div className="h-4 bg-gray-200 rounded w-32"></div>
                   </td>
                 )}
                 {columnVisibility.actions && (
                   <td className="py-4 px-6 whitespace-nowrap w-[10%]">
-                    <div className="h-7 bg-gray-200 dark:bg-white/10 rounded-lg w-16"></div>
+                    <div className="h-7 bg-gray-200 rounded-lg w-16"></div>
                   </td>
                 )}
               </tr>
@@ -354,23 +336,21 @@ export function Scans() {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-transparent">
-        <div className="p-8">
-          {/* Live Scans Strip */}
-          <LiveScansStrip onNewScan={() => setIsNewScanModalOpen(true)} />
-
+      <div className="min-h-screen bg-gray-50">
+        <Header title="Scans" timeRange="7" onTimeRangeChange={() => {}} />
+        <main className="p-8">
           {/* Controls skeleton */}
-          <div className="bg-white dark:bg-white/5 dark:backdrop-blur-xl rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm p-6 mb-6">
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">
             <div className="flex flex-col gap-4">
-              <div className="h-10 bg-gray-100 dark:bg-white/10 rounded-xl animate-pulse"></div>
+              <div className="h-10 bg-gray-100 rounded-xl animate-pulse"></div>
               <div className="flex gap-3">
-                <div className="h-10 w-32 bg-gray-100 dark:bg-white/10 rounded-xl animate-pulse"></div>
-                <div className="h-10 w-32 bg-gray-100 dark:bg-white/10 rounded-xl animate-pulse"></div>
+                <div className="h-10 w-32 bg-gray-100 rounded-xl animate-pulse"></div>
+                <div className="h-10 w-32 bg-gray-100 rounded-xl animate-pulse"></div>
               </div>
             </div>
           </div>
           {renderLoadingSkeleton()}
-        </div>
+        </main>
       </div>
     );
   }
@@ -378,13 +358,11 @@ export function Scans() {
   // Error state
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-transparent">
-        <div className="p-8">
-          {/* Live Scans Strip */}
-          <LiveScansStrip onNewScan={() => setIsNewScanModalOpen(true)} />
-
+      <div className="min-h-screen bg-gray-50">
+        <Header title="Scans" timeRange="7" onTimeRangeChange={() => {}} />
+        <main className="p-8">
           {/* Controls */}
-          <div className="bg-white dark:bg-white/5 dark:backdrop-blur-xl rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm p-6 mb-6">
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">
             <div className="flex flex-col gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -392,19 +370,19 @@ export function Scans() {
                   type="text"
                   placeholder="Search session ID or URL…"
                   disabled
-                  className="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                  className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm placeholder:text-gray-400"
                 />
               </div>
             </div>
           </div>
           
           {/* Error Alert */}
-          <div className="bg-white dark:bg-white/5 dark:backdrop-blur-xl rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm p-8">
-            <div className="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 rounded-xl p-6 flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
+            <div className="bg-red-50 border border-red-200 rounded-xl p-6 flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
               <div className="flex-1">
-                <h3 className="font-semibold text-red-900 dark:text-red-300 mb-1">Failed to Load Scans</h3>
-                <p className="text-red-700 dark:text-red-400 text-sm mb-3">{error}</p>
+                <h3 className="font-semibold text-red-900 mb-1">Failed to Load Scans</h3>
+                <p className="text-red-700 text-sm mb-3">{error}</p>
                 <button
                   onClick={() => window.location.reload()}
                   className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-semibold hover:bg-red-700 transition-colors"
@@ -414,29 +392,28 @@ export function Scans() {
               </div>
             </div>
           </div>
-        </div>
+        </main>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-transparent">
-      <div className="p-8">
-        {/* Live Scans Strip */}
-        <LiveScansStrip onNewScan={() => setIsNewScanModalOpen(true)} />
+    <div className="min-h-screen bg-gray-50">
+      <Header title="Scans" timeRange="7" onTimeRangeChange={() => {}} />
 
+      <main className="p-8">
         {/* Controls */}
-        <div className="bg-white dark:bg-white/5 dark:backdrop-blur-xl rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm p-6 mb-6">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">
           <div className="flex flex-col gap-4">
             {/* Search */}
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 type="text"
                 placeholder="Search session ID or URL…"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:bg-white dark:focus:bg-white/10 transition-all"
+                className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:bg-white transition-all"
               />
             </div>
 
@@ -445,7 +422,7 @@ export function Scans() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="px-4 py-2 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer [&>option]:bg-white [&>option]:dark:bg-gray-900"
+                className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
               >
                 {statuses.map((status) => (
                   <option key={status} value={status}>
@@ -457,7 +434,7 @@ export function Scans() {
               <select
                 value={regionFilter}
                 onChange={(e) => setRegionFilter(e.target.value)}
-                className="px-4 py-2 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer [&>option]:bg-white [&>option]:dark:bg-gray-900"
+                className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
               >
                 {regions.map((region) => (
                   <option key={region} value={region}>
@@ -466,7 +443,7 @@ export function Scans() {
                 ))}
               </select>
 
-              <div className="text-sm text-gray-600 dark:text-gray-400">
+              <div className="text-sm text-gray-600">
                 {filteredAndSortedSessions.length} {filteredAndSortedSessions.length === 1 ? 'session' : 'sessions'}
               </div>
 
@@ -474,7 +451,7 @@ export function Scans() {
               <div className="relative" ref={columnsMenuRef}>
                 <button
                   onClick={() => setShowColumnsMenu(!showColumnsMenu)}
-                  className="px-4 py-2 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors flex items-center gap-2"
+                  className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors flex items-center gap-2"
                   title="Toggle columns"
                 >
                   <Columns3 className="w-4 h-4" />
@@ -482,22 +459,22 @@ export function Scans() {
                 </button>
 
                 {showColumnsMenu && (
-                  <div className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-gray-900 dark:backdrop-blur-xl rounded-xl border border-gray-200 dark:border-white/10 shadow-lg z-20 py-2">
-                    <div className="px-3 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-white/10">
+                  <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl border border-gray-200 shadow-lg z-20 py-2">
+                    <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-100">
                       Show Columns
                     </div>
                     {Object.entries(columnVisibility).map(([key, value]) => (
                       <label
                         key={key}
-                        className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 dark:hover:bg-white/5 cursor-pointer transition-colors"
+                        className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors"
                       >
                         <input
                           type="checkbox"
                           checked={value}
                           onChange={() => toggleColumn(key as keyof ColumnVisibility)}
-                          className="w-4 h-4 text-emerald-600 border-gray-300 dark:border-gray-600 rounded focus:ring-emerald-500"
+                          className="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500"
                         />
-                        <span className="text-sm text-gray-700 dark:text-gray-300 capitalize">
+                        <span className="text-sm text-gray-700 capitalize">
                           {key === 'sessionId' ? 'Session ID' : key === 'url' ? 'Target URL' : key}
                         </span>
                       </label>
@@ -510,7 +487,7 @@ export function Scans() {
               <button
                 onClick={handleRefresh}
                 disabled={loading}
-                className="px-4 py-2 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Refresh sessions"
               >
                 <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
@@ -520,7 +497,7 @@ export function Scans() {
               <div className="flex-1" />
 
               <button
-                onClick={() => setIsNewScanModalOpen(true)}
+                onClick={() => navigate('/scans/new')}
                 className="px-4 py-2 bg-emerald-600 text-white rounded-xl text-sm font-semibold hover:bg-emerald-700 transition-colors flex items-center gap-2"
               >
                 <Plus className="w-4 h-4" />
@@ -530,45 +507,22 @@ export function Scans() {
           </div>
         </div>
 
-        {/* Success Toast */}
-        {successMessage && (
-          <div className="fixed top-8 right-8 z-50 animate-in slide-in-from-top-4 fade-in duration-300">
-            <div className="bg-white dark:bg-gray-900 dark:backdrop-blur-xl rounded-xl border border-emerald-200 dark:border-emerald-500/30 shadow-lg p-4 flex items-start gap-3 max-w-md">
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center">
-                  <CheckCircle className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                </div>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-gray-900 dark:text-white mb-0.5">Scan Started</p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">{successMessage}</p>
-              </div>
-              <button
-                onClick={() => setSuccessMessage(null)}
-                className="flex-shrink-0 p-1 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 rounded transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        )}
-
         {/* Empty state */}
         {filteredAndSortedSessions.length === 0 && sessions.length > 0 && (
-          <div className="bg-white dark:bg-white/5 dark:backdrop-blur-xl rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm p-12 text-center">
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center">
             <div className="max-w-sm mx-auto">
-              <div className="w-16 h-16 bg-gray-100 dark:bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Search className="w-8 h-8 text-gray-400 dark:text-gray-500" />
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Search className="w-8 h-8 text-gray-400" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No sessions found</h3>
-              <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">Try adjusting your search or filter criteria</p>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">No sessions found</h3>
+              <p className="text-gray-500 text-sm mb-4">Try adjusting your search or filter criteria</p>
               <button
                 onClick={() => {
                   setSearchQuery('');
                   setStatusFilter('All');
                   setRegionFilter('All');
                 }}
-                className="px-4 py-2 bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-white/20 transition-colors"
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
               >
                 Clear Filters
               </button>
@@ -577,15 +531,15 @@ export function Scans() {
         )}
 
         {sessions.length === 0 && (
-          <div className="bg-white dark:bg-white/5 dark:backdrop-blur-xl rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm p-12 text-center">
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center">
             <div className="max-w-sm mx-auto">
-              <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Plus className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
+              <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Plus className="w-8 h-8 text-emerald-600" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No scan sessions yet</h3>
-              <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">Create your first scan to get started</p>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">No scan sessions yet</h3>
+              <p className="text-gray-500 text-sm mb-4">Create your first scan to get started</p>
               <button
-                onClick={() => setIsNewScanModalOpen(true)}
+                onClick={() => navigate('/scans/new')}
                 className="px-4 py-2 bg-emerald-600 text-white rounded-xl text-sm font-semibold hover:bg-emerald-700 transition-colors inline-flex items-center gap-2"
               >
                 <Plus className="w-4 h-4" />
@@ -597,17 +551,17 @@ export function Scans() {
 
         {/* Premium Table */}
         {sessions.length > 0 && filteredAndSortedSessions.length > 0 && (
-          <div className="bg-white dark:bg-white/5 dark:backdrop-blur-xl rounded-2xl border border-gray-100 dark:border-white/10 shadow-sm overflow-hidden">
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
             {/* Scrollable table container */}
             <div className="overflow-x-auto overflow-y-auto" style={{ maxHeight: 'calc(100vh - 320px)' }}>
               <table className="w-full table-fixed">
                 {/* Sticky header with backdrop blur */}
-                <thead className="bg-gray-50/70 dark:bg-gray-900/70 backdrop-blur-xl border-b border-gray-100 dark:border-white/10 sticky top-0 z-10">
+                <thead className="bg-gray-50/95 backdrop-blur-sm border-b border-gray-100 sticky top-0 z-10">
                   <tr>
                     {columnVisibility.sessionId && (
                       <th 
                         onClick={() => handleSort('sessionId')}
-                        className="group text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider py-3 px-6 whitespace-nowrap cursor-pointer hover:bg-gray-100/80 dark:hover:bg-white/5 transition-colors relative select-none w-[15%] overflow-hidden"
+                        className="group text-left text-xs font-semibold text-gray-500 uppercase tracking-wider py-3 px-6 whitespace-nowrap cursor-pointer hover:bg-gray-100/80 transition-colors relative select-none w-[15%]"
                       >
                         <div className="flex items-center gap-2">
                           Session ID
@@ -626,7 +580,7 @@ export function Scans() {
                     {columnVisibility.url && (
                       <th 
                         onClick={() => handleSort('url')}
-                        className="group text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider py-3 px-4 whitespace-nowrap cursor-pointer hover:bg-gray-100/80 dark:hover:bg-white/5 transition-colors relative select-none w-[25%]"
+                        className="group text-left text-xs font-semibold text-gray-500 uppercase tracking-wider py-3 px-4 whitespace-nowrap cursor-pointer hover:bg-gray-100/80 transition-colors relative select-none w-[25%]"
                       >
                         <div className="flex items-center gap-2">
                           Target URL
@@ -645,7 +599,7 @@ export function Scans() {
                     {columnVisibility.status && (
                       <th 
                         onClick={() => handleSort('status')}
-                        className="group text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider py-3 px-4 whitespace-nowrap cursor-pointer hover:bg-gray-100/80 dark:hover:bg-white/5 transition-colors relative select-none w-[12%]"
+                        className="group text-left text-xs font-semibold text-gray-500 uppercase tracking-wider py-3 px-4 whitespace-nowrap cursor-pointer hover:bg-gray-100/80 transition-colors relative select-none w-[12%]"
                       >
                         <div className="flex items-center gap-2">
                           Status
@@ -664,7 +618,7 @@ export function Scans() {
                     {columnVisibility.region && (
                       <th 
                         onClick={() => handleSort('region')}
-                        className="group text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider py-3 px-4 whitespace-nowrap cursor-pointer hover:bg-gray-100/80 dark:hover:bg-white/5 transition-colors relative select-none w-[10%]"
+                        className="group text-left text-xs font-semibold text-gray-500 uppercase tracking-wider py-3 px-4 whitespace-nowrap cursor-pointer hover:bg-gray-100/80 transition-colors relative select-none w-[10%]"
                       >
                         <div className="flex items-center gap-2">
                           Region
@@ -683,7 +637,7 @@ export function Scans() {
                     {columnVisibility.created && (
                       <th 
                         onClick={() => handleSort('created')}
-                        className="group text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider py-3 px-4 whitespace-nowrap cursor-pointer hover:bg-gray-100/80 dark:hover:bg-white/5 transition-colors relative select-none w-[14%]"
+                        className="group text-left text-xs font-semibold text-gray-500 uppercase tracking-wider py-3 px-4 whitespace-nowrap cursor-pointer hover:bg-gray-100/80 transition-colors relative select-none w-[14%]"
                       >
                         <div className="flex items-center gap-2">
                           Created
@@ -702,7 +656,7 @@ export function Scans() {
                     {columnVisibility.updated && (
                       <th 
                         onClick={() => handleSort('updated')}
-                        className="group text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider py-3 px-4 whitespace-nowrap cursor-pointer hover:bg-gray-100/80 dark:hover:bg-white/5 transition-colors relative select-none w-[14%]"
+                        className="group text-left text-xs font-semibold text-gray-500 uppercase tracking-wider py-3 px-4 whitespace-nowrap cursor-pointer hover:bg-gray-100/80 transition-colors relative select-none w-[14%]"
                       >
                         <div className="flex items-center gap-2">
                           Updated
@@ -720,14 +674,14 @@ export function Scans() {
                     )}
                     {columnVisibility.actions && (
                       <th 
-                        className="text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider py-3 px-6 whitespace-nowrap relative w-[10%]"
+                        className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider py-3 px-6 whitespace-nowrap relative w-[10%]"
                       >
                         Actions
                       </th>
                     )}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50 dark:divide-white/5">
+                <tbody className="divide-y divide-gray-50">
                   {paginatedSessions.map((session, idx) => {
                     const sessionId = pickSessionId(session);
                     const url = pickUrl(session);
@@ -740,7 +694,7 @@ export function Scans() {
                     return (
                       <tr
                         key={`${sessionId}-${idx}`}
-                        className="group relative hover:bg-gray-50/80 dark:hover:bg-white/5 cursor-pointer transition-all duration-150 active:scale-[0.998]"
+                        className="group relative hover:bg-gray-50/80 cursor-pointer transition-all duration-150 active:scale-[0.998]"
                         onClick={() => navigate(`/scans/${sessionId}`)}
                       >
                         {columnVisibility.sessionId && (
@@ -748,16 +702,16 @@ export function Scans() {
                             className="py-4 px-6 whitespace-nowrap relative border-l-2 border-transparent group-hover:border-emerald-500 transition-colors duration-150 w-[15%]"
                           >
                             <div className="flex items-center gap-2">
-                              <SessionIdCell sessionId={sessionId} className="text-sm text-gray-900 dark:text-white" />
+                              <SessionIdCell sessionId={sessionId} className="text-sm text-gray-900" />
                               <button
                                 onClick={(e) => handleCopyId(sessionId, e)}
-                                className="p-1 hover:bg-gray-200 dark:hover:bg-white/10 rounded transition-colors flex-shrink-0"
+                                className="p-1 hover:bg-gray-200 rounded transition-colors flex-shrink-0"
                                 title="Copy full session ID"
                               >
                                 {copiedId === sessionId ? (
-                                  <Check className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                                  <Check className="w-3 h-3 text-emerald-600" />
                                 ) : (
-                                  <Copy className="w-3 h-3 text-gray-400 dark:text-gray-500" />
+                                  <Copy className="w-3 h-3 text-gray-400" />
                                 )}
                               </button>
                             </div>
@@ -767,7 +721,7 @@ export function Scans() {
                           <td 
                             className={`py-4 px-4 whitespace-nowrap w-[25%] ${!columnVisibility.sessionId ? 'border-l-2 border-transparent group-hover:border-emerald-500 transition-colors duration-150' : ''}`}
                           >
-                            <UrlCell url={url} className="text-sm text-gray-700 dark:text-gray-300" />
+                            <UrlCell url={url} className="text-sm text-gray-700" />
                           </td>
                         )}
                         {columnVisibility.status && (
@@ -777,12 +731,12 @@ export function Scans() {
                             <span
                               className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${
                                 status === 'Scan Complete' || status === 'completed' || status === 'success'
-                                  ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400'
+                                  ? 'bg-emerald-100 text-emerald-700'
                                   : status === 'Scan Error' || status === 'failed' || status === 'error'
-                                  ? 'bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400'
+                                  ? 'bg-red-100 text-red-700'
                                   : status === 'In Progress' || status === 'pending' || status === 'running'
-                                  ? 'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400'
-                                  : 'bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-gray-400'
+                                  ? 'bg-blue-100 text-blue-700'
+                                  : 'bg-gray-100 text-gray-700'
                               }`}
                             >
                               {status === 'In Progress' && <Loader2 className="w-3 h-3 mr-1.5 animate-spin" />}
@@ -794,17 +748,11 @@ export function Scans() {
                           <td 
                             className="py-4 px-4 whitespace-nowrap w-[10%]"
                           >
-                            <div className="flex items-center justify-center gap-1">
-                              <CountryFlag country={region} />
-                              {isInferred && (
-                                <span 
-                                  className="text-xs text-gray-400" 
-                                  title="Inferred from domain"
-                                >
-                                  *
-                                </span>
-                              )}
-                            </div>
+                            <EllipsisCell 
+                              value={`${region}${isInferred ? ' *' : ''}`}
+                              title={isInferred ? `${region} (Inferred from domain)` : region}
+                              className="text-sm text-gray-700"
+                            />
                           </td>
                         )}
                         {columnVisibility.created && (
@@ -813,7 +761,7 @@ export function Scans() {
                           >
                             <EllipsisCell
                               value={created !== '-' ? new Date(created).toLocaleString() : created}
-                              className="text-sm text-gray-700 dark:text-gray-300"
+                              className="text-sm text-gray-700"
                             />
                           </td>
                         )}
@@ -823,7 +771,7 @@ export function Scans() {
                           >
                             <EllipsisCell
                               value={updated ? new Date(updated).toLocaleString() : updated}
-                              className="text-sm text-gray-700 dark:text-gray-300"
+                              className="text-sm text-gray-700"
                             />
                           </td>
                         )}
@@ -851,19 +799,19 @@ export function Scans() {
 
             {/* Pagination */}
             {filteredAndSortedSessions.length > 0 && (
-              <div className="border-t border-gray-100 dark:border-white/10 px-6 py-4 flex items-center justify-between">
+              <div className="border-t border-gray-100 px-6 py-4 flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="text-sm text-gray-600">
                     Showing {(currentPage - 1) * pageSize + 1} to{' '}
                     {Math.min(currentPage * pageSize, filteredAndSortedSessions.length)} of{' '}
                     {filteredAndSortedSessions.length} sessions
                   </p>
                   <div className="flex items-center gap-2">
-                    <label className="text-sm text-gray-600 dark:text-gray-400">Rows per page:</label>
+                    <label className="text-sm text-gray-600">Rows per page:</label>
                     <select
                       value={pageSize}
                       onChange={(e) => setPageSize(Number(e.target.value))}
-                      className="px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg hover:bg-gray-50 dark:hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer [&>option]:bg-white [&>option]:dark:bg-gray-900"
+                      className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
                     >
                       <option value={10}>10</option>
                       <option value={25}>25</option>
@@ -874,20 +822,20 @@ export function Scans() {
                 </div>
                 {totalPages > 1 && (
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-600 dark:text-gray-400 mr-2">
+                    <span className="text-sm text-gray-600 mr-2">
                       Page {currentPage} of {totalPages}
                     </span>
                     <button
                       onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                       disabled={currentPage === 1}
-                      className="px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg hover:bg-gray-50 dark:hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                       Previous
                     </button>
                     <button
                       onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                       disabled={currentPage === totalPages}
-                      className="px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg hover:bg-gray-50 dark:hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                       Next
                     </button>
@@ -897,14 +845,7 @@ export function Scans() {
             )}
           </div>
         )}
-      </div>
-
-      {/* New Scan Modal */}
-      <NewScanModal 
-        isOpen={isNewScanModalOpen}
-        onClose={() => setIsNewScanModalOpen(false)}
-        onSuccess={handleScanSuccess}
-      />
+      </main>
     </div>
   );
 }

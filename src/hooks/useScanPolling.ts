@@ -1,6 +1,5 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { ScannerAPI } from '../api';
-import { scanJobsStore } from '../lib/scans/scanJobsStore';
 
 interface UseScanPollingOptions {
   sessionId: string;
@@ -78,9 +77,6 @@ export function useScanPolling({
       
       if (isTerminal) {
         console.log(`[useScanPolling] Terminal status detected (inactive). Stopping polling for session: ${sessionId}`);
-        
-        // Remove from active jobs
-        scanJobsStore.removeJob(sessionId);
 
         // Trigger completion callbacks based on success field
         // If success === true, scan completed successfully
@@ -111,13 +107,6 @@ export function useScanPolling({
         console.log(`[useScanPolling] Polling stopped for session: ${sessionId}`);
         return;
       }
-
-      // Update job in store with new data
-      scanJobsStore.updateJob(sessionId, {
-        last_status: status,
-        last_update: new Date().toISOString(),
-        ...(typeof progress === 'object' && progress ? progress : {}),
-      });
 
       // Schedule next poll with backoff
       const elapsedTime = Date.now() - startTimeRef.current;

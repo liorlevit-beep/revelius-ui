@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react';
 import { Loader2, CheckCircle, AlertTriangle, Package, TrendingUp } from 'lucide-react';
 import { useRoutingTable } from '../../hooks/useRoutingTable';
 import { computeLineItemsEligibility } from '../../utils/routingEligibility';
-import { EligibleProvidersSelector } from '../EligibleProvidersSelector';
 import { ProviderRouteModal } from '../routing/ProviderRouteModal';
 import { getProviderDisplayName } from '../../data/providerRegions';
 import type { LineItem } from '../../demo/transactions';
@@ -216,21 +215,6 @@ export function RoutingDecisionBlock({ lineItems }: RoutingDecisionBlockProps) {
 
   return (
     <div className="space-y-4">
-      {/* Provider Selection UI */}
-      {eligibilityResult && (
-        <div className="bg-white border border-gray-200 rounded-xl p-6">
-          <EligibleProvidersSelector
-            eligibleProviders={eligibilityResult.eligibleProviders}
-            selectedProvider={displayedProvider}
-            totalItems={eligibilityResult.totalItems}
-            onProviderSelect={(provider) => {
-              setModalProvider(provider);
-            }}
-            readOnly={false}
-          />
-        </div>
-      )}
-
       {/* Selected PSP Card */}
       <div className={`p-6 rounded-xl border-2 ${
         hasFullCoverage
