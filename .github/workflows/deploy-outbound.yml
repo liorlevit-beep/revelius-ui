@@ -1,0 +1,50 @@
+name: Deploy Outbound Website
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'outbound-website/**'
+      - '.github/workflows/deploy-outbound.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'outbound-website/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: ./outbound-website
+        run: npm ci
+
+      - name: Build
+        working-directory: ./outbound-website
+        run: npm run build
+        env:
+          GITHUB_ACTIONS: true
+
+      - name: Add .nojekyll
+        run: touch ./outbound-website/dist/.nojekyll
+
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./outbound-website/dist
+          force_orphan: true
+          cname: false
