@@ -1,0 +1,73 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "src/**"
+      - "public/**"
+      - "index.html"
+      - "package.json"
+      - "vite.config.ts"
+      - "outbound-website/**"
+      - ".github/workflows/deploy-unified.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Build Dashboard
+      - name: Setup Node for Dashboard
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install Dashboard Dependencies
+        run: npm ci
+
+      - name: Build Dashboard
+        run: npm run build
+        env:
+          GITHUB_ACTIONS: true
+
+      - name: Copy Dashboard to deploy folder
+        run: |
+          mkdir -p deploy/app
+          cp -r dist/* deploy/app/
+
+      # Build Outbound Website
+      - name: Install Outbound Dependencies
+        working-directory: ./outbound-website
+        run: npm ci
+
+      - name: Build Outbound Website
+        working-directory: ./outbound-website
+        run: npm run build
+        env:
+          GITHUB_ACTIONS: true
+
+      - name: Copy Outbound to deploy folder
+        run: cp -r outbound-website/dist/* deploy/
+
+      - name: Add .nojekyll
+        run: touch deploy/.nojekyll
+
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./deploy
+          force_orphan: true
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
