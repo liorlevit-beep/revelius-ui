@@ -16,8 +16,11 @@ import RequestAccess from "./pages/RequestAccess";
 import Contact from "./pages/Contact";
 
 function App() {
+  // Use basename for GitHub Pages deployment
+  const basename = import.meta.env.BASE_URL || '/';
+  
   return (
-    <Router>
+    <Router basename={basename}>
       <div className="min-h-screen flex flex-col">
         <Header />
         <main className="flex-1">

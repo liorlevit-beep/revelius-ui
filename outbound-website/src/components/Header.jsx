@@ -3,6 +3,9 @@ import { Link } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import GlossyButton from './GlossyButton';
 
+// Dashboard URL - update this with your production dashboard URL
+const DASHBOARD_URL = import.meta.env.VITE_DASHBOARD_URL || 'https://app.revelius.com';
+
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -58,7 +61,7 @@ export default function Header() {
 
           {/* Desktop Buttons */}
           <div className="hidden md:flex gap-3 items-center">
-            <GlossyButton to="/auth" variant="outline-dark">
+            <GlossyButton href={`${DASHBOARD_URL}/auth`} variant="outline-dark">
               Sign in
             </GlossyButton>
             <GlossyButton to="/contact" variant="dark">
@@ -93,11 +96,9 @@ export default function Header() {
             ))}
             
             <div className="pt-6 space-y-3">
-              <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
-                <GlossyButton variant="outline-dark" className="w-full">
-                  Sign in
-                </GlossyButton>
-              </Link>
+              <GlossyButton href={`${DASHBOARD_URL}/auth`} variant="outline-dark" className="w-full">
+                Sign in
+              </GlossyButton>
               <Link to="/contact" onClick={() => setMobileMenuOpen(false)}>
                 <GlossyButton variant="dark" className="w-full">
                   Request access

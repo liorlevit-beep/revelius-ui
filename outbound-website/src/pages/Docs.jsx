@@ -773,7 +773,7 @@ Content-Type: application/json`}
                 <GlossyButton to="/contact" variant="dark">
                   Request access
                 </GlossyButton>
-                <GlossyButton to="/auth" variant="outline-dark">
+                <GlossyButton href={`${DASHBOARD_URL}/auth`} variant="outline-dark">
                   Sign in
                 </GlossyButton>
               </div>

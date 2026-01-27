@@ -5,6 +5,9 @@ import ContextGapSection from "../components/ContextGapSection";
 import GlossyButton from "../components/GlossyButton";
 import AnimatedFlowSection from "../components/AnimatedFlowSection";
 
+// Dashboard URL - update this with your production dashboard URL
+const DASHBOARD_URL = import.meta.env.VITE_DASHBOARD_URL || 'https://app.revelius.com';
+
 export default function Home() {
   return (
     <div>
@@ -293,7 +296,7 @@ export default function Home() {
 
           {/* Inline CTA Row */}
           <div className="flex gap-4 justify-center flex-wrap pt-8 border-t border-gray-200 animate-fade-in" style={{ animationDelay: '0.4s' }}>
-            <GlossyButton to="/auth" variant="outline-dark">
+            <GlossyButton href={`${DASHBOARD_URL}/auth`} variant="outline-dark">
               Sign in
             </GlossyButton>
             <GlossyButton to="/contact" variant="dark">
