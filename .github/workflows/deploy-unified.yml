@@ -57,6 +57,9 @@ jobs:
         env:
           GITHUB_ACTIONS: true
 
+      - name: Copy correct 404.html (preserves OAuth hash)
+        run: cp public/404.html deploy/404.html
+
       - name: Add .nojekyll
         run: touch deploy/.nojekyll
 
