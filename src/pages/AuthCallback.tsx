@@ -108,17 +108,14 @@ export default function AuthCallback() {
         console.log('[AuthCallback] Navigating to:', targetPath);
         console.log('[AuthCallback] Current location:', window.location.href);
         console.log('[AuthCallback] Basename:', import.meta.env.BASE_URL);
+        console.log('[AuthCallback] Token stored in localStorage:', localStorage.getItem('revelius_auth_token')?.substring(0, 20) + '...');
         
-        // Use window.location for more reliable redirect after OAuth
-        if (!redirectPath) {
-          // No saved redirect, go to dashboard home
-          const dashboardHome = import.meta.env.BASE_URL || '/';
-          console.log('[AuthCallback] Using window.location to navigate to dashboard home:', dashboardHome);
-          window.location.href = dashboardHome;
-        } else {
-          // Use React Router navigate for internal navigation
-          navigate(targetPath, { replace: true });
-        }
+        // Small delay to ensure token is fully written to localStorage
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Use React Router navigate for more reliable navigation
+        console.log('[AuthCallback] Using React Router navigate to:', targetPath);
+        navigate(targetPath, { replace: true });
         
       } catch (err) {
         console.error('[AuthCallback] Error processing callback:', err);

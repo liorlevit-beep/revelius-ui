@@ -47,9 +47,11 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
         });
 
         console.log('[ProtectedRoute] Response status:', response.status);
+        console.log('[ProtectedRoute] Response headers:', Object.fromEntries(response.headers.entries()));
 
         if (response.ok) {
-          console.log('[ProtectedRoute] ✅ Session valid');
+          const statusData = await response.json().catch(() => ({}));
+          console.log('[ProtectedRoute] ✅ Session valid:', statusData);
           setIsAuthenticated(true);
           setIsValidating(false);
           
@@ -62,7 +64,13 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
         console.log('[ProtectedRoute] ❌ Session invalid (status:', response.status, '), attempting refresh...');
         
         const errorText = await response.text().catch(() => '');
-        console.log('[ProtectedRoute] /auth/status error:', errorText);
+        console.log('[ProtectedRoute] /auth/status error response:', errorText);
+        console.log('[ProtectedRoute] Full error details:', {
+          status: response.status,
+          statusText: response.statusText,
+          url: response.url,
+          body: errorText
+        });
         
         console.log('[ProtectedRoute] Calling refresh endpoint:', `${env.baseUrl}/auth/refresh`);
         
