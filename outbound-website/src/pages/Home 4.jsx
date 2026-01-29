@@ -5,8 +5,9 @@ import ContextGapSection from "../components/ContextGapSection";
 import GlossyButton from "../components/GlossyButton";
 import AnimatedFlowSection from "../components/AnimatedFlowSection";
 
-// Dashboard URL - production portal
-const DASHBOARD_URL = 'https://portal.revelius.com';
+// Dashboard URL - GitHub Pages or production
+const DASHBOARD_URL = import.meta.env.VITE_DASHBOARD_URL || 
+  (import.meta.env.PROD ? 'https://liorlevit-beep.github.io/revelius-ui/app' : 'http://localhost:5174');
 
 export default function Home() {
   return (
